@@ -1,0 +1,72 @@
+cabal-version: 1.12
+
+-- This file has been generated from package.yaml by hpack version 0.33.0.
+--
+-- see: https://github.com/sol/hpack
+--
+-- hash: 084447740bdc46be6c59472a7c1b24f695007abfde18f3c1e8fc8a50f2b936e6
+
+name:           real-world-server
+version:        0.1.0.0
+description:    Please see the README on Github at <https://github.com/uliSchuster/real-world-backend#readme>
+homepage:       https://github.com/githubuser/real-world-server#readme
+bug-reports:    https://github.com/githubuser/real-world-server/issues
+author:         Ulrich Schuster, Mona Lux
+maintainer:     real-world-study-group@ugsmail.mailworks.org
+copyright:      2020 Ulrich Schuster, Mona Lux
+license:        Apache License 2.0
+license-file:   LICENSE
+build-type:     Simple
+extra-source-files:
+    README.md
+    ChangeLog.md
+
+source-repository head
+  type: git
+  location: https://github.com/githubuser/real-world-server
+
+library
+  exposed-modules:
+      Import
+      Run
+      Types
+      Util
+  other-modules:
+      Paths_real_world_server
+  hs-source-dirs:
+      src
+  ghc-options: -Wall -Wcompat -Widentities -Wincomplete-record-updates -Wincomplete-uni-patterns -Wpartial-fields -Wredundant-constraints
+  build-depends:
+      base >=4.11 && <10
+    , rio >=0.1.12.0
+  default-language: Haskell2010
+
+executable real-world-server-exe
+  main-is: Main.hs
+  other-modules:
+      Paths_real_world_server
+  hs-source-dirs:
+      app
+  ghc-options: -Wall -Wcompat -Widentities -Wincomplete-record-updates -Wincomplete-uni-patterns -Wpartial-fields -Wredundant-constraints -threaded -rtsopts -with-rtsopts=-N
+  build-depends:
+      base >=4.11 && <10
+    , optparse-simple
+    , real-world-server
+    , rio >=0.1.12.0
+  default-language: Haskell2010
+
+test-suite real-world-server-test
+  type: exitcode-stdio-1.0
+  main-is: Spec.hs
+  other-modules:
+      UtilSpec
+      Paths_real_world_server
+  hs-source-dirs:
+      test
+  ghc-options: -Wall -Wcompat -Widentities -Wincomplete-record-updates -Wincomplete-uni-patterns -Wpartial-fields -Wredundant-constraints -threaded -rtsopts -with-rtsopts=-N
+  build-depends:
+      base >=4.11 && <10
+    , hspec
+    , real-world-server
+    , rio >=0.1.12.0
+  default-language: Haskell2010
