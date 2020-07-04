@@ -8,6 +8,8 @@ import RIO.Process
 import Options.Applicative.Simple
 import qualified Paths_real_world_server
 
+
+-- another comment
 -- unnecessary comment
 
 main :: IO ()

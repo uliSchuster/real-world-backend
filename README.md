@@ -8,3 +8,4 @@
 ## Run tests
 
 `stack test`
+
