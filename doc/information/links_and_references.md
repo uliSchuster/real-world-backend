@@ -5,15 +5,23 @@
 ### Haskell Web Resources
 
 - The [Haskell Wiki](https://wiki.haskell.org/Haskell). Official web presence for the Haskell language.
-- The [FP Complete](https://www.fpcomplete.com) [Haskell Blog](https://www.fpcomplete.com/tags/haskell/). The blog from the compay behind Stack, Yesod, Persistent and RIO.
 - [What I Whish I Knew When Learning Haskell](http://dev.stephendiehl.com/hask/) Stephen Diehl provides excellent coverage of all aspects of modern haskell, from the basics to advanced type-level programming and GHC internals.
-- [Haskell for All](http://www.haskellforall.com). G. Gonzales' blog about all things Haskell. Good tutorials and though-provoking posts, but hard to browse.
-- [Mark Karpov's Haskell Blog](https://markkarpov.com/tag/haskell.html).
 - [Monday Morning Haskell](https://mmhaskell.com). Introductory Haskell tutorials and blog posts.
 - [Haskell Programming Guidelines](https://wiki.haskell.org/Programming_guidelines) from the Haskell Wiki.
 - [Haskell Programming Tips](https://wiki.haskell.org/Haskell_programming_tips#Don.27t_use_Int_when_you_don.27t_consider_integers), also from the Haskell Wiki.
 - Kowainik's opinionated [Haskell Styel Guide](https://kowainik.github.io/posts/2019-02-06-style-guide).
 - O.Charles [Haskell Blog](https://ocharles.org.uk). Good exposition of advanced Haskell topics, language extensions, and key libraries.
+- The [Haskell Section](https://github.com/caiorss/Functional-Programming/tree/master/haskell) from the _FP by Example_ github repository.
+
+### Haskell Blogs
+
+- The [FP Complete](https://www.fpcomplete.com) [Haskell Blog](https://www.fpcomplete.com/tags/haskell/). The blog from the compay behind Stack, Yesod, Persistent and RIO.
+- The [Tweag Haskell Blog Posts](https://www.tweag.io/blog/tags/haskell) from a company that specializes in Haskell.
+- [Advanced Haskell Blog](http://okmij.org/ftp/Haskell/)
+- [Haskell for All](http://www.haskellforall.com). G. Gonzales' blog about all things Haskell. Good tutorials and though-provoking posts, but hard to browse.
+- [Mark Karpov's Haskell Blog](https://markkarpov.com/tag/haskell.html).
+- [William Yao's Haskell Blog](https://www.williamyaoh.com/archive.html)
+
 
 ### Books about Haskell
 
@@ -26,8 +34,20 @@
 
 ### Monads and Monad Transformers
 - [You Could Have Invented Monads! (And Maybe You Already Have.)](http://blog.sigfpe.com/2006/08/you-could-have-invented-monads-and.html). In my opinion, the best introduction to functional state handling, and the monad abstraction that follows from it.
+- [Monadic examples for exception handling and logging](https://www.williamyaoh.com/posts/2019-10-12-how-to-basic-error-handling-logging.html).
+- [Concise introduction to the state monad](https://www.quora.com/What-is-a-state-monad). This simple description finally helped me understand how functions can be monadic structure, and what is meant by a _monadic action_: They key is to use currying and write `(a, s) -> (b, s)` as `a -> (s -> (b, s))`, which is a function that returns a state action.
 - [A Gentle Introduction to Monad Transformers](https://two-wrongs.com/a-gentle-introduction-to-monad-transformers).
 - [The ReaderT Desidn Pattern](https://www.fpcomplete.com/blog/2017/06/readert-design-pattern/). Minimal Transformer stack (ReaderT and IO) advocated by FPComplete. See also their posts on the [RIO Monad](https://www.fpcomplete.com/blog/2017/07/the-rio-monad/) and the [RIO Standard Library](https://www.fpcomplete.com/haskell/library/rio/.)
+
+### Exception and Error Handling
+
+To get started, we need to understand the [distinction between errors and exceptions](https://wiki.haskell.org/Error_vs._Exception) as described in the Haskell Wiki.
+There are many different ways to handle exceptions in Haskell. Which one to pick, or how to mix the approaches is a subject of lively debate.
+- FPComplete's [opinionated view on error handling](https://www.fpcomplete.com/blog/2016/11/exceptions-best-practices-haskell/) and [safe exception handling](https://www.fpcomplete.com/haskell/tutorial/exceptions/): `MonadThrow`. Throwing exceptions is not a bad thing as long as you are atop IO, because you need to handle all sorts of exceptions anyways.
+- The [blog post](https://www.tweag.io/blog/2020-04-16-exceptions-in-haskell/) from Tweag is a summary along the same lines, with a difference to not handle _imprecise_ exceptions.
+- An outdated but still instructional [overview of handling errors](http://www.randomhacks.net/2007/03/10/haskell-8-ways-to-report-errors/), and an [updated overview](http://blog.ezyang.com/2011/08/8-ways-to-report-errors-in-haskell-revisited/).
+- [The trouble with typed errors](https://www.parsonsmatt.org/2018/11/03/trouble_with_typed_errors.html) examines the problem of building up typed error hierarchies, which mess with the concept of independent software modules.
+
 
 ## Haskell Libraries
 
@@ -111,3 +131,4 @@ To limit complexity, it is essential to properly organize and minimize dependenc
 
 - [Bartosz Milewski's Programming Café](https://bartoszmilewski.com)
 - [F# for Fun and Profit](https://fsharpforfunandprofit.com/). S. Wlaschin's excellent blog and video tutorials on FP. Examples are mostly in F#.
+- [FP by Example](https://github.com/caiorss/Functional-Programming). FP concepts in many different programming languages.
