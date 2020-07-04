@@ -22,7 +22,6 @@
 - [Mark Karpov's Haskell Blog](https://markkarpov.com/tag/haskell.html).
 - [William Yao's Haskell Blog](https://www.williamyaoh.com/archive.html)
 
-
 ### Books about Haskell
 
 - C. Allen, J. Moronuki: [Haskell Programming from first principles](https://haskellbook.com), aka _The Haskell Book_.
@@ -33,6 +32,7 @@
 - S. Thompson: [Haskell - the Craft of Functional Programming](http://www.haskellcraft.com/craft3e/Home.html).
 
 ### Monads and Monad Transformers
+
 - [You Could Have Invented Monads! (And Maybe You Already Have.)](http://blog.sigfpe.com/2006/08/you-could-have-invented-monads-and.html). In my opinion, the best introduction to functional state handling, and the monad abstraction that follows from it.
 - [Monadic examples for exception handling and logging](https://www.williamyaoh.com/posts/2019-10-12-how-to-basic-error-handling-logging.html).
 - [Concise introduction to the state monad](https://www.quora.com/What-is-a-state-monad). This simple description finally helped me understand how functions can be monadic structure, and what is meant by a _monadic action_: They key is to use currying and write `(a, s) -> (b, s)` as `a -> (s -> (b, s))`, which is a function that returns a state action.
@@ -43,11 +43,11 @@
 
 To get started, we need to understand the [distinction between errors and exceptions](https://wiki.haskell.org/Error_vs._Exception) as described in the Haskell Wiki.
 There are many different ways to handle exceptions in Haskell. Which one to pick, or how to mix the approaches is a subject of lively debate.
+
 - FPComplete's [opinionated view on error handling](https://www.fpcomplete.com/blog/2016/11/exceptions-best-practices-haskell/) and [safe exception handling](https://www.fpcomplete.com/haskell/tutorial/exceptions/): `MonadThrow`. Throwing exceptions is not a bad thing as long as you are atop IO, because you need to handle all sorts of exceptions anyways.
 - The [blog post](https://www.tweag.io/blog/2020-04-16-exceptions-in-haskell/) from Tweag is a summary along the same lines, with a difference to not handle _imprecise_ exceptions.
 - An outdated but still instructional [overview of handling errors](http://www.randomhacks.net/2007/03/10/haskell-8-ways-to-report-errors/), and an [updated overview](http://blog.ezyang.com/2011/08/8-ways-to-report-errors-in-haskell-revisited/).
 - [The trouble with typed errors](https://www.parsonsmatt.org/2018/11/03/trouble_with_typed_errors.html) examines the problem of building up typed error hierarchies, which mess with the concept of independent software modules.
-
 
 ## Haskell Libraries
 
@@ -65,7 +65,6 @@ There are many different ways to handle exceptions in Haskell. Which one to pick
 
 ### Persistence
 
-
 - [Opinionated comparison of persistence libraries for Haskell](https://williamyaoh.com/posts/2019-12-14-typesafe-db-libraries.html) by W. Yao
 - [Persistent](https://www.yesodweb.com/book/persistent), the persistence framework for a variety of relational and non-relational databases that powers Yesod.
 - [Esqueleto](https://github.com/bitemyapp/esqueleto), and embedded type-safe DSL for expressing SQL queries within Haskell. A library that works atop Persistent.
@@ -73,13 +72,13 @@ There are many different ways to handle exceptions in Haskell. Which one to pick
 - [Tutorial on Esqueleto and Persisten](https://ocharles.org.uk/posts/2013-12-06-24-days-of-hackage-persistent-esqueleto.html).
 - [Opaleye](https://github.com/tomjaguarpaw/haskell-opaleye). Type-safe embedded DSL to interact with PostgreSQL.
 - [Groundhog](https://www.schoolofhaskell.com/user/lykahb/groundhog). Relational DB mapping and querying.
-- 
-
 
 ## Application Architecture
+
 Software architecture is about design in the large. It strives to attain the conflicting goals of functionality and performance while managing complexity. Software complexity is sharply constrained by our limited intellectual capacity. Therefore, one can argue that functionality and performance cannot be attained without proper management of complexity.
 
 ### Clean Architecture
+
 To limit complexity, it is essential to properly organize and minimize dependencies. This is the goal the architecture principles know as _Clean Architecture_, _Onion Architecture_, _Hexagonal Architecture_, or _Ports and Adapters_.
 
 - Bob Martin's [introductory blog post](https://blog.cleancoder.com/uncle-bob/2012/08/13/the-clean-architecture.html) on Clean Architecture.
@@ -99,16 +98,17 @@ To limit complexity, it is essential to properly organize and minimize dependenc
 ### Haskell Build System
 
 - [Stack](https://docs.haskellstack.org/en/stable/README/), the Haskell tool stack.
-- 
 
 ### Editors
 
-- [Setting up Jaskell in Visual Studio Code with Stack and the IDE Engine](https://medium.com/@dogwith1eye/setting-up-haskell-in-vs-code-with-stack-and-the-ide-engine-81d49eda3ecf). If you use VS Code, this seems to be the most up-to-date introduction how to set up a decent development environment with advanced editing support.
+- [Setting up Haskell in Visual Studio Code with Stack and the IDE Engine](https://medium.com/@dogwith1eye/setting-up-haskell-in-vs-code-with-stack-and-the-ide-engine-81d49eda3ecf). If you use VS Code, this seems to be the most up-to-date introduction how to set up a decent development environment with advanced editing support.
+- The above setup uses [Haskell IDE-Engine](https://github.com/haskell/haskell-ide-engine) to integrate the editor with a ghci console to obtain advanced editor features like type annotations.
 
 ### Version Control
 
 - The [git source code management system](https://git-scm.com). Home of git, and the ultimate git reference.
-
+- This [simple introduction to git](https://rogerdudler.github.io/git-guide/) shows the most important commands.
+- Understand [branching and merging](https://git-scm.com/book/en/v2/Git-Branching-Basic-Branching-and-Merging).
 
 ### Debugging
 
