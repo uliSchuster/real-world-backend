@@ -49,6 +49,11 @@ There are many different ways to handle exceptions in Haskell. Which one to pick
 - An outdated but still instructional [overview of handling errors](http://www.randomhacks.net/2007/03/10/haskell-8-ways-to-report-errors/), and an [updated overview](http://blog.ezyang.com/2011/08/8-ways-to-report-errors-in-haskell-revisited/).
 - [The trouble with typed errors](https://www.parsonsmatt.org/2018/11/03/trouble_with_typed_errors.html) examines the problem of building up typed error hierarchies, which mess with the concept of independent software modules.
 
+### Testing
+
+- [How to specify it!](https://www.youtube.com/watch?v=G0NUOst-53U) Keynote talk by John Hughes (one of the developers of QuickCheck) at lambda days 2020. He talks about how to write properties of pure functions.
+
+
 ## Haskell Libraries
 
 ### General Purpose Libraries
@@ -109,6 +114,7 @@ To limit complexity, it is essential to properly organize and minimize dependenc
 - The [git source code management system](https://git-scm.com). Home of git, and the ultimate git reference.
 - This [simple introduction to git](https://rogerdudler.github.io/git-guide/) shows the most important commands.
 - Understand [branching and merging](https://git-scm.com/book/en/v2/Git-Branching-Basic-Branching-and-Merging).
+
 
 ### Debugging
 
