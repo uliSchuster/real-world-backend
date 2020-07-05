@@ -36,6 +36,7 @@
 - [You Could Have Invented Monads! (And Maybe You Already Have.)](http://blog.sigfpe.com/2006/08/you-could-have-invented-monads-and.html). In my opinion, the best introduction to functional state handling, and the monad abstraction that follows from it.
 - [Monadic examples for exception handling and logging](https://www.williamyaoh.com/posts/2019-10-12-how-to-basic-error-handling-logging.html).
 - [Concise introduction to the state monad](https://www.quora.com/What-is-a-state-monad). This simple description finally helped me understand how functions can be monadic structure, and what is meant by a _monadic action_: They key is to use currying and write `(a, s) -> (b, s)` as `a -> (s -> (b, s))`, which is a function that returns a state action.
+- [Purpose of the Reader monad](https://stackoverflow.com/questions/12968351/monad-transformers-vs-passing-parameters-to-functions), nicely explained in a StackOverflow answer.
 - [A Gentle Introduction to Monad Transformers](https://two-wrongs.com/a-gentle-introduction-to-monad-transformers).
 - [The ReaderT Desidn Pattern](https://www.fpcomplete.com/blog/2017/06/readert-design-pattern/). Minimal Transformer stack (ReaderT and IO) advocated by FPComplete. See also their posts on the [RIO Monad](https://www.fpcomplete.com/blog/2017/07/the-rio-monad/) and the [RIO Standard Library](https://www.fpcomplete.com/haskell/library/rio/.)
 
@@ -52,7 +53,6 @@ There are many different ways to handle exceptions in Haskell. Which one to pick
 ### Testing
 
 - [How to specify it!](https://www.youtube.com/watch?v=G0NUOst-53U) Keynote talk by John Hughes (one of the developers of QuickCheck) at lambda days 2020. He talks about how to write properties of pure functions.
-
 
 ## Haskell Libraries
 
@@ -114,7 +114,6 @@ To limit complexity, it is essential to properly organize and minimize dependenc
 - The [git source code management system](https://git-scm.com). Home of git, and the ultimate git reference.
 - This [simple introduction to git](https://rogerdudler.github.io/git-guide/) shows the most important commands.
 - Understand [branching and merging](https://git-scm.com/book/en/v2/Git-Branching-Basic-Branching-and-Merging).
-
 
 ### Debugging
 
