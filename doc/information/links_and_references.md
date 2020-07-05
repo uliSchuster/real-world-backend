@@ -38,7 +38,6 @@
 - [Concise introduction to the state monad](https://www.quora.com/What-is-a-state-monad). This simple description finally helped me understand how functions can be monadic structure, and what is meant by a _monadic action_: They key is to use currying and write `(a, s) -> (b, s)` as `a -> (s -> (b, s))`, which is a function that returns a state action.
 - [Purpose of the Reader monad](https://stackoverflow.com/questions/12968351/monad-transformers-vs-passing-parameters-to-functions), nicely explained in a StackOverflow answer.
 - [A Gentle Introduction to Monad Transformers](https://two-wrongs.com/a-gentle-introduction-to-monad-transformers).
-- [The ReaderT Desidn Pattern](https://www.fpcomplete.com/blog/2017/06/readert-design-pattern/). Minimal Transformer stack (ReaderT and IO) advocated by FPComplete. See also their posts on the [RIO Monad](https://www.fpcomplete.com/blog/2017/07/the-rio-monad/) and the [RIO Standard Library](https://www.fpcomplete.com/haskell/library/rio/.)
 
 ### Exception and Error Handling
 
@@ -97,6 +96,8 @@ To limit complexity, it is essential to properly organize and minimize dependenc
 
 - [Three Layer Haskell Cake](https://www.parsonsmatt.org/2018/03/22/three_layer_haskell_cake.html). Architecture proposal by P. Matt. It's an implementation of Clean Architecture principles, with a pure domain core, and adapters to external systems in the outermost layer.
 - [Invert Your Mocks](https://www.parsonsmatt.org/2017/07/27/inverted_mocking.html). Mocking external systems for efficient testing of the aplication core.
+- [The ReaderT Desidn Pattern](https://www.fpcomplete.com/blog/2017/06/readert-design-pattern/). Minimal Transformer stack (ReaderT and IO) advocated by FPComplete. See also their posts on the [RIO Monad](https://www.fpcomplete.com/blog/2017/07/the-rio-monad/) and the [RIO Standard Library](https://www.fpcomplete.com/haskell/library/rio/.)
+- An [StackOverflow] question about modular application architecture. The answers explain why stacking multiple Reader monads might be problematic, and explain the ReaderT design pattern as a solution for large applications.
 
 ## Tooling
 
