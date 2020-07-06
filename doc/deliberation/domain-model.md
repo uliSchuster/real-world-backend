@@ -23,6 +23,13 @@ There are two user-related objects in the API: One for authentication, and one f
 - Update: Possible by the named user only.
 - Delete: Not specified. This simplifies the application logic significantly, because we do not need to deal with orphaned articles and comments.
 
+#### User References
+
+The user is referenced in multiple places: Each Article belongs to exactly one user, as does each comment. How do we model this relation?
+
+- Make the `User` type part of both the `Article` and the `Comment` types. That is, include the user whenever we are dealing with an article or a comment. This creates some memory overhead. On the other hand, it is easy to handle. User data might become inconsistent across multiple articles or comments.
+- Include a reference to the `User`. This can be a database foreign key or an abstraction thereof, or it can be another unique field, like the username. Key point: If we use a user reference, we need to separately retrieve users from storage and maintain them in another data structure; e.g., a map.
+
 ### Article
 
 Core type for the blogging system. The main content resides in the title, description and body. In addition, there is a _slug_ used to identify the article in routes. The slug should somehow be drived from the title. When the user changes the title, the slug must be updated as well; hence, the slug cannot be used to refer to other articles.
