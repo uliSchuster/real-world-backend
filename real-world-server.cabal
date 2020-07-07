@@ -4,7 +4,7 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: cd5e2cfa1abd3ba2aa69afda6c64ec9cb343ebd840e7165270b01930db4a8d2f
+-- hash: bd375472c8e4da9afa2698add7fa708ae92c552783d9727d5f4f50b938c68b4f
 
 name:           real-world-server
 version:        0.1.0.0
@@ -29,6 +29,7 @@ library
   exposed-modules:
       Domain.Article
       Domain.Comment
+      Domain.Title
       Domain.User
       Import
       Run

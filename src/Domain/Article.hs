@@ -21,9 +21,8 @@ where
 import qualified Data.Time as DT
 import qualified Domain.User as USR
 import RIO
+import Domain.Title
 
-newtype ArticleTitle = ArticleTitle {getTitle :: Text}
-  deriving (Eq, Show, Ord, IsString, Semigroup, Monoid, Display, Hashable)
 
 newtype ArticleDescription = ArticleDescription {getDescription :: Text}
   deriving (Eq, Show, Ord, IsString, Semigroup, Monoid, Display, Hashable)
@@ -36,7 +35,7 @@ newtype ContentBody = ArticleBody {getBody :: Text}
 
 data Article
   = Article
-      { articleTitle :: ArticleTitle,
+      { articleTitle :: Title,
         articleDescription :: ArticleDescription,
         articleSlug :: ArticleSlug,
         articleBody :: ContentBody,

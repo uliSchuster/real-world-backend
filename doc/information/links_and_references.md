@@ -98,6 +98,13 @@ To limit complexity, it is essential to properly organize and minimize dependenc
 - [Invert Your Mocks](https://www.parsonsmatt.org/2017/07/27/inverted_mocking.html). Mocking external systems for efficient testing of the aplication core.
 - [The ReaderT Desidn Pattern](https://www.fpcomplete.com/blog/2017/06/readert-design-pattern/). Minimal Transformer stack (ReaderT and IO) advocated by FPComplete. See also their posts on the [RIO Monad](https://www.fpcomplete.com/blog/2017/07/the-rio-monad/) and the [RIO Standard Library](https://www.fpcomplete.com/haskell/library/rio/.)
 - An [StackOverflow] question about modular application architecture. The answers explain why stacking multiple Reader monads might be problematic, and explain the ReaderT design pattern as a solution for large applications.
+- An [example](https://gvolpe.github.io/blog/lessons-learned-while-writing-a-haskell-app/) about a web application that uses `dhall` configuration, the ReaderT design pattern plus polymprphic function records.
+
+### Best Practices
+Here are some articles, blog posts, and videos that provide guidance on how to write Haskell applications in the large:
+
+- [Parse, don't validate!](https://lexi-lambda.github.io/blog/2019/11/05/parse-don-t-validate/) gives deep insight into type-driven design. Key guideline: _Make illegal states unrepresentable_.
+- In the same vein, here are more examples on [pushing type failure to the application boundary](https://www.parsonsmatt.org/2017/10/11/type_safety_back_and_forth.html).
 
 ## Tooling
 

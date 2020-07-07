@@ -94,7 +94,7 @@ _Question_ Should we provide generic functionality for listing and paging of art
    1. Define two types: A core domain type without the auto-generated fields, and a persistence type that contains these fields. Consequence: auto-generated fields cannot be referred to inside the domain logic, because they are specific to the chosen persistence layer.
 1. How strongly should we encapsulate our domain types?
    1. No encapsulation at all: The domain types are mostly records of primitive types or library data structures. The corresponding values can freely be pattern-matched on, because all data constructors are accessible. On the downside, there cannot be semantic guarantees; e.g., if we store a name as `Text`, we cannot ensure a maximum length or constraints on the character set.
-   2. Purely abstract types: All domain types are abstract and can only be accessed via a defined interface. This allows for strong semantic guarantees provided by smart constructors. On the other hand, we would need lots of boilerplate code to access fields. Pattern matching would not be possible.
+   2. Purely abstract types: All domain types are abstract and can only be accessed via a defined interface. This allows for strong semantic guarantees provided by smart constructors. On the other hand, we would need lots of boilerplate code to access fields. Pattern matching can be achieved via the `PatternSynonyms` language extension, as shown in [this example](https://haskell-explained.gitlab.io/blog/posts/2019/08/27/pattern-synonyms/index.html).
 
 ## Design Decisions
 
