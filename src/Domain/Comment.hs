@@ -28,3 +28,4 @@ data Comment
         commentModifiedAt :: DT.UTCTime,
         commentUser :: USR.User
       }
+  deriving (Eq, Show)

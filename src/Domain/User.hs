@@ -1,3 +1,4 @@
+{-# LANGUAGE GeneralizedNewtypeDeriving #-}
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE NoImplicitPrelude #-}
 
@@ -21,8 +22,10 @@ import qualified Text.Email.Validate as Email
 import qualified Text.URI as URI
 
 newtype UserName = UserName {getUserName :: Text}
+  deriving (Eq, Show, Ord, IsString, Semigroup, Monoid, Display, Hashable)
 
 newtype UserBio = UserBio {getUserBio :: Text}
+  deriving (Eq, Show, Ord, IsString, Semigroup, Monoid, Display, Hashable)
 
 data User
   = User
@@ -31,3 +34,4 @@ data User
         userImageUrl :: URI.URI,
         userBio :: UserBio
       }
+  deriving (Eq, Show)

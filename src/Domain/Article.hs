@@ -1,3 +1,4 @@
+{-# LANGUAGE GeneralizedNewtypeDeriving #-}
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE NoImplicitPrelude #-}
 
@@ -22,12 +23,16 @@ import qualified Domain.User as USR
 import RIO
 
 newtype ArticleTitle = ArticleTitle {getTitle :: Text}
+  deriving (Eq, Show, Ord, IsString, Semigroup, Monoid, Display, Hashable)
 
 newtype ArticleDescription = ArticleDescription {getDescription :: Text}
+  deriving (Eq, Show, Ord, IsString, Semigroup, Monoid, Display, Hashable)
 
 newtype ArticleSlug = ArticleSlug {getSlug :: Text}
+  deriving (Eq, Show, Ord, IsString, Semigroup, Monoid, Display, Hashable)
 
 newtype ContentBody = ArticleBody {getBody :: Text}
+  deriving (Eq, Show, Ord, IsString, Semigroup, Monoid, Display, Hashable)
 
 data Article
   = Article
@@ -39,3 +44,4 @@ data Article
         articleModifiedAt :: DT.UTCTime,
         articleUser :: USR.User
       }
+  deriving (Eq, Show)
