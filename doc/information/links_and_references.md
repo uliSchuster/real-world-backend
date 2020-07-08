@@ -101,6 +101,7 @@ To limit complexity, it is essential to properly organize and minimize dependenc
 - An [example](https://gvolpe.github.io/blog/lessons-learned-while-writing-a-haskell-app/) about a web application that uses `dhall` configuration, the ReaderT design pattern plus polymprphic function records.
 
 ### Best Practices
+
 Here are some articles, blog posts, and videos that provide guidance on how to write Haskell applications in the large:
 
 - [Parse, don't validate!](https://lexi-lambda.github.io/blog/2019/11/05/parse-don-t-validate/) gives deep insight into type-driven design. Key guideline: _Make illegal states unrepresentable_.

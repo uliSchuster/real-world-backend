@@ -14,7 +14,7 @@ Several alternatives to the Standard Prelude are discussed [here](https://guide.
 
 For our application at hand, the prelude should provide the following:
 
-- Replace the inefficient `String` type consistently with `Text`
+- Replace the inefficient `String` type consistently with `Text`. More on `Text` [here](https://www.fpcomplete.com/haskell/tutorial/string-types/).
 - Remove unsafe functions.
 Otherwise, an alternative Prelude should not reinvent the wheel but keep known functions and types that work well in general. Fixing the mathematical hierarchy is not a priority for our application. S. Diehl gives [discussion](https://www.stephendiehl.com/posts/protolude.html) on this approach.
 
