@@ -4,7 +4,7 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: bd375472c8e4da9afa2698add7fa708ae92c552783d9727d5f4f50b938c68b4f
+-- hash: e47b1efb029708b7495fc4140c97e92f780adecc94ec569c591fa5810562f617
 
 name:           real-world-server
 version:        0.1.0.0
@@ -31,6 +31,7 @@ library
       Domain.Comment
       Domain.Title
       Domain.User
+      Domain.Username
       Import
       Run
       Types
@@ -47,6 +48,7 @@ library
     , modern-uri
     , quickcheck-instances
     , rio
+    , text-latin1
     , time
   default-language: Haskell2010
 
@@ -66,6 +68,7 @@ executable real-world-server-exe
     , quickcheck-instances
     , real-world-server
     , rio
+    , text-latin1
     , time
   default-language: Haskell2010
 
@@ -87,5 +90,6 @@ test-suite real-world-server-test
     , quickcheck-instances
     , real-world-server
     , rio
+    , text-latin1
     , time
   default-language: Haskell2010

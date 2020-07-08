@@ -27,6 +27,7 @@ dependencies:
 - time
 - QuickCheck
 - quickcheck-instances
+- text-latin1
 
 ghc-options:
 - -Wall
