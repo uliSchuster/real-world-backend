@@ -19,15 +19,12 @@ module Domain.Article
 where
 
 import qualified Data.Time as DT
-import qualified Domain.User as USR
-import RIO
+import Domain.Slug
 import Domain.Title
-
+import Domain.User
+import RIO
 
 newtype ArticleDescription = ArticleDescription {getDescription :: Text}
-  deriving (Eq, Show, Ord, IsString, Semigroup, Monoid, Display, Hashable)
-
-newtype ArticleSlug = ArticleSlug {getSlug :: Text}
   deriving (Eq, Show, Ord, IsString, Semigroup, Monoid, Display, Hashable)
 
 newtype ContentBody = ArticleBody {getBody :: Text}
@@ -37,10 +34,10 @@ data Article
   = Article
       { articleTitle :: Title,
         articleDescription :: ArticleDescription,
-        articleSlug :: ArticleSlug,
+        articleSlug :: Slug,
         articleBody :: ContentBody,
         articleCreatedAt :: DT.UTCTime,
         articleModifiedAt :: DT.UTCTime,
-        articleUser :: USR.User
+        articleUser :: User
       }
   deriving (Eq, Show)

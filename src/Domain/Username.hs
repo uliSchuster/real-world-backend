@@ -50,6 +50,10 @@ newtype UserName = UnconstrainedUserName Text
 pattern UserName :: Text -> UserName
 pattern UserName a <- UnconstrainedUserName a
 
+-- To satisfy the completeness checker;
+-- see https://gitlab.haskell.org/ghc/ghc/-/wikis/pattern-synonyms/complete-sigs
+{-# COMPLETE UserName #-}
+
 getUserNameText :: UserName -> Text
 getUserNameText (UnconstrainedUserName t) = t
 

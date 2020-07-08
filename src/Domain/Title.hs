@@ -22,7 +22,7 @@ module Domain.Title
   ( Title (), -- do not export the data constructor
     pattern Title,
     getTitleText,
-    mkTitle
+    mkTitle,
   )
 where
 
@@ -41,6 +41,10 @@ newtype Title = UnconstrainedTitle Text
 -- the data constructor is hidden.
 pattern Title :: Text -> Title
 pattern Title a <- UnconstrainedTitle a
+
+-- To satisfy the completeness checker;
+-- see https://gitlab.haskell.org/ghc/ghc/-/wikis/pattern-synonyms/complete-sigs
+{-# COMPLETE Title #-}
 
 getTitleText :: Title -> Text
 getTitleText (UnconstrainedTitle t) = t
