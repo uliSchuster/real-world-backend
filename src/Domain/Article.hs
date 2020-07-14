@@ -25,10 +25,10 @@ import Domain.User
 import RIO
 
 newtype ArticleDescription = ArticleDescription {getDescription :: Text}
-  deriving (Eq, Show, Ord, IsString, Semigroup, Monoid, Display, Hashable)
+  deriving (Eq, Show, Ord, IsString, Display, Hashable)
 
 newtype ContentBody = ArticleBody {getBody :: Text}
-  deriving (Eq, Show, Ord, IsString, Semigroup, Monoid, Display, Hashable)
+  deriving (Eq, Show, Ord, IsString, Display, Hashable)
 
 data Article
   = Article
