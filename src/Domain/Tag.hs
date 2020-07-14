@@ -13,41 +13,47 @@
 --             :  PatternSynonyms - Set up custom patterns to match over
 --             :  NoImplicitPrelude - Use RIO instead
 --
--- Abstract data type for canonical title text with constrained character set.
--- This is an attempt to encode some constraints about the Title in its type
--- and to ensure those constraints by means of a smart constructor. Similar to
--- the `Domain.Article` type, it does not generalize to other text strings.
--- The title must be Latin-1 alphanumeric or whitespace.
+-- Abstract data type for canonical article tags text with constrained
+-- character set and maximum length, similar to `Domain.UserName`.
+-- The tag must be Latin-1 alphanumeric or whitespace of fixed max length.
 -- In addition, the title text is canonicalized: No leading or trailing
 -- whitespace, exactly one whitespace character between words.
-module Domain.Title
-  ( Title (), -- do not export the data constructor
-    pattern Title,
-    getTitle,
-    mkTitle,
+module Domain.Tag
+  ( Tag (Tag),
+    getTag,
+    mkTag,
   )
 where
 
 import Domain.ValidationUtils
 import RIO
 
--- | Type that encapsulates a title string. Garanteed to have valid characters
--- only.
--- Because the data constructor is not exported, titles with arbitrary Unicode
+minTagLength :: Int
+minTagLength = 3
+
+maxTagLength :: Int
+maxTagLength = 20
+
+valTagLength :: Text -> Maybe Text
+valTagLength = valLength minTagLength maxTagLength
+
+-- | Type that encapsulates a tag string.
+-- Because the data constructor is not exported, tags with arbitrary Unicode
 -- characters cannot be constructed.
-newtype Title = Title_ {getTitle :: Text}
+newtype Tag = Tag_ {getTag :: Text}
   deriving (Eq, Show, Ord, IsString, Display, Hashable)
 
 -- | Pattern synonym to allow pattern matching on the `Title` type even though
 -- the data constructor is hidden.
 -- See https://stackoverflow.com/questions/33722381/pattern-matching-on-a-private-data-constructor
-pattern Title :: Text -> Title
-pattern Title t <- Title_ t
+pattern Tag :: Text -> Tag
+pattern Tag t <- Tag_ t
 
--- To satisfy the completeness checker;
--- see https://gitlab.haskell.org/ghc/ghc/-/wikis/pattern-synonyms/complete-sigs
-{-# COMPLETE Title #-}
+-- -- To satisfy the completeness checker;
+-- -- see https://gitlab.haskell.org/ghc/ghc/-/wikis/pattern-synonyms/complete-sigs
+{-# COMPLETE Tag #-}
 
--- Smart constructor to guarantee a well-formed title string.
-mkTitle :: Text -> Maybe Title
-mkTitle t = Title_ . toCanonicText <$> valLatin1Letters t
+mkTag :: Text -> Maybe Tag
+mkTag t = do
+  canonical <- toCanonicText <$> valLatin1Letters t
+  Tag_ <$> valTagLength canonical

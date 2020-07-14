@@ -4,7 +4,7 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: 6c20ab98fc6dfd165b9abdd02062d997f946d3a06b4722ddf75681f367466fe6
+-- hash: da6d67b193e9270680cbe264a66d15f2210288044a69c0ece32aef9d74687315
 
 name:           real-world-server
 version:        0.1.0.0
@@ -31,9 +31,11 @@ library
       Domain.Comment
       Domain.Content
       Domain.Slug
+      Domain.Tag
       Domain.Title
       Domain.User
       Domain.Username
+      Domain.ValidationUtils
       Import
       Run
       Types

@@ -58,7 +58,11 @@ A comment always pertains to exactly one article. Similar to articles, comments 
 
 Tags are words that can be affixed to articles for means of organizing them. Tags can only be affixe to articles, not to comments nor users.
 
-_Question:_ Should users be able to create new tags, or should we provide a fixed set of tags? _Proposal:_ Start with predefined tags. This simplifies the problem, because we no not need CRUD-logic for tags.
+_Questions:_
+
+1. Should users be able to create new tags, or should we provide a fixed set of tags? _Proposal:_ Start with predefined tags. This simplifies the problem, because we no not need CRUD-logic for tags.
+2. Should the Author add tags to his or her articles, or should every user be able to add tags to arbitrary articles? _Proposal:_ Only authors can add tags to their articles.
+3. If arbitrary users can add tags to arbitrary articles, are these tags private – that is, every user only sees his or her own tags, so that Article A has tags [U1.A, U1.B, U1.C] for user U1, but, say, tags [U2.A, U2.B] for user U2? _Proposal:_ Don't make it that complex, follow the preceding option and only let authors tag their own articles.
 
 ### Favorits
 
@@ -97,6 +101,7 @@ _Question_ Should we provide generic functionality for listing and paging of art
    2. Purely abstract types: All domain types are abstract and can only be accessed via a defined interface. This allows for strong semantic guarantees provided by smart constructors. On the other hand, we would need lots of boilerplate code to access fields. Pattern matching can be achieved via the `PatternSynonyms` language extension, as shown in [this example](https://haskell-explained.gitlab.io/blog/posts/2019/08/27/pattern-synonyms/index.html).
 1. If we opt for strong domain types, exactly how much information do we want to encode in the type? For example, should our `Title` type constrain the number of characters? Should it ban line feed and tab characters? Which Unicode symbols are admissible? Scott Wlaschin has an [interesting blog post](https://fsharpforfunandprofit.com/posts/designing-with-types-more-semantic-types/) about these issues, as does Tom Moertel on [Safe Strings in Haskell](http://blog.moertel.com/posts/2006-10-18-a-type-based-solution-to-the-strings-problem.html).  On a more theoretical note, such types are called [refinement types](https://en.wikipedia.org/wiki/Refinement_type), and there indeed does exist a [refinement types library](http://nikita-volkov.github.io/refined/).
 1. The `Slug` is used in the URL to uniquely identify an article. Hence, slugs must be unique. Yet, because slugs are derived from an Article's title, and thus may change if the title changes, how can we ensure that all slugs are unique?
+1. So far, we take an `Article` and a `Comment` to be two separate things. Ar they? Or do they have enough things in common that we can factor out? Both are some text written by some author. Is this enough to create a `BlogContent` type that handels the text and author link, and then wrap it up in a surrounding `Article` and `Comment` types. What would we gain from this overhead?
 
 ## Design Decisions
 
