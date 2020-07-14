@@ -1,5 +1,4 @@
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
-{-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE NoImplicitPrelude #-}
 
 -- |
@@ -9,7 +8,8 @@
 -- License     :  Apache License 2.0
 -- Maintainer  :  real-world-study-group@ugsmail.mailworks.org
 -- Stability   :  unstable
--- Portability :  portable
+-- Lang. Ext.  :  GeneralizedNewtypeDeriving - Derive typeclasses for newtypes
+--             :  NoImplicitPrelude - Use RIO instead
 --
 -- Domain data types and business logic to describe a blog user.
 module Domain.User

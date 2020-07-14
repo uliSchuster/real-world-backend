@@ -10,14 +10,18 @@
 -- License     :  Apache License 2.0
 -- Maintainer  :  real-world-study-group@ugsmail.mailworks.org
 -- Stability   :  unstable
+-- Lang. Ext.  :  GeneralizedNewtypeDeriving - Derive typeclasses for newtypes
+--             :  OverloadedStrings - Use Text literals
+--             :  PatternSynonyms - Set up custom patterns to match over
+--             :  NoImplicitPrelude - Use RIO instead
 --
 -- Abstract data type for canonical title text with constrained character set.
 -- This is an attempt to encode some constraints about the Title in its type
--- and to ensure those constraints by means of a smart constructor. It is a
--- concrete type for the Title only, it does not generalize to other text
--- strings: In particular: The title must be Latin-1 alphanumeric or whitespace.
--- In addition, the title text is canonicalized: Now leading or trailing
--- whitespace, one whitespace character between words only.
+-- and to ensure those constraints by means of a smart constructor. Similar to 
+-- the `Domain.Article` type, it does not generalize to other text strings.
+-- The title must be Latin-1 alphanumeric or whitespace.
+-- In addition, the title text is canonicalized: No leading or trailing
+-- whitespace, exactly one whitespace character between words.
 module Domain.Title
   ( Title (), -- do not export the data constructor
     pattern Title,
@@ -39,8 +43,9 @@ newtype Title = UnconstrainedTitle Text
 
 -- | Pattern synonym to allow pattern matching on the `Title` type even though
 -- the data constructor is hidden.
+-- See https://stackoverflow.com/questions/33722381/pattern-matching-on-a-private-data-constructor
 pattern Title :: Text -> Title
-pattern Title a <- UnconstrainedTitle a
+pattern Title t <- UnconstrainedTitle t
 
 -- To satisfy the completeness checker;
 -- see https://gitlab.haskell.org/ghc/ghc/-/wikis/pattern-synonyms/complete-sigs

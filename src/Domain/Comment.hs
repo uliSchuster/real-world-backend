@@ -1,4 +1,3 @@
-{-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE NoImplicitPrelude #-}
 
 -- |
@@ -8,24 +7,28 @@
 -- License     :  Apache License 2.0
 -- Maintainer  :  real-world-study-group@ugsmail.mailworks.org
 -- Stability   :  unstable
--- Portability :  portable
+-- Lang. Ext.  :  NoImplicitPrelude - Use RIO instead
 --
 -- Domain data types and business logic to describe a blog comment.
 module Domain.Comment
   ( Comment (..),
+    -- Reexport for convenience
+    module Domain.Content,
+    module Domain.User,
   )
 where
 
 import qualified Data.Time as DT
-import qualified Domain.Article as ART
-import qualified Domain.User as USR
+import Domain.Article
+import Domain.Content
+import Domain.User
 import RIO
 
 data Comment
   = Comment
-      { commendBody :: ART.ContentBody,
+      { commentBody :: Body,
         commentCreatedAt :: DT.UTCTime,
         commentModifiedAt :: DT.UTCTime,
-        commentUser :: USR.User
+        commentAuthor :: User
       }
   deriving (Eq, Show)

@@ -10,15 +10,20 @@
 -- License     :  Apache License 2.0
 -- Maintainer  :  real-world-study-group@ugsmail.mailworks.org
 -- Stability   :  unstable
+-- Lang. Ext.  :  GeneralizedNewtypeDeriving - Derive typeclasses for newtypes
+--             :  OverloadedStrings - Use Text literals
+--             :  PatternSynonyms - Set up custom patterns to match over
+--             :  NoImplicitPrelude - Use RIO instead
 --
 -- Abstract data type for a length-constrained user name.
--- This is an attempt to encode some constraints about the Username in its type
--- and to ensure those constraints by means of a smart constructor. It is a
--- concrete type for the Username only, it does not generalize to other text
--- strings: In particular: The username must be a single word with Latin-1
--- alphanumeric characters, with minimum and maximum length.
+-- This is an attempt to encode some constraints about the Username in its type,
+-- and to ensure those constraints by means of a smart constructor.
+-- This is a rather simple, non-generic variant of an abstract data type that 
+-- only works for a user name. It does not generalize to other Text strings.
+-- The username must be a single word with Latin-1 alphanumeric characters 
+-- and between some minimum and maximum length.
 module Domain.Username
-  ( UserName (), -- do not export the data constructor
+  ( UserName (), -- Do not export the data constructor
     pattern UserName,
     getUserNameText,
     mkUserName,
@@ -45,13 +50,14 @@ maxUserNameLength = 20
 newtype UserName = UnconstrainedUserName Text
   deriving (Eq, Show, Ord, IsString, Display, Hashable)
 
--- | Pattern synonym to allow pattern matching on the `UserName` type even
+-- | Pattern synonym to allow pattern matching on the `UserName` type, even
 -- though the data constructor is hidden.
+-- See https://stackoverflow.com/questions/33722381/pattern-matching-on-a-private-data-constructor
 pattern UserName :: Text -> UserName
-pattern UserName a <- UnconstrainedUserName a
+pattern UserName name <- UnconstrainedUserName name
 
--- To satisfy the completeness checker;
--- see https://gitlab.haskell.org/ghc/ghc/-/wikis/pattern-synonyms/complete-sigs
+-- To satisfy the completeness checker.
+-- See https://gitlab.haskell.org/ghc/ghc/-/wikis/pattern-synonyms/complete-sigs
 {-# COMPLETE UserName #-}
 
 getUserNameText :: UserName -> Text

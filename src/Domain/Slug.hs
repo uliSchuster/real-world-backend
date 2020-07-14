@@ -10,6 +10,10 @@
 -- License     :  Apache License 2.0
 -- Maintainer  :  real-world-study-group@ugsmail.mailworks.org
 -- Stability   :  unstable
+-- Lang. Ext.  :  GeneralizedNewtypeDeriving - Derive typeclasses for newtypes
+--             :  OverloadedStrings - Use Text literals
+--             :  PatternSynonyms - Set up custom patterns to match over
+--             :  NoImplicitPrelude - Use RIO instead
 --
 -- Abstract data type for the article slug that identifies the corresponding
 -- page. The slug here is modeled as opaque type that can only be created from
@@ -43,8 +47,9 @@ newtype Slug = UnconstrainedSlug Text
 
 -- | Pattern synonym to allow pattern matching on the `Slug` type even though
 -- the data constructor is hidden.
+-- See https://stackoverflow.com/questions/33722381/pattern-matching-on-a-private-data-constructor
 pattern Slug :: Text -> Slug
-pattern Slug a <- UnconstrainedSlug a
+pattern Slug s <- UnconstrainedSlug s
 
 -- To satisfy the completeness checker;
 -- see https://gitlab.haskell.org/ghc/ghc/-/wikis/pattern-synonyms/complete-sigs
