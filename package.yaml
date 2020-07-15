@@ -25,7 +25,10 @@ dependencies:
 - email-validate
 - modern-uri
 - time
-- QuickCheck
+- tasty
+- tasty-hunit
+- tasty-quickcheck
+- tasty-discover
 - quickcheck-instances
 - text-latin1
 
@@ -56,11 +59,15 @@ executables:
 
 tests:
   real-world-server-test:
-    main:                Spec.hs
+    main:                Test.hs
     source-dirs:         test
     dependencies:
     - real-world-server
-    - hspec
+    - tasty
+    - tasty-hunit
+    - tasty-quickcheck
+    - tasty-discover
+    - quickcheck-instances
 
     ghc-options:
     - -threaded
