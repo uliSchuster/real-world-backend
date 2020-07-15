@@ -51,7 +51,7 @@ valLatin1PrintableNonSpace t
 -- | Ensure that the first character of the input string is alphanumeric.
 valInitialLatin1Letter :: Text -> Maybe Text
 valInitialLatin1Letter t
-  | TL1.isAlpha . flip T.index 1 $ t = Just t
+  | TL1.isAlpha . flip T.index 0 $ t = Just t
   | otherwise = Nothing
 
 -- | Ensure that the input text satisfies the constraints on its minimum and
