@@ -4,7 +4,7 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: 432231b101029988d71530f4ab5bfd3173c9df22ef83258d1f79730dcf279511
+-- hash: 45b3338b04329f56951000b438b1809f82bfd1cfdcb936f528f572d160b5d306
 
 name:           real-world-server
 version:        0.1.0.0
@@ -46,7 +46,9 @@ library
       src
   ghc-options: -Wall -Wcompat -Widentities -Wincomplete-record-updates -Wincomplete-uni-patterns -Wpartial-fields -Wredundant-constraints
   build-depends:
-      base >=4.11 && <10
+      QuickCheck
+    , base >=4.11 && <10
+    , checkers
     , email-validate
     , modern-uri
     , quickcheck-instances
@@ -67,7 +69,9 @@ executable real-world-server-exe
       app
   ghc-options: -Wall -Wcompat -Widentities -Wincomplete-record-updates -Wincomplete-uni-patterns -Wpartial-fields -Wredundant-constraints -threaded -rtsopts -with-rtsopts=-N
   build-depends:
-      base >=4.11 && <10
+      QuickCheck
+    , base >=4.11 && <10
+    , checkers
     , email-validate
     , modern-uri
     , optparse-simple
@@ -93,7 +97,9 @@ test-suite real-world-server-test
       test
   ghc-options: -Wall -Wcompat -Widentities -Wincomplete-record-updates -Wincomplete-uni-patterns -Wpartial-fields -Wredundant-constraints -threaded -rtsopts -with-rtsopts=-N
   build-depends:
-      base >=4.11 && <10
+      QuickCheck
+    , base >=4.11 && <10
+    , checkers
     , email-validate
     , modern-uri
     , quickcheck-instances

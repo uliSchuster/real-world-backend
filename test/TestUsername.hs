@@ -3,11 +3,13 @@
 
 module TestUsername where
 
+import qualified Data.Maybe as DM
 import Domain.Username
 import RIO
 import qualified RIO.List as L
+import qualified RIO.Text as T
 import qualified Test.Tasty.HUnit as HU
-import qualified Test.Tasty.QuickCheck as QC
+import qualified TestUtils as TU
 
 -- HUnit test cases --
 
@@ -27,8 +29,12 @@ unit_noControlCharInUserName :: IO ()
 unit_noControlCharInUserName = HU.assertBool "A UserName that contains a control character cannot be constructed" (isNothing $ mkUserName "Invalid\nUser")
 
 unit_noNonAlphaInitial :: IO ()
-unit_noNonAlphaInitial = HU.assertBool "A UserName that starts with a character that is not alphanumeric cannot be constructed" (isNothing $ mkUserName "8UserName")
+unit_noNonAlphaInitial = HU.assertBool "A UserName that starts with a character that is not alphabetic cannot be constructed" (isNothing $ mkUserName "8UserName")
 
 -- Quickspec test cases --
-prop_example :: [Int] -> Bool
-prop_example list = L.sort (list :: [Int]) == L.sort (reverse list)
+prop_validUserName :: TU.AlphaLatin1 -> TU.PrintableText -> Bool
+prop_validUserName (TU.AlphaLatin1 a) (TU.PrintableText t)
+  | T.length uName >= minUserNameLength && T.length uName <= maxUserNameLength = DM.isJust $ mkUserName uName
+  | otherwise = DM.isNothing $ mkUserName uName
+  where
+    uName = T.cons a t -- First letter must be alpha

@@ -29,7 +29,9 @@ dependencies:
 - tasty-hunit
 - tasty-quickcheck
 - tasty-discover
+- QuickCheck
 - quickcheck-instances
+- checkers
 - text-latin1
 
 ghc-options:
@@ -67,7 +69,9 @@ tests:
     - tasty-hunit
     - tasty-quickcheck
     - tasty-discover
+    - QuickCheck
     - quickcheck-instances
+    - checkers
 
     ghc-options:
     - -threaded
