@@ -14,6 +14,7 @@
 -- Functions to normalize and validate text input.
 module Domain.ValidationUtils
   ( toCanonicText,
+    valNonEmpty,
     valLatin1Letters,
     valLatin1PrintableNonSpace,
     valInitialLatin1Letter,
@@ -29,6 +30,12 @@ import qualified Text.Latin1 as TL1
 -- separated by exactly one space each.
 toCanonicText :: Text -> Text
 toCanonicText = T.intercalate " " . T.words . T.strip
+
+-- | Ensure that the input text is not the empty string.
+valNonEmpty :: Text -> Maybe Text
+valNonEmpty t
+  | T.null t = Nothing
+  | otherwise = Just t
 
 -- | Ensure that the input text contains only alphanumeric and whitespace
 -- Latin-1 characters.
