@@ -3,7 +3,8 @@
 {-# LANGUAGE NoImplicitPrelude #-}
 
 module TestUtils
-  ( latin1Chars,
+  ( Utf8Text1 (..),
+    latin1Chars,
     PrintableLatin1 (..),
     PrintableText (..),
     alphaChars,
@@ -21,6 +22,14 @@ import RIO
 import qualified RIO.Text as T
 import Test.QuickCheck
 import qualified Test.QuickCheck.Instances.List as QL
+import qualified Test.QuickCheck.Utf8 as QCU
+
+-- A nonempty UTF8 String
+newtype Utf8Text1 = Utf8Text1 {getUtf8Text1 :: Text}
+  deriving (Eq, Show, Ord, Display)
+
+instance Arbitrary Utf8Text1 where
+  arbitrary = Utf8Text1 <$> QCU.genValidUtf81
 
 -- A list of most (all?) printable Latin-1 characters.
 latin1Chars :: String

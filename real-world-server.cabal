@@ -4,7 +4,7 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: 45b3338b04329f56951000b438b1809f82bfd1cfdcb936f528f572d160b5d306
+-- hash: efb8a4017b436cd7d040bf0189435f8d93728bf9fcc877648afe5cb802e40a21
 
 name:           real-world-server
 version:        0.1.0.0
@@ -52,6 +52,7 @@ library
     , email-validate
     , modern-uri
     , quickcheck-instances
+    , quickcheck-text
     , rio
     , tasty
     , tasty-discover
@@ -76,6 +77,7 @@ executable real-world-server-exe
     , modern-uri
     , optparse-simple
     , quickcheck-instances
+    , quickcheck-text
     , real-world-server
     , rio
     , tasty
@@ -103,6 +105,7 @@ test-suite real-world-server-test
     , email-validate
     , modern-uri
     , quickcheck-instances
+    , quickcheck-text
     , real-world-server
     , rio
     , tasty

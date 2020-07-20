@@ -31,6 +31,7 @@ dependencies:
 - tasty-discover
 - QuickCheck
 - quickcheck-instances
+- quickcheck-text
 - checkers
 - text-latin1
 
@@ -71,6 +72,7 @@ tests:
     - tasty-discover
     - QuickCheck
     - quickcheck-instances
+    - quickcheck-text
     - checkers
 
     ghc-options:
