@@ -4,7 +4,7 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: 2ce60ee4157c214d6433531c355427db8d8942e532d7c801c5a73ac5fbfa4037
+-- hash: 523357f7ada496d55b21a5eba560e17bb0edf9b44d89e7738db83deee103fb09
 
 name:           real-world-server
 version:        0.1.0.0
@@ -37,6 +37,7 @@ library
       Domain.Username
       Domain.ValidationUtils
       Import
+      Persistence.Users
       Run
       Types
       Util
@@ -51,6 +52,10 @@ library
     , checkers
     , email-validate
     , modern-uri
+    , opaleye
+    , postgresql-simple
+    , product-profunctors
+    , profunctors
     , quickcheck-instances
     , quickcheck-text
     , rio
@@ -75,7 +80,11 @@ executable real-world-server-exe
     , checkers
     , email-validate
     , modern-uri
+    , opaleye
     , optparse-simple
+    , postgresql-simple
+    , product-profunctors
+    , profunctors
     , quickcheck-instances
     , quickcheck-text
     , real-world-server
@@ -107,6 +116,10 @@ test-suite real-world-server-test
     , checkers
     , email-validate
     , modern-uri
+    , opaleye
+    , postgresql-simple
+    , product-profunctors
+    , profunctors
     , quickcheck-instances
     , quickcheck-text
     , real-world-server
