@@ -5,10 +5,13 @@
 module Domain.DomainInstances
   ( ValidUserName (..),
     ValidTitle (..),
+    ValidTag (..),
   )
 where
 
 import Control.Monad
+import qualified Data.Char as C
+import qualified Domain.Tag as TG
 import qualified Domain.Username as UN
 import RIO
 import qualified RIO.Text as T
@@ -38,3 +41,15 @@ instance Arbitrary ValidTitle where
     tws <- listOf1 (arbitrary :: Gen TU.AlphaNumText)
     let t = TU.getAlphaNumText <$> tws
     return $ ValidTitle (T.unwords t)
+
+-- Newtype wrapper to create an Arbitrary instance.
+newtype ValidTag = ValidTag {getValidTag :: Text}
+  deriving (Eq, Show, Ord, Display)
+
+instance Arbitrary ValidTag where
+  arbitrary = do
+    tagSize <- choose (TG.minTagLength - 2, TG.maxTagLength - 2)
+    firstLetter <- TU.getAlphaLatin1 <$> (arbitrary :: Gen TU.AlphaLatin1)
+    lastLetter <- TU.getAlphaLatin1 <$> (arbitrary :: Gen TU.AlphaLatin1)
+    ts <- replicateM tagSize (frequency [(10, TU.getAlphaLatin1 <$> (arbitrary :: Gen TU.AlphaLatin1)), (1, elements [C.chr 32, C.chr 160])])
+    return $ ValidTag (T.pack $ (firstLetter : ts) ++ [lastLetter])

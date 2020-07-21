@@ -27,7 +27,7 @@ unit_noWhitespaceInUserName :: IO ()
 unit_noWhitespaceInUserName = HU.assertBool "A UserName that contains whitespace characters cannot be constructed" (isNothing $ mkUserName "Invalid Username")
 
 unit_noControlCharInUserName :: IO ()
-unit_noControlCharInUserName = HU.assertBool "A UserName that contains a control character cannot be constructed" (isNothing $ mkUserName "Invalid\nUser")
+unit_noControlCharInUserName = HU.assertBool "A UserName that contains a control character cannot be constructed" (isNothing $ mkUserName "Invalid\^GUser")
 
 unit_noNonAlphaInitial :: IO ()
 unit_noNonAlphaInitial = HU.assertBool "A UserName that starts with a character that is not alphabetic cannot be constructed" (isNothing $ mkUserName "8UserName")

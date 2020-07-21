@@ -4,7 +4,7 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: 989acab15ce582185fbe0b270ffc9819e8c9c14a0040a3a645b3bf736eed5c6f
+-- hash: 2ce60ee4157c214d6433531c355427db8d8942e532d7c801c5a73ac5fbfa4037
 
 name:           real-world-server
 version:        0.1.0.0
@@ -93,6 +93,7 @@ test-suite real-world-server-test
   main-is: Test.hs
   other-modules:
       Domain.DomainInstances
+      Domain.TestTag
       Domain.TestTitle
       Domain.TestUsername
       TestUtils
