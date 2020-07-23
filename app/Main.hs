@@ -1,37 +1,27 @@
-{-# LANGUAGE NoImplicitPrelude #-}
-{-# LANGUAGE TemplateHaskell #-}
-module Main (main) where
+-- {-# LANGUAGE NoImplicitPrelude #-}
 
-import Import
-import Run
-import RIO.Process
-import Options.Applicative.Simple
+module Main
+  ( main,
+  )
+where
+
+import qualified Database.PostgreSQL.Simple as PGS
 import qualified Paths_real_world_server
+import qualified Persistence.Users as PU
+-- import RIO
 
-
--- another comment
--- unnecessary comment
+connInfo :: PGS.ConnectInfo
+connInfo =
+  PGS.ConnectInfo
+    { PGS.connectHost = "localhost",
+      PGS.connectPort = 5432,
+      PGS.connectDatabase = "conduit",
+      PGS.connectPassword = "conduit",
+      PGS.connectUser = "cond"
+    }
 
 main :: IO ()
 main = do
-  (options, ()) <- simpleOptions
-    $(simpleVersion Paths_real_world_server.version)
-    "Header for command line arguments"
-    "Program description, also for command line arguments"
-    (Options
-       <$> switch ( long "verbose"
-                 <> short 'v'
-                 <> help "Verbose output?"
-                  )
-    )
-    empty
-  lo <- logOptionsHandle stderr (optionsVerbose options)
-  pc <- mkDefaultProcessContext
-  withLogFunc lo $ \lf ->
-    let app = App
-          { appLogFunc = lf
-          , appProcessContext = pc
-          , appOptions = options
-          }
-     in runRIO app run
---comment
+  conn <- PGS.connect connInfo
+  allUsers <- PU.getAllUsers conn
+  print allUsers
