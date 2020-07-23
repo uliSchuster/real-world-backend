@@ -4,7 +4,7 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: ff3e2e55e0ae5c6cd9ece80275ebf839b9132508181487823acb55c91bc2df86
+-- hash: 750d8b2098844fb270efdb32a14780d95166889fc3022e91ccccdb21d8381667
 
 name:           real-world-server
 version:        0.1.0.0
@@ -36,10 +36,8 @@ library
       Domain.User
       Domain.Username
       Domain.ValidationUtils
-      Import
+      Persistence.DbConfig
       Persistence.Users
-      Run
-      Types
   other-modules:
       Paths_real_world_server
   hs-source-dirs:
@@ -69,6 +67,7 @@ library
 executable real-world-server-exe
   main-is: Main.hs
   other-modules:
+      AppConfig
       Paths_real_world_server
   hs-source-dirs:
       app

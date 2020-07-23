@@ -36,10 +36,12 @@ import qualified Opaleye as OE
 import RIO
 
 -- | Type synonyms for convenience
-type F field = -- | Opaleye type for a non-nullable DB field.
+type F field =
+  -- | Opaleye type for a non-nullable DB field.
   OE.Field field
 
-type FNull field = -- | Nullable DB field
+type FNull field =
+  -- | Nullable DB field
   OE.FieldNullable field
 
 --------------------
@@ -92,6 +94,9 @@ type User =
     (Maybe Text) -- bio
     (Maybe Text) -- image url
 
+instance Display User where
+  display = displayShow
+
 -- | Template Haskell helper to create the mapping function between PostgreSQL
 -- records and the Haskell record used below.
 $(makeAdaptorAndInstance "pUser" ''UserT)
@@ -137,5 +142,9 @@ selectUsers = OE.selectTable userTable
 -- connection string. These functions use Opaleye primitive that perform the
 -- mapping between Haskell records and Opaleye PostgreSQL records.
 
-getAllUsers :: PGS.Connection -> IO [User]
-getAllUsers conn = OE.runSelect conn selectUsers
+getAllUsers :: PGS.ConnectInfo -> IO [User]
+getAllUsers connInfo = do
+  conn <- PGS.connect connInfo
+  result <- OE.runSelect conn selectUsers
+  PGS.close conn
+  return result
