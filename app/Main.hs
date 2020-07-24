@@ -8,11 +8,13 @@ where
 import qualified AppConfig as APC
 import qualified Database.PostgreSQL.Simple as PGS
 import qualified Paths_real_world_server
+import qualified Persistence.Articles as PA
 import qualified Persistence.DbConfig as DBC
+import qualified Persistence.Follows as PF
 import qualified Persistence.Users as PU
 import RIO
 
--- | Connection string for the PostgreSQL DBMS. Here for development and 
+-- | Connection string for the PostgreSQL DBMS. Here for development and
 -- experimentation. Should be loaded from a config file or the system environment later on.
 dBConnInfo :: DBC.DbConfig
 dBConnInfo =
@@ -26,7 +28,7 @@ dBConnInfo =
       }
 
 -- Helper function to run the main application logic.
--- This function is a very preliminary sketch. The goal later on is to properly 
+-- This function is a very preliminary sketch. The goal later on is to properly
 -- isolate the different IO subsystems (logging, command line, web server, DB).
 runApp :: RIO APC.AppConfig a -> IO a
 runApp app = do
@@ -47,6 +49,10 @@ conduitApp = do
   connInf <- view $ APC.dbConfigL . DBC.connInfoL
   allUsers <- liftIO $ PU.getAllUsers connInf
   logInfo $ mconcat (display <$> allUsers)
+  allFollows <- liftIO $ PF.getAllFollows connInf
+  logInfo $ mconcat (display <$> allFollows)
+  allArticles <- liftIO $ PA.getAllArticles connInf
+  logInfo $ mconcat (display <$> allArticles)
 
 -- | Enry point of the application
 main :: IO ()

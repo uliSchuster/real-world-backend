@@ -1,5 +1,6 @@
 {-# LANGUAGE Arrows #-}
 {-# LANGUAGE FlexibleInstances #-}
+{-# LANGUAGE GeneralizedNewtypeDeriving #-}
 {-# LANGUAGE MultiParamTypeClasses #-}
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE TemplateHaskell #-}
@@ -17,13 +18,15 @@
 --             :  MultiParamTypeClasses - Required by Opaleye
 --             :  TemplateHaskell - Lets Opaleye generate the mapping function
 --             :  NoImplicitPrelude - Use RIO instead
+--             : GeneralizedNewtypeDeriving - Simplify newtype usage
 --
 -- Database interface for the "user" relation, using the Opaleye mapper and
 -- typesafe query and data manipulation DSL.
 -- See https://github.com/tomjaguarpaw/haskell-opaleye and the (outdated)
 -- tutorial here: https://www.haskelltutorials.com/opaleye/index.html
 module Persistence.Users
-  ( User,
+  ( UserId (..),
+    User,
     getAllUsers,
   )
 where
@@ -33,16 +36,21 @@ import qualified Data.Profunctor.Product ()
 import Data.Profunctor.Product.TH (makeAdaptorAndInstance)
 import qualified Database.PostgreSQL.Simple as PGS
 import qualified Opaleye as OE
+import Persistence.PersistenceUtils
 import RIO
 
--- | Type synonyms for convenience
-type F field =
-  -- | Opaleye type for a non-nullable DB field.
-  OE.Field field
+--------------------
+-- Dedicated User ID
+--------------------
+newtype UserId = UserId {getUserId :: Int64}
+  deriving (Show, Eq, Ord, Display, Num, Enum)
 
-type FNull field =
-  -- | Nullable DB field
-  OE.FieldNullable field
+instance OE.QueryRunnerColumnDefault OE.SqlInt8 UserId where
+  queryRunnerColumnDefault = UserId <$> OE.queryRunnerColumnDefault
+
+-- $(makeAdaptorAndInstance "pUserId" ''UserId)
+
+-- type UserIdField = UserId (OE.Field OE.SqlInt8)
 
 --------------------
 -- Table Setup
@@ -51,13 +59,15 @@ type FNull field =
 -- | Polymorphic type for the "user" table. This type describes the "shape" of
 -- a record, but not the type of individual record fields. This allows Opaleye
 -- map Haskell types to PostgreSQL types by specializing the type parameters.
-data UserT key username email bio imageUrl
+data UserT key username email bio imageUrl pwdHash salt
   = User
       { userKey :: key,
         userUsername :: username,
         userEmail :: email,
         userBio :: bio,
-        userImageUrl :: imageUrl
+        userImageUrl :: imageUrl,
+        userPwdHash :: pwdHash,
+        userSalt :: salt
       }
   deriving (Show)
 
@@ -72,6 +82,8 @@ type UserW =
     (F OE.SqlText) -- email
     (FNull OE.SqlText) -- optional bio
     (FNull OE.SqlText) -- optional image url
+    (F OE.SqlText) -- password hash
+    (F OE.SqlText) -- password salt
 
 -- | Record that Opaleye reads from the "user" table. This record uses nativ
 -- PostreSQL types.
@@ -82,17 +94,21 @@ type UserR =
     (F OE.SqlText) -- email
     (FNull OE.SqlText) -- bio
     (FNull OE.SqlText) -- image url
+    (F OE.SqlText) -- password hash
+    (F OE.SqlText) -- password salt
 
 -- | Typesafe Haskell record to interface with the application. Under the hood,
 -- Opaleye converts between this application record and the above PostgreSQL
 -- read and write records.
 type User =
   UserT
-    Int64 -- key
+    UserId -- key
     Text -- username
     Text -- email
     (Maybe Text) -- bio
     (Maybe Text) -- image url
+    Text -- pwdHash
+    Text -- Salt
 
 instance Display User where
   display = displayShow
@@ -114,7 +130,9 @@ userTable =
             userUsername = OE.required "username",
             userEmail = OE.required "email",
             userBio = OE.required "bio",
-            userImageUrl = OE.required "image_url"
+            userImageUrl = OE.required "image_url",
+            userPwdHash = OE.required "password_hash",
+            userSalt = OE.required "salt"
           }
     )
 
