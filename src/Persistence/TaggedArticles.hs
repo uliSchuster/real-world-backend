@@ -20,14 +20,15 @@
 --             :  NoImplicitPrelude - Use RIO instead
 --             :  GeneralizedNewtypeDeriving - Simplify newtype usage
 --
--- Database interface for the "follows" relation, using the Opaleye mapper and
--- typesafe query and data manipulation DSL.
+-- Database interface for the "articles_tags" relation, using the Opaleye
+-- mapper and typesafe query and data manipulation DSL.
 -- See https://github.com/tomjaguarpaw/haskell-opaleye and the (outdated)
 -- tutorial here: https://www.haskelltutorials.com/opaleye/index.html
-module Persistence.Follows
-  ( UserId (..),
-    Follows,
-    getAllFollows,
+module Persistence.TaggedArticles
+  ( TagId (..),
+    ArticleId (..),
+    TaggedArticle,
+    getAllTaggedArticles,
   )
 where
 
@@ -36,49 +37,61 @@ import qualified Data.Profunctor.Product ()
 import Data.Profunctor.Product.TH (makeAdaptorAndInstance)
 import qualified Database.PostgreSQL.Simple as PGS
 import qualified Opaleye as OE
-import Persistence.Users (UserId (..))
+import Persistence.Articles (ArticleId (..))
 import Persistence.PersistenceUtils
+import Persistence.Tags (TagId (..))
 import RIO
 
 --------------------
 -- Table Setup
 --------------------
 
--- | Polymorphic type for the "follows" table.
-data FollowsT key
-  = Follows
-      { followerFk :: key,
-        followeeFk :: key
+-- | Polymorphic type for the "favorites" table.
+data TaggedArticleT articleKey tagKey
+  = TaggedArticle
+      { articleFk :: articleKey,
+        tagFk :: tagKey
       }
   deriving (Show)
 
--- | Record that Opaleye uses to write to the "follows" table.
-type FollowsW = FollowsT (F OE.SqlInt8) -- user FK
+-- | Record that Opaleye uses to write to the "favorites" table.
+type TaggedArticleW =
+  TaggedArticleT
+    (F OE.SqlInt8) -- article FK
+    (F OE.SqlInt8) -- tag FK
 
--- | Record that Opaleye reads from the "follows" table.
-type FollowsR = FollowsT (F OE.SqlInt8) -- user FK
+-- | Record that Opaleye reads from the "favorites" table.
+type TaggedArticleR =
+  TaggedArticleT
+    (F OE.SqlInt8) -- article FK
+    (F OE.SqlInt8) -- tag FK
 
--- | Typesafe Haskell record to interface with the application.
-type Follows = FollowsT UserId -- user fk
+-- | Typesafe Haskell record to interface with the application. Under the hood,
+-- Opaleye converts between this application record and the above PostgreSQL
+-- read and write records.
+type TaggedArticle =
+  TaggedArticleT
+    ArticleId -- article FK
+    TagId -- tag FK
 
-instance Display Follows where
+instance Display TaggedArticle where
   display = displayShow
 
 -- | Template Haskell helper to create the mapping function between PostgreSQL
 -- records and the Haskell record used below.
-$(makeAdaptorAndInstance "pFollows" ''FollowsT)
+$(makeAdaptorAndInstance "pTaggedArticle" ''TaggedArticleT)
 
 -- | The actual mapping setup tells Opaleye exactly how to map between the
 -- PostgreSQL records and the Haskell record. For each record, the function
 -- specifies the name of the table column and the constraints.
-followsTable :: OE.Table FollowsW FollowsR
-followsTable =
+taggedArticlesTable :: OE.Table TaggedArticleW TaggedArticleR
+taggedArticlesTable =
   OE.Table
-    "follows"
-    ( pFollows
-        Follows
-          { followerFk = OE.required "follower_fk",
-            followeeFk = OE.required "followee_fk"
+    "articles_tags"
+    ( pTaggedArticle
+        TaggedArticle
+          { articleFk = OE.required "article_fk",
+            tagFk = OE.required "tag_fk"
           }
     )
 
@@ -87,16 +100,16 @@ followsTable =
 --------------------
 
 -- | Retrieve all follow relations.
-selectFollows :: OE.Select FollowsR
-selectFollows = OE.selectTable followsTable
+selectTaggedArticles :: OE.Select TaggedArticleR
+selectTaggedArticles = OE.selectTable taggedArticlesTable
 
 --------------------
 -- DB Access
 --------------------
 
-getAllFollows :: PGS.ConnectInfo -> IO [Follows]
-getAllFollows connInfo = do
+getAllTaggedArticles :: PGS.ConnectInfo -> IO [TaggedArticle]
+getAllTaggedArticles connInfo = do
   conn <- PGS.connect connInfo
-  result <- OE.runSelect conn selectFollows
+  result <- OE.runSelect conn selectTaggedArticles
   PGS.close conn
   return result

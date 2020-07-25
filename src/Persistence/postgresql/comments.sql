@@ -5,6 +5,8 @@ create table cond.comments (
     ,article_fk integer not null
     ,author_fk integer not null
     ,body text not null
+    ,created_at timestamptz not null default current_timestamp
+    ,updated_at timestamptz not null default current_timestamp
     ,unique (article_fk, author_fk, body)
     ,foreign key (article_fk) references cond.articles (id)
         on update cascade
