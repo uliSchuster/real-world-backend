@@ -73,7 +73,7 @@ $(makeAdaptorAndInstance "pFollows" ''FollowsT)
 -- specifies the name of the table column and the constraints.
 followsTable :: OE.Table FollowsW FollowsR
 followsTable =
-  OE.Table
+  OE.table
     "follows"
     ( pFollows
         Follows

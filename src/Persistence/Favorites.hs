@@ -86,7 +86,7 @@ $(makeAdaptorAndInstance "pFavorite" ''FavoriteT)
 -- specifies the name of the table column and the constraints.
 favoritesTable :: OE.Table FavoriteW FavoriteR
 favoritesTable =
-  OE.Table
+  OE.table
     "favorites"
     ( pFavorite
         Favorite

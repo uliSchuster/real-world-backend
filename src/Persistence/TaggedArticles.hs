@@ -86,7 +86,7 @@ $(makeAdaptorAndInstance "pTaggedArticle" ''TaggedArticleT)
 -- specifies the name of the table column and the constraints.
 taggedArticlesTable :: OE.Table TaggedArticleW TaggedArticleR
 taggedArticlesTable =
-  OE.Table
+  OE.table
     "articles_tags"
     ( pTaggedArticle
         TaggedArticle

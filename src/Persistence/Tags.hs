@@ -91,7 +91,7 @@ $(makeAdaptorAndInstance "pTag" ''TagT)
 -- record.
 tagsTable :: OE.Table TagW TagR
 tagsTable =
-  OE.Table
+  OE.table
     "tags"
     ( pTag
         Tag

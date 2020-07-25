@@ -110,7 +110,7 @@ $(makeAdaptorAndInstance "pArticle" ''ArticleT)
 -- record.
 articlesTable :: OE.Table ArticleW ArticleR
 articlesTable =
-  OE.Table
+  OE.table
     "articles"
     ( pArticle
         Article

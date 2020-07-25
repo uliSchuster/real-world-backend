@@ -122,7 +122,7 @@ $(makeAdaptorAndInstance "pUser" ''UserT)
 -- specifies the name of the table column and the constraints.
 userTable :: OE.Table UserW UserR
 userTable =
-  OE.Table
+  OE.table
     "users"
     ( pUser
         User

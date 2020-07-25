@@ -109,7 +109,7 @@ $(makeAdaptorAndInstance "pComment" ''CommentT)
 -- record.
 commentsTable :: OE.Table CommentW CommentR
 commentsTable =
-  OE.Table
+  OE.table
     "comments"
     ( pComment
         Comment
