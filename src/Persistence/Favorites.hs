@@ -38,6 +38,7 @@ import Data.Profunctor.Product.TH (makeAdaptorAndInstance)
 import qualified Database.PostgreSQL.Simple as PGS
 import qualified Opaleye as OE
 import Persistence.Articles (ArticleId (..))
+import Persistence.DbConfig (schemaName)
 import Persistence.PersistenceUtils
 import Persistence.Users (UserId (..))
 import RIO
@@ -86,7 +87,8 @@ $(makeAdaptorAndInstance "pFavorite" ''FavoriteT)
 -- specifies the name of the table column and the constraints.
 favoritesTable :: OE.Table FavoriteW FavoriteR
 favoritesTable =
-  OE.table
+  OE.tableWithSchema
+    schemaName
     "favorites"
     ( pFavorite
         Favorite

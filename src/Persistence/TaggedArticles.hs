@@ -38,6 +38,7 @@ import Data.Profunctor.Product.TH (makeAdaptorAndInstance)
 import qualified Database.PostgreSQL.Simple as PGS
 import qualified Opaleye as OE
 import Persistence.Articles (ArticleId (..))
+import Persistence.DbConfig (schemaName)
 import Persistence.PersistenceUtils
 import Persistence.Tags (TagId (..))
 import RIO
@@ -86,7 +87,8 @@ $(makeAdaptorAndInstance "pTaggedArticle" ''TaggedArticleT)
 -- specifies the name of the table column and the constraints.
 taggedArticlesTable :: OE.Table TaggedArticleW TaggedArticleR
 taggedArticlesTable =
-  OE.table
+  OE.tableWithSchema
+    schemaName
     "articles_tags"
     ( pTaggedArticle
         TaggedArticle

@@ -40,6 +40,7 @@ import qualified Data.Time as T
 import qualified Database.PostgreSQL.Simple as PGS
 import qualified Opaleye as OE
 import Persistence.Articles (ArticleId (..))
+import Persistence.DbConfig (schemaName)
 import Persistence.PersistenceUtils
 import Persistence.Users (UserId (..))
 import RIO
@@ -109,7 +110,8 @@ $(makeAdaptorAndInstance "pComment" ''CommentT)
 -- record.
 commentsTable :: OE.Table CommentW CommentR
 commentsTable =
-  OE.table
+  OE.tableWithSchema
+    schemaName
     "comments"
     ( pComment
         Comment

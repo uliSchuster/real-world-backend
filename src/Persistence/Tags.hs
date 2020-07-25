@@ -36,6 +36,7 @@ import qualified Data.Profunctor.Product ()
 import Data.Profunctor.Product.TH (makeAdaptorAndInstance)
 import qualified Database.PostgreSQL.Simple as PGS
 import qualified Opaleye as OE
+import Persistence.DbConfig (schemaName)
 import Persistence.PersistenceUtils
 import RIO
 
@@ -91,7 +92,8 @@ $(makeAdaptorAndInstance "pTag" ''TagT)
 -- record.
 tagsTable :: OE.Table TagW TagR
 tagsTable =
-  OE.table
+  OE.tableWithSchema
+    schemaName
     "tags"
     ( pTag
         Tag

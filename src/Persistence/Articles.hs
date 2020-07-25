@@ -37,6 +37,7 @@ import Data.Profunctor.Product.TH (makeAdaptorAndInstance)
 import qualified Data.Time as T
 import qualified Database.PostgreSQL.Simple as PGS
 import qualified Opaleye as OE
+import Persistence.DbConfig (schemaName)
 import Persistence.PersistenceUtils (F)
 import Persistence.Users (UserId (..))
 import RIO
@@ -110,7 +111,8 @@ $(makeAdaptorAndInstance "pArticle" ''ArticleT)
 -- record.
 articlesTable :: OE.Table ArticleW ArticleR
 articlesTable =
-  OE.table
+  OE.tableWithSchema
+    schemaName
     "articles"
     ( pArticle
         Article

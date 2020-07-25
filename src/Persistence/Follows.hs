@@ -36,8 +36,9 @@ import qualified Data.Profunctor.Product ()
 import Data.Profunctor.Product.TH (makeAdaptorAndInstance)
 import qualified Database.PostgreSQL.Simple as PGS
 import qualified Opaleye as OE
-import Persistence.Users (UserId (..))
+import Persistence.DbConfig (schemaName)
 import Persistence.PersistenceUtils
+import Persistence.Users (UserId (..))
 import RIO
 
 --------------------
@@ -73,7 +74,8 @@ $(makeAdaptorAndInstance "pFollows" ''FollowsT)
 -- specifies the name of the table column and the constraints.
 followsTable :: OE.Table FollowsW FollowsR
 followsTable =
-  OE.table
+  OE.tableWithSchema
+    schemaName
     "follows"
     ( pFollows
         Follows
