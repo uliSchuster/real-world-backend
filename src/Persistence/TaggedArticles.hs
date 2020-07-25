@@ -92,8 +92,8 @@ taggedArticlesTable =
     "articles_tags"
     ( pTaggedArticle
         TaggedArticle
-          { articleFk = OE.required "article_fk",
-            tagFk = OE.required "tag_fk"
+          { articleFk = OE.tableField "article_fk",
+            tagFk = OE.tableField "tag_fk"
           }
     )
 

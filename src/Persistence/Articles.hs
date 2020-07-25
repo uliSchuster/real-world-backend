@@ -116,13 +116,13 @@ articlesTable =
     "articles"
     ( pArticle
         Article
-          { articleKey = OE.optional "id",
-            articleAuthorFk = OE.required "author_fk",
-            articleTitle = OE.required "title",
-            articleDescription = OE.required "description",
-            articleBody = OE.required "body",
-            articleCreatedAt = OE.optional "created_at",
-            articleUpdatedAt = OE.optional "updated_at"
+          { articleKey = OE.tableField "id",
+            articleAuthorFk = OE.tableField "author_fk",
+            articleTitle = OE.tableField "title",
+            articleDescription = OE.tableField "description",
+            articleBody = OE.tableField "body",
+            articleCreatedAt = OE.tableField "created_at",
+            articleUpdatedAt = OE.tableField "updated_at"
           }
     )
 

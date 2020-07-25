@@ -97,8 +97,8 @@ tagsTable =
     "tags"
     ( pTag
         Tag
-          { tagKey = OE.optional "id",
-            tagName = OE.required "tagname"
+          { tagKey = OE.tableField "id",
+            tagName = OE.tableField "tagname"
           }
     )
 

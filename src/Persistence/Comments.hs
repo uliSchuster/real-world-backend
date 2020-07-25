@@ -115,12 +115,12 @@ commentsTable =
     "comments"
     ( pComment
         Comment
-          { commentKey = OE.optional "id",
-            commentArticleFk = OE.required "article_fk",
-            commentAuthorFk = OE.required "author_fk",
-            commentBody = OE.required "body",
-            commentCreatedAt = OE.optional "created_at",
-            commentUpdatedAt = OE.optional "updated_at"
+          { commentKey = OE.tableField "id",
+            commentArticleFk = OE.tableField "article_fk",
+            commentAuthorFk = OE.tableField "author_fk",
+            commentBody = OE.tableField "body",
+            commentCreatedAt = OE.tableField "created_at",
+            commentUpdatedAt = OE.tableField "updated_at"
           }
     )
 

@@ -92,8 +92,8 @@ favoritesTable =
     "favorites"
     ( pFavorite
         Favorite
-          { readerFk = OE.required "reader_fk",
-            articleFk = OE.required "favorite_fk"
+          { readerFk = OE.tableField "reader_fk",
+            articleFk = OE.tableField "favorite_fk"
           }
     )
 

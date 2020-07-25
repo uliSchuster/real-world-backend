@@ -128,13 +128,13 @@ userTable =
     "users"
     ( pUser
         User
-          { userKey = OE.optional "id",
-            userUsername = OE.required "username",
-            userEmail = OE.required "email",
-            userBio = OE.required "bio",
-            userImageUrl = OE.required "image_url",
-            userPwdHash = OE.required "password_hash",
-            userSalt = OE.required "salt"
+          { userKey = OE.tableField "id",
+            userUsername = OE.tableField "username",
+            userEmail = OE.tableField "email",
+            userBio = OE.tableField "bio",
+            userImageUrl = OE.tableField "image_url",
+            userPwdHash = OE.tableField "password_hash",
+            userSalt = OE.tableField "salt"
           }
     )
 

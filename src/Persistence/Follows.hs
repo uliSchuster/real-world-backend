@@ -79,8 +79,8 @@ followsTable =
     "follows"
     ( pFollows
         Follows
-          { followerFk = OE.required "follower_fk",
-            followeeFk = OE.required "followee_fk"
+          { followerFk = OE.tableField "follower_fk",
+            followeeFk = OE.tableField "followee_fk"
           }
     )
 
