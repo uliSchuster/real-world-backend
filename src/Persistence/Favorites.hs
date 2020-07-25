@@ -62,10 +62,7 @@ type FavoriteW =
     (F OE.SqlInt8) -- favorite FK
 
 -- | Record that Opaleye reads from the "favorites" table.
-type FavoriteR =
-  FavoriteT
-    (F OE.SqlInt8) -- reader FK
-    (F OE.SqlInt8) -- favorite FK
+type FavoriteR = FavoriteW
 
 -- | Typesafe Haskell record to interface with the application. Under the hood,
 -- Opaleye converts between this application record and the above PostgreSQL

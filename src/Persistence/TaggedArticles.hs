@@ -62,10 +62,7 @@ type TaggedArticleW =
     (F OE.SqlInt8) -- tag FK
 
 -- | Record that Opaleye reads from the "favorites" table.
-type TaggedArticleR =
-  TaggedArticleT
-    (F OE.SqlInt8) -- article FK
-    (F OE.SqlInt8) -- tag FK
+type TaggedArticleR = TaggedArticleW
 
 -- | Typesafe Haskell record to interface with the application. Under the hood,
 -- Opaleye converts between this application record and the above PostgreSQL

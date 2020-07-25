@@ -57,7 +57,7 @@ data FollowsT key
 type FollowsW = FollowsT (F OE.SqlInt8) -- user FK
 
 -- | Record that Opaleye reads from the "follows" table.
-type FollowsR = FollowsT (F OE.SqlInt8) -- user FK
+type FollowsR = FollowsW
 
 -- | Typesafe Haskell record to interface with the application.
 type Follows = FollowsT UserId -- user fk
