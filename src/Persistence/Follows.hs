@@ -25,8 +25,7 @@
 -- See https://github.com/tomjaguarpaw/haskell-opaleye and the (outdated)
 -- tutorial here: https://www.haskelltutorials.com/opaleye/index.html
 module Persistence.Follows
-  ( UserId (..),
-    Follows,
+  ( Follows,
     getAllFollows,
   )
 where
@@ -37,8 +36,7 @@ import Data.Profunctor.Product.TH (makeAdaptorAndInstance)
 import qualified Database.PostgreSQL.Simple as PGS
 import qualified Opaleye as OE
 import Persistence.DbConfig (schemaName)
-import Persistence.PersistenceUtils
-import Persistence.Users (UserId (..))
+import qualified Persistence.Users as PU
 import RIO
 
 --------------------
@@ -54,13 +52,13 @@ data FollowsT key
   deriving (Show)
 
 -- | Record that Opaleye uses to write to the "follows" table.
-type FollowsW = FollowsT (F OE.SqlInt8) -- user FK
+type FollowsW = FollowsT PU.UserIdField -- user FK
 
 -- | Record that Opaleye reads from the "follows" table.
 type FollowsR = FollowsW
 
 -- | Typesafe Haskell record to interface with the application.
-type Follows = FollowsT UserId -- user fk
+type Follows = FollowsT PU.UserId -- user fk
 
 instance Display Follows where
   display = displayShow
@@ -79,8 +77,8 @@ followsTable =
     "follows"
     ( pFollows
         Follows
-          { followerFk = OE.tableField "follower_fk",
-            followeeFk = OE.tableField "followee_fk"
+          { followerFk = PU.pUserId (PU.UserId (OE.tableField "follower_fk")),
+            followeeFk = PU.pUserId (PU.UserId (OE.tableField "followee_fk"))
           }
     )
 

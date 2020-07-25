@@ -25,9 +25,7 @@
 -- See https://github.com/tomjaguarpaw/haskell-opaleye and the (outdated)
 -- tutorial here: https://www.haskelltutorials.com/opaleye/index.html
 module Persistence.Favorites
-  ( UserId (..),
-    ArticleId (..),
-    Favorite,
+  ( Favorite,
     getAllFavorites,
   )
 where
@@ -37,10 +35,9 @@ import qualified Data.Profunctor.Product ()
 import Data.Profunctor.Product.TH (makeAdaptorAndInstance)
 import qualified Database.PostgreSQL.Simple as PGS
 import qualified Opaleye as OE
-import Persistence.Articles (ArticleId (..))
+import qualified Persistence.Articles as PA
 import Persistence.DbConfig (schemaName)
-import Persistence.PersistenceUtils
-import Persistence.Users (UserId (..))
+import qualified Persistence.Users as PU
 import RIO
 
 --------------------
@@ -58,8 +55,8 @@ data FavoriteT userKey articleKey
 -- | Record that Opaleye uses to write to the "favorites" table.
 type FavoriteW =
   FavoriteT
-    (F OE.SqlInt8) -- reader FK
-    (F OE.SqlInt8) -- favorite FK
+    PU.UserIdField -- reader FK
+    PA.ArticleIdField -- favorite FK
 
 -- | Record that Opaleye reads from the "favorites" table.
 type FavoriteR = FavoriteW
@@ -69,8 +66,8 @@ type FavoriteR = FavoriteW
 -- read and write records.
 type Favorite =
   FavoriteT
-    UserId -- reader
-    ArticleId -- favorite
+    PU.UserId -- reader
+    PA.ArticleId -- favorite
 
 instance Display Favorite where
   display = displayShow
@@ -89,8 +86,8 @@ favoritesTable =
     "favorites"
     ( pFavorite
         Favorite
-          { readerFk = OE.tableField "reader_fk",
-            articleFk = OE.tableField "favorite_fk"
+          { readerFk = PU.pUserId (PU.UserId (OE.tableField "reader_fk")),
+            articleFk = PA.pArticleId (PA.ArticleId (OE.tableField "favorite_fk"))
           }
     )
 

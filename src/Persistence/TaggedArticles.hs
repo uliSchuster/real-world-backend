@@ -25,9 +25,7 @@
 -- See https://github.com/tomjaguarpaw/haskell-opaleye and the (outdated)
 -- tutorial here: https://www.haskelltutorials.com/opaleye/index.html
 module Persistence.TaggedArticles
-  ( TagId (..),
-    ArticleId (..),
-    TaggedArticle,
+  ( TaggedArticle,
     getAllTaggedArticles,
   )
 where
@@ -37,10 +35,9 @@ import qualified Data.Profunctor.Product ()
 import Data.Profunctor.Product.TH (makeAdaptorAndInstance)
 import qualified Database.PostgreSQL.Simple as PGS
 import qualified Opaleye as OE
-import Persistence.Articles (ArticleId (..))
+import qualified Persistence.Articles as PA
 import Persistence.DbConfig (schemaName)
-import Persistence.PersistenceUtils
-import Persistence.Tags (TagId (..))
+import qualified Persistence.Tags as PT
 import RIO
 
 --------------------
@@ -58,8 +55,8 @@ data TaggedArticleT articleKey tagKey
 -- | Record that Opaleye uses to write to the "favorites" table.
 type TaggedArticleW =
   TaggedArticleT
-    (F OE.SqlInt8) -- article FK
-    (F OE.SqlInt8) -- tag FK
+    PA.ArticleIdField -- article FK
+    PT.TagIdField -- tag FK
 
 -- | Record that Opaleye reads from the "favorites" table.
 type TaggedArticleR = TaggedArticleW
@@ -69,8 +66,8 @@ type TaggedArticleR = TaggedArticleW
 -- read and write records.
 type TaggedArticle =
   TaggedArticleT
-    ArticleId -- article FK
-    TagId -- tag FK
+    PA.ArticleId -- article FK
+    PT.TagId -- tag FK
 
 instance Display TaggedArticle where
   display = displayShow
@@ -89,8 +86,8 @@ taggedArticlesTable =
     "articles_tags"
     ( pTaggedArticle
         TaggedArticle
-          { articleFk = OE.tableField "article_fk",
-            tagFk = OE.tableField "tag_fk"
+          { articleFk = PA.pArticleId (PA.ArticleId (OE.tableField "article_fk")),
+            tagFk = PT.pTagId (PT.TagId (OE.tableField "tag_fk"))
           }
     )
 
