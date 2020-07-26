@@ -19,6 +19,7 @@
 --             :  TemplateHaskell - Lets Opaleye generate the mapping function
 --             :  NoImplicitPrelude - Use RIO instead
 --             :  GeneralizedNewtypeDeriving - Simplify newtype usage
+--             :  OverloadedStrings - Use Text literals
 --
 -- Database interface for the "follows" relation, using the Opaleye mapper and
 -- typesafe query and data manipulation DSL.
@@ -26,7 +27,7 @@
 -- tutorial here: https://www.haskelltutorials.com/opaleye/index.html
 module Persistence.Follows
   ( Follows,
-    getAllFollows,
+    findAllFollows,
   )
 where
 
@@ -94,8 +95,10 @@ selectFollows = OE.selectTable followsTable
 -- DB Access
 --------------------
 
-getAllFollows :: PGS.ConnectInfo -> IO [Follows]
-getAllFollows connInfo = do
+-- | Find all following relations stored in the DB and return them.
+-- Naming convention: DB retrievals are called "find".
+findAllFollows :: PGS.ConnectInfo -> IO [Follows]
+findAllFollows connInfo = do
   conn <- PGS.connect connInfo
   result <- OE.runSelect conn selectFollows
   PGS.close conn

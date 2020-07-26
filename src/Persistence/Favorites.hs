@@ -19,6 +19,7 @@
 --             :  TemplateHaskell - Lets Opaleye generate the mapping function
 --             :  NoImplicitPrelude - Use RIO instead
 --             :  GeneralizedNewtypeDeriving - Simplify newtype usage
+--             :  OverloadedStrings - Use Text literals
 --
 -- Database interface for the "favorites" relation, using the Opaleye mapper and
 -- typesafe query and data manipulation DSL.
@@ -26,7 +27,7 @@
 -- tutorial here: https://www.haskelltutorials.com/opaleye/index.html
 module Persistence.Favorites
   ( Favorite,
-    getAllFavorites,
+    findAllFavorites,
   )
 where
 
@@ -103,8 +104,10 @@ selectFavorites = OE.selectTable favoritesTable
 -- DB Access
 --------------------
 
-getAllFavorites :: PGS.ConnectInfo -> IO [Favorite]
-getAllFavorites connInfo = do
+-- | Find all favorites stored in the DB and return them.
+-- Naming convention: DB retrievals are called "find".
+findAllFavorites :: PGS.ConnectInfo -> IO [Favorite]
+findAllFavorites connInfo = do
   conn <- PGS.connect connInfo
   result <- OE.runSelect conn selectFavorites
   PGS.close conn

@@ -19,6 +19,7 @@
 --             :  TemplateHaskell - Lets Opaleye generate the mapping function
 --             :  NoImplicitPrelude - Use RIO instead
 --             :  GeneralizedNewtypeDeriving - Simplify newtype usage
+--             :  OverloadedStrings - Use Text literals
 --
 -- Database interface for the "articles" relation, using the Opaleye mapper and
 -- typesafe query and data manipulation DSL.
@@ -31,7 +32,7 @@ module Persistence.Articles
     ArticleId,
     pArticleId,
     Article,
-    getAllArticles,
+    findAllArticles,
   )
 where
 
@@ -148,8 +149,10 @@ selectArticles = OE.selectTable articlesTable
 --------------------
 -- Functions in the IO Monad that perform the actual database access.
 
-getAllArticles :: PGS.ConnectInfo -> IO [Article]
-getAllArticles connInfo = do
+-- | Find all articles stored in the DB and return them.
+-- Naming convention: DB retrievals are called "find".
+findAllArticles :: PGS.ConnectInfo -> IO [Article]
+findAllArticles connInfo = do
   conn <- PGS.connect connInfo
   result <- OE.runSelect conn selectArticles
   PGS.close conn

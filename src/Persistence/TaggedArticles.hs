@@ -19,6 +19,7 @@
 --             :  TemplateHaskell - Lets Opaleye generate the mapping function
 --             :  NoImplicitPrelude - Use RIO instead
 --             :  GeneralizedNewtypeDeriving - Simplify newtype usage
+--             :  OverloadedStrings - Use Text literals
 --
 -- Database interface for the "articles_tags" relation, using the Opaleye
 -- mapper and typesafe query and data manipulation DSL.
@@ -26,7 +27,7 @@
 -- tutorial here: https://www.haskelltutorials.com/opaleye/index.html
 module Persistence.TaggedArticles
   ( TaggedArticle,
-    getAllTaggedArticles,
+    findAllTaggedArticles,
   )
 where
 
@@ -103,8 +104,10 @@ selectTaggedArticles = OE.selectTable taggedArticlesTable
 -- DB Access
 --------------------
 
-getAllTaggedArticles :: PGS.ConnectInfo -> IO [TaggedArticle]
-getAllTaggedArticles connInfo = do
+-- | Find all tagged articles stored in the DB and return them.
+-- Naming convention: DB retrievals are called "find".
+findAllTaggedArticles :: PGS.ConnectInfo -> IO [TaggedArticle]
+findAllTaggedArticles connInfo = do
   conn <- PGS.connect connInfo
   result <- OE.runSelect conn selectTaggedArticles
   PGS.close conn

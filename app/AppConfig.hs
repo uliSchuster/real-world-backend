@@ -26,5 +26,8 @@ instance HasDbConfig DBC.DbConfig where
 instance HasDbConfig AppConfig where
   dbConfigL = lens dBConfig (\x y -> x {dBConfig = y})
 
+instance DBC.HasDbConnInfo AppConfig where
+  connInfoL = dbConfigL.DBC.connInfoL
+
 instance HasLogFunc AppConfig where
   logFuncL = lens logger (\x y -> x {logger = y})

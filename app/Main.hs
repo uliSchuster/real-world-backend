@@ -13,10 +13,14 @@ import qualified Persistence.Comments as PC
 import qualified Persistence.DbConfig as DBC
 import qualified Persistence.Favorites as PFA
 import qualified Persistence.Follows as PFO
+import qualified Persistence.TagRepository as TRepo
 import qualified Persistence.TaggedArticles as PTA
 import qualified Persistence.Tags as PT
 import qualified Persistence.Users as PU
 import RIO
+import qualified RIO.Text as T
+import qualified Usecases.TagRepositoryI as TRepoI
+import qualified Usecases.TagUsecase as UCT
 
 -- | Connection string for the PostgreSQL DBMS. Here for development and
 -- experimentation. Should be loaded from a config file or the system environment later on.
@@ -30,6 +34,10 @@ dBConnInfo =
         PGS.connectPassword = "conduit",
         PGS.connectUser = "cond"
       }
+
+-- Wire dependencies.
+instance TRepoI.TagRepositoryI APC.AppConfig where
+  readAllTags = TRepo.readAllTags
 
 -- Helper function to run the main application logic.
 -- This function is a very preliminary sketch. The goal later on is to properly
@@ -51,20 +59,22 @@ runApp app = do
 conduitApp :: RIO APC.AppConfig ()
 conduitApp = do
   connInf <- view $ APC.dbConfigL . DBC.connInfoL
-  allUsers <- liftIO $ PU.getAllUsers connInf
+  allUsers <- liftIO $ PU.findAllUsers connInf
   logInfo $ mconcat (display <$> allUsers)
-  allFollows <- liftIO $ PFO.getAllFollows connInf
+  allFollows <- liftIO $ PFO.findAllFollows connInf
   logInfo $ mconcat (display <$> allFollows)
-  allArticles <- liftIO $ PA.getAllArticles connInf
+  allArticles <- liftIO $ PA.findAllArticles connInf
   logInfo $ mconcat (display <$> allArticles)
-  allFavorites <- liftIO $ PFA.getAllFavorites connInf
+  allFavorites <- liftIO $ PFA.findAllFavorites connInf
   logInfo $ mconcat (display <$> allFavorites)
-  allComments <- liftIO $ PC.getAllComments connInf
+  allComments <- liftIO $ PC.findAllComments connInf
   logInfo $ mconcat (display <$> allComments)
-  allTags <- liftIO $ PT.getAllTags connInf
+  allTags <- liftIO $ PT.findAllTags connInf
   logInfo $ mconcat (display <$> allTags)
-  allTaggedArticles <- liftIO $ PTA.getAllTaggedArticles connInf
+  allTaggedArticles <- liftIO $ PTA.findAllTaggedArticles connInf
   logInfo $ mconcat (display <$> allTaggedArticles)
+  allDTags <- UCT.getAllTags
+  logInfo $ display $ T.unwords (tshow <$> allDTags)
 
 -- | Enry point of the application
 main :: IO ()

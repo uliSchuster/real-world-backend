@@ -19,19 +19,21 @@
 --             :  TemplateHaskell - Lets Opaleye generate the mapping function
 --             :  NoImplicitPrelude - Use RIO instead
 --             :  GeneralizedNewtypeDeriving - Simplify newtype usage
+--             :  OverloadedStrings - Use Text literals
 --
 -- Database interface for the "tags" relation, using the Opaleye mapper and
 -- typesafe query and data manipulation DSL.
 -- See https://github.com/tomjaguarpaw/haskell-opaleye and the (outdated)
 -- tutorial here: https://www.haskelltutorials.com/opaleye/index.html
 module Persistence.Tags
-  ( TagIdT (..),
+  ( TagT (..),
+    TagIdT (..),
     TagIdField,
     OptionalTagIdField,
     TagId,
     pTagId,
     Tag,
-    getAllTags,
+    findAllTags,
   )
 where
 
@@ -65,7 +67,7 @@ type TagId = TagIdT Int64
 
 -- | Polymorphic type for the "tags" table.
 data TagT tKey tName
-  = Tag
+  = TagD
       { tagKey :: tKey,
         tagName :: tName
       }
@@ -106,7 +108,7 @@ tagsTable =
     schemaName
     "tags"
     ( pTag
-        Tag
+        TagD
           { tagKey = pTagId (TagId (OE.tableField "id")),
             tagName = OE.tableField "tagname"
           }
@@ -125,8 +127,10 @@ selectTagss = OE.selectTable tagsTable
 --------------------
 -- Functions in the IO Monad that perform the actual database access.
 
-getAllTags :: PGS.ConnectInfo -> IO [Tag]
-getAllTags connInfo = do
+-- | Find all tags stored in the DB and return them.
+-- Naming convention: DB retrievals are called "find".
+findAllTags :: PGS.ConnectInfo -> IO [Tag]
+findAllTags connInfo = do
   conn <- PGS.connect connInfo
   result <- OE.runSelect conn selectTagss
   PGS.close conn

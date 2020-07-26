@@ -18,7 +18,8 @@
 --             :  MultiParamTypeClasses - Required by Opaleye
 --             :  TemplateHaskell - Lets Opaleye generate the mapping function
 --             :  NoImplicitPrelude - Use RIO instead
---             : GeneralizedNewtypeDeriving - Simplify newtype usage
+--             :  GeneralizedNewtypeDeriving - Simplify newtype usage
+--             :  OverloadedStrings - Use Text literals
 --
 -- Database interface for the "user" relation, using the Opaleye mapper and
 -- typesafe query and data manipulation DSL.
@@ -31,7 +32,7 @@ module Persistence.Users
     UserId,
     pUserId,
     User,
-    getAllUsers,
+    findAllUsers,
   )
 where
 
@@ -168,8 +169,10 @@ selectUsers = OE.selectTable userTable
 -- connection string. These functions use Opaleye primitive that perform the
 -- mapping between Haskell records and Opaleye PostgreSQL records.
 
-getAllUsers :: PGS.ConnectInfo -> IO [User]
-getAllUsers connInfo = do
+-- | Find all users stored in the DB and return them.
+-- Naming convention: DB retrievals are called "find".
+findAllUsers :: PGS.ConnectInfo -> IO [User]
+findAllUsers connInfo = do
   conn <- PGS.connect connInfo
   result <- OE.runSelect conn selectUsers
   PGS.close conn

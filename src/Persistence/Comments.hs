@@ -19,6 +19,7 @@
 --             :  TemplateHaskell - Lets Opaleye generate the mapping function
 --             :  NoImplicitPrelude - Use RIO instead
 --             :  GeneralizedNewtypeDeriving - Simplify newtype usage
+--             :  OverloadedStrings - Use Text literals
 --
 -- Database interface for the "comments" relation, using the Opaleye mapper and
 -- typesafe query and data manipulation DSL.
@@ -26,7 +27,7 @@
 -- tutorial here: https://www.haskelltutorials.com/opaleye/index.html
 module Persistence.Comments
   ( Comment,
-    getAllComments,
+    findAllComments,
   )
 where
 
@@ -139,8 +140,10 @@ selectComments = OE.selectTable commentsTable
 --------------------
 -- Functions in the IO Monad that perform the actual database access.
 
-getAllComments :: PGS.ConnectInfo -> IO [Comment]
-getAllComments connInfo = do
+-- | Find all comments stored in the DB and return them.
+-- Naming convention: DB retrievals are called "find".
+findAllComments :: PGS.ConnectInfo -> IO [Comment]
+findAllComments connInfo = do
   conn <- PGS.connect connInfo
   result <- OE.runSelect conn selectComments
   PGS.close conn
