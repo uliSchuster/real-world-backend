@@ -1,4 +1,4 @@
--- {-# LANGUAGE NoImplicitPrelude #-}
+{-# LANGUAGE NoImplicitPrelude #-}
 
 module Main
   ( main,
@@ -6,6 +6,7 @@ module Main
 where
 
 import qualified AppConfig as APC
+import qualified Data.Aeson.Encode.Pretty as JPP
 import qualified Database.PostgreSQL.Simple as PGS
 import qualified Paths_real_world_server
 import qualified Persistence.Articles as PA
@@ -17,8 +18,11 @@ import qualified Persistence.TagRepository as TRepo
 import qualified Persistence.TaggedArticles as PTA
 import qualified Persistence.Tags as PT
 import qualified Persistence.Users as PU
+import qualified Presenter.Json.JsonDto as DTO
 import RIO
+import RIO.ByteString.Lazy (toStrict)
 import qualified RIO.Text as T
+import qualified UI.CommandLine.CLI as CLI
 import qualified Usecases.TagRepositoryI as TRepoI
 import qualified Usecases.TagUsecase as UCT
 
@@ -58,23 +62,34 @@ runApp app = do
 -- For now, we just play with the persistence subsystem to get it working.
 conduitApp :: RIO APC.AppConfig ()
 conduitApp = do
-  connInf <- view $ APC.dbConfigL . DBC.connInfoL
-  allUsers <- liftIO $ PU.findAllUsers connInf
-  logInfo $ mconcat (display <$> allUsers)
-  allFollows <- liftIO $ PFO.findAllFollows connInf
-  logInfo $ mconcat (display <$> allFollows)
-  allArticles <- liftIO $ PA.findAllArticles connInf
-  logInfo $ mconcat (display <$> allArticles)
-  allFavorites <- liftIO $ PFA.findAllFavorites connInf
-  logInfo $ mconcat (display <$> allFavorites)
-  allComments <- liftIO $ PC.findAllComments connInf
-  logInfo $ mconcat (display <$> allComments)
-  allTags <- liftIO $ PT.findAllTags connInf
-  logInfo $ mconcat (display <$> allTags)
-  allTaggedArticles <- liftIO $ PTA.findAllTaggedArticles connInf
-  logInfo $ mconcat (display <$> allTaggedArticles)
-  allDTags <- UCT.getAllTags
-  logInfo $ display $ T.unwords (tshow <$> allDTags)
+  request <- liftIO CLI.parseCmdLine
+  result <- case request of
+    CLI.User -> undefined
+    CLI.Profile -> undefined
+    CLI.Article -> undefined
+    CLI.Comment -> undefined
+    CLI.Tag -> do
+      allDTags <- UCT.getAllTags
+      let tagsDto = DTO.toDto allDTags :: DTO.TagListDto
+      return $ JPP.encodePretty tagsDto
+  let disp = displayBytesUtf8 $ toStrict result
+  logInfo disp
+
+-- connInf <- view $ APC.dbConfigL . DBC.connInfoL
+-- allUsers <- liftIO $ PU.findAllUsers connInf
+-- logInfo $ mconcat (display <$> allUsers)
+-- allFollows <- liftIO $ PFO.findAllFollows connInf
+-- logInfo $ mconcat (display <$> allFollows)
+-- allArticles <- liftIO $ PA.findAllArticles connInf
+-- logInfo $ mconcat (display <$> allArticles)
+-- allFavorites <- liftIO $ PFA.findAllFavorites connInf
+-- logInfo $ mconcat (display <$> allFavorites)
+-- allComments <- liftIO $ PC.findAllComments connInf
+-- logInfo $ mconcat (display <$> allComments)
+-- allTags <- liftIO $ PT.findAllTags connInf
+-- logInfo $ mconcat (display <$> allTags)
+-- allTaggedArticles <- liftIO $ PTA.findAllTaggedArticles connInf
+-- logInfo $ mconcat (display <$> allTaggedArticles)
 
 -- | Enry point of the application
 main :: IO ()

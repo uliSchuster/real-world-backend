@@ -38,6 +38,9 @@ dependencies:
 - product-profunctors
 - postgresql-simple
 - opaleye
+- optparse-applicative
+- aeson
+- aeson-pretty
 
 ghc-options:
 - -Wall
