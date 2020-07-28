@@ -3,7 +3,7 @@
 {-# LANGUAGE NoImplicitPrelude #-}
 
 module Domain.DomainInstances
-  ( ValidUserName (..),
+  ( ValidUsername (..),
     ValidTitle (..),
     ValidTag (..),
   )
@@ -11,8 +11,8 @@ where
 
 import Control.Monad
 import qualified Data.Char as C
-import qualified Domain.Tag as TG
-import qualified Domain.Username as UN
+import qualified Domain.Tag as DT
+import qualified Domain.Username as DUN
 import RIO
 import qualified RIO.Text as T
 import Test.QuickCheck
@@ -20,17 +20,17 @@ import qualified Test.QuickCheck.Instances.List as QL
 import qualified TestUtils as TU
 
 -- Newtype wrapper to create an Arbitrary instance.
-newtype ValidUserName = ValidUserName {getValidUserName :: Text}
+newtype ValidUsername = ValidUsername {getValidUsername :: Text}
   deriving (Eq, Show, Ord, Display)
 
-instance Arbitrary ValidUserName where
+instance Arbitrary ValidUsername where
   arbitrary = do
-    uNameSize <- choose (UN.minUserNameLength - 1, UN.maxUserNameLength - 1)
+    uNameSize <- choose (DUN.minUsernameLength - 1, DUN.maxUsernameLength - 1)
     ps <- replicateM uNameSize (arbitrary :: Gen TU.PrintableLatin1)
     firstLetter <- arbitrary :: Gen TU.AlphaLatin1
     let ss = TU.getPrintableLatin1 <$> ps -- unwrap
     let fl = TU.getAlphaLatin1 firstLetter
-    return $ ValidUserName (T.pack (fl : ss)) -- convert to Text and wrap in Gen
+    return $ ValidUsername (T.pack (fl : ss)) -- convert to Text and wrap in Gen
 
 -- Newtype wrapper to create an Arbitrary instance.
 newtype ValidTitle = ValidTitle {getValidTitle :: Text}
@@ -48,7 +48,7 @@ newtype ValidTag = ValidTag {getValidTag :: Text}
 
 instance Arbitrary ValidTag where
   arbitrary = do
-    tagSize <- choose (TG.minTagLength - 2, TG.maxTagLength - 2)
+    tagSize <- choose (DT.minTagLength - 2, DT.maxTagLength - 2)
     firstLetter <- TU.getAlphaLatin1 <$> (arbitrary :: Gen TU.AlphaLatin1)
     lastLetter <- TU.getAlphaLatin1 <$> (arbitrary :: Gen TU.AlphaLatin1)
     ts <- replicateM tagSize (frequency [(10, TU.getAlphaLatin1 <$> (arbitrary :: Gen TU.AlphaLatin1)), (1, elements [C.chr 32, C.chr 160])])

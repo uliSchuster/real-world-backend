@@ -41,6 +41,7 @@ dependencies:
 - optparse-applicative
 - aeson
 - aeson-pretty
+- errors
 
 ghc-options:
 - -Wall

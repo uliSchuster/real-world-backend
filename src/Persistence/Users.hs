@@ -31,19 +31,23 @@ module Persistence.Users
     OptionalUserIdField,
     UserId,
     pUserId,
+    UserT (..),
     User,
     findAllUsers,
+    findUser,
   )
 where
 
-import qualified Control.Arrow ()
+import Control.Arrow ((<<<), arr, returnA)
 import qualified Data.Profunctor.Product ()
 import Data.Profunctor.Product.TH (makeAdaptorAndInstance)
 import qualified Database.PostgreSQL.Simple as PGS
 import qualified Opaleye as OE
+import Opaleye ((.==))
 import Persistence.DbConfig (schemaName)
 import Persistence.PersistenceUtils
 import RIO
+import RIO.List as L
 
 --------------------
 -- Dedicated User ID
@@ -159,8 +163,14 @@ userTable =
 -- Queries return Opaleye PostgreSQL "Read" records.
 
 -- | Retrieve all users.
-selectUsers :: OE.Select UserR
-selectUsers = OE.selectTable userTable
+allUsersQ :: OE.Select UserR
+allUsersQ = OE.selectTable userTable
+
+userByNameQ :: OE.SelectArr (F OE.SqlText) UserR
+userByNameQ = proc uName -> do
+  row <- allUsersQ -< ()
+  OE.restrict -< userUsername row .== uName
+  returnA -< row
 
 --------------------
 -- DB Access
@@ -174,6 +184,14 @@ selectUsers = OE.selectTable userTable
 findAllUsers :: PGS.ConnectInfo -> IO [User]
 findAllUsers connInfo = do
   conn <- PGS.connect connInfo
-  result <- OE.runSelect conn selectUsers
+  result <- OE.runSelect conn allUsersQ
   PGS.close conn
   return result
+
+-- | Find the user with given user name.
+findUser :: PGS.ConnectInfo -> Text -> IO (Maybe User)
+findUser connInfo uName = do
+  conn <- PGS.connect connInfo
+  result <- OE.runSelect conn (userByNameQ <<< arr (const $ OE.sqlStrictText uName))
+  PGS.close conn
+  return $ L.headMaybe result

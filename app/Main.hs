@@ -1,3 +1,5 @@
+{-# LANGUAGE DeriveGeneric #-}
+{-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE NoImplicitPrelude #-}
 
 module Main
@@ -6,25 +8,35 @@ module Main
 where
 
 import qualified AppConfig as APC
+import qualified Data.Aeson as J
 import qualified Data.Aeson.Encode.Pretty as JPP
 import qualified Database.PostgreSQL.Simple as PGS
-import qualified Paths_real_world_server
-import qualified Persistence.Articles as PA
-import qualified Persistence.Comments as PC
+import qualified Domain.Username as DUN
 import qualified Persistence.DbConfig as DBC
-import qualified Persistence.Favorites as PFA
-import qualified Persistence.Follows as PFO
 import qualified Persistence.TagRepository as TRepo
-import qualified Persistence.TaggedArticles as PTA
-import qualified Persistence.Tags as PT
-import qualified Persistence.Users as PU
-import qualified Presenter.Json.JsonDto as DTO
+import qualified Persistence.UserRepository as URepo
+import qualified Presenter.Resources.Profile as RP
+import qualified Presenter.Resources.Tags as RT
+import qualified Presenter.Resources.Resource as RR
 import RIO
 import RIO.ByteString.Lazy (toStrict)
-import qualified RIO.Text as T
 import qualified UI.CommandLine.CLI as CLI
+import qualified Usecases.ProfileUsecases as UCP
 import qualified Usecases.TagRepositoryI as TRepoI
-import qualified Usecases.TagUsecase as UCT
+import qualified Usecases.TagUsecases as UCT
+import qualified Usecases.UserRepositoryI as URepoI
+
+-- | Simple error type with error message, to be returned to the user.
+-- This error handling is preliminary. It must be improved to allow for
+-- comprehensive application-wide errors.
+data ApplicationError
+  = Unauthorized Text
+  | Forbidden Text
+  | NotFound Text
+  | Invalid Text
+  deriving (Eq, Ord, Show, Generic)
+
+instance J.ToJSON ApplicationError
 
 -- | Connection string for the PostgreSQL DBMS. Here for development and
 -- experimentation. Should be loaded from a config file or the system environment later on.
@@ -42,6 +54,9 @@ dBConnInfo =
 -- Wire dependencies.
 instance TRepoI.TagRepositoryI APC.AppConfig where
   readAllTags = TRepo.readAllTags
+
+instance URepoI.UserRepositoryI APC.AppConfig where
+  readUser = URepo.readUser
 
 -- Helper function to run the main application logic.
 -- This function is a very preliminary sketch. The goal later on is to properly
@@ -65,15 +80,13 @@ conduitApp = do
   request <- liftIO CLI.parseCmdLine
   result <- case request of
     CLI.User -> undefined
-    CLI.Profile -> undefined
+    (CLI.Profile profileCmd) -> case profileCmd of
+      (CLI.ShowProfile uName) -> getProfileResource uName
     CLI.Article -> undefined
     CLI.Comment -> undefined
-    CLI.Tag -> do
-      allDTags <- UCT.getAllTags
-      let tagsDto = DTO.toDto allDTags :: DTO.TagListDto
-      return $ JPP.encodePretty tagsDto
-  let disp = displayBytesUtf8 $ toStrict result
-  logInfo disp
+    CLI.Tag -> getTagResource
+  let dispResult = displayResult result
+  logInfo dispResult
 
 -- connInf <- view $ APC.dbConfigL . DBC.connInfoL
 -- allUsers <- liftIO $ PU.findAllUsers connInf
@@ -94,3 +107,23 @@ conduitApp = do
 -- | Enry point of the application
 main :: IO ()
 main = runApp conduitApp
+
+getProfileResource :: DUN.Username -> RIO APC.AppConfig (Either ApplicationError RR.Resource)
+getProfileResource uName = do
+  userOrError <- UCP.getProfile uName
+  case userOrError of
+    Left e -> return $ Left $ NotFound e
+    Right u -> return $ Right $ RR.Profile $ RP.toResource u
+
+getTagResource :: RIO APC.AppConfig (Either ApplicationError RR.Resource)
+getTagResource = do
+  dTags <- UCT.getAllTags
+  let tagList = RT.toResource dTags
+  return $ Right (RR.Tags tagList)
+
+displayResult :: (J.ToJSON l, J.ToJSON r) => Either l r -> Utf8Builder
+displayResult res = displayBytesUtf8 . toStrict $ out
+  where
+    out = case res of
+      Left e -> JPP.encodePretty e
+      Right r -> JPP.encodePretty r

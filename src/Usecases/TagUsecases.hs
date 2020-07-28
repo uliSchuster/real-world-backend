@@ -12,7 +12,7 @@
 -- The simplest Conduit use case: retrieve all stored tags.
 -- Uses an abstract repository to retrieve the persisted tags. Filters them and
 -- logs errors for those tags that could not be properly loaded from the store.
-module Usecases.TagUsecase
+module Usecases.TagUsecases
   ( getAllTags,
   )
 where

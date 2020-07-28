@@ -18,21 +18,32 @@
 -- https://www.stackage.org/lts-16.7/package/optparse-applicative-0.15.1.0
 module UI.CommandLine.CLI
   ( Command (..),
+    ProfileCmd (..),
     parseCmdLine,
   )
 where
 
+import qualified Control.Error.Util as EUTL
+import qualified Domain.Username as DUN
 import qualified Options.Applicative as O
 import RIO
+import qualified RIO.Text as T
 
 -- | All possible commands the user can input via the command line.
 data Command
   = User
-  | Profile
+  | Profile ProfileCmd
   | Article
   | Comment
   | Tag
   deriving (Eq, Show)
+
+newtype ProfileCmd
+  = ShowProfile DUN.Username
+  deriving (Eq, Show)
+
+--- | FollowUser Text
+--- | UnfollowUser Text
 
 -- | Uses the `Options.Applicative`command line parser to determine
 -- the user's instruction for the application what to do.
@@ -95,8 +106,14 @@ versionOption =
 userCmdParser :: O.Parser Command
 userCmdParser = undefined
 
+-- | Parse the command line when the "profile" subcommand is given.
+-- Currently, we take only one argument, the username.
 profileCmdParser :: O.Parser Command
-profileCmdParser = undefined
+profileCmdParser =
+  Profile
+    <$> ( ShowProfile
+            <$> O.argument usernameReader (O.metavar "<username>" <> O.help "Username of the profile to show.")
+        )
 
 articleCmdParser :: O.Parser Command
 articleCmdParser = undefined
@@ -104,7 +121,11 @@ articleCmdParser = undefined
 commentCmdParser :: O.Parser Command
 commentCmdParser = undefined
 
--- Parse the command line when the tag subcommand is given. Currently, there
+-- | Parse the command line when the "tag" subcommand is given. Currently, there
 -- are no options to parse here, we simply list all available tags.
 tagCmdParser :: O.Parser Command
 tagCmdParser = pure Tag
+
+usernameReader :: O.ReadM DUN.Username
+usernameReader = O.eitherReader $
+  \s -> EUTL.note ("Not a valid username: " ++ s) (DUN.mkUsername $ T.pack s)
