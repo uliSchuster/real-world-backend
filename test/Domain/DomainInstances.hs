@@ -3,7 +3,9 @@
 {-# LANGUAGE NoImplicitPrelude #-}
 
 module Domain.DomainInstances
-  ( ValidUsername (..),
+  ( ValidEmailAddress (..),
+    ValidURI (..),
+    ValidUsername (..),
     ValidTitle (..),
     ValidTag (..),
   )
@@ -11,13 +13,54 @@ where
 
 import Control.Monad
 import qualified Data.Char as C
+import Data.Maybe
 import qualified Domain.Tag as DT
 import qualified Domain.Username as DUN
 import RIO
 import qualified RIO.Text as T
 import Test.QuickCheck
-import qualified Test.QuickCheck.Instances.List as QL
 import qualified TestUtils as TU
+import qualified Text.Email.Validate as Email
+import qualified Text.URI as URI
+
+newtype ValidEmailAddress
+  = ValidEmailAddress {getValidEmailAddress :: Email.EmailAddress}
+  deriving (Eq, Show)
+
+instance Arbitrary ValidEmailAddress where
+  arbitrary =
+    ValidEmailAddress
+      <$> ( do
+              (TU.SafeText localAdr) <- arbitrary
+              (TU.SafeText hostName) <- arbitrary
+              tld <- elements [".com", ".org", ".de", ".fr", ".berlin"]
+              return $ T.encodeUtf8 (localAdr <> "@" <> hostName <> tld)
+          )
+      `suchThatMap` Email.emailAddress
+
+newtype ValidURI = ValidURI {getValidURI :: URI.URI}
+  deriving (Eq, Show)
+
+instance Arbitrary ValidURI where
+  arbitrary = do
+    sc <- elements ["https", "http", "ftps", "ftp"]
+    tld <- elements [".com", ".org", ".de", ".fr", ".berlin"]
+    (TU.AlphaNumText hostName) <- arbitrary
+    let uri = do
+          scheme <- URI.mkScheme sc
+          host <- URI.mkHost (hostName <> "." <> tld)
+          -- path <- URI.mkPathPiece pathPiece
+          return $
+            URI.URI
+              { URI.uriScheme = Just scheme,
+                URI.uriAuthority =
+                  Right
+                    (URI.Authority Nothing host Nothing),
+                URI.uriPath = Nothing,
+                URI.uriQuery = [],
+                URI.uriFragment = Nothing
+              }
+    return $ ValidURI (fromJust uri)
 
 -- Newtype wrapper to create an Arbitrary instance.
 newtype ValidUsername = ValidUsername {getValidUsername :: Text}

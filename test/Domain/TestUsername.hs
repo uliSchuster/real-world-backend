@@ -15,10 +15,10 @@ import qualified Text.Latin1 as TL1
 -- HUnit test cases --
 
 unit_validUsername :: IO ()
-unit_validUsername = HU.assertBool "Can a valid UserName be constructed?" (isJust $ mkUsername "uliSchuster")
+unit_validUsername = HU.assertBool "Can a valid Username be constructed?" (isJust $ mkUsername "uliSchuster")
 
 unit_UsernameTooShort :: IO ()
-unit_UsernameTooShort = HU.assertBool "A UserName that is less than 5 characters cannot be constructed" (isNothing $ mkUsername "min")
+unit_UsernameTooShort = HU.assertBool "A Username that is less than 5 characters cannot be constructed" (isNothing $ mkUsername "min")
 
 unit_UsernameTooLong :: IO ()
 unit_UsernameTooLong = HU.assertBool "A Username that longer than 20 characters cannot be constructed" (isNothing $ mkUsername "ThiIsAUsernameThatIsTooLong")
@@ -34,7 +34,7 @@ unit_noNonAlphaInitial = HU.assertBool "A Username that starts with a character 
 
 -- Quickspec test cases --
 
--- Ensure that a `UserName` is indeed constructed from an admissible string.
+-- Ensure that a `Username` is indeed constructed from an admissible string.
 prop_validUsername :: DI.ValidUsername -> Bool
 prop_validUsername (DI.ValidUsername uName) = DM.isJust $ mkUsername uName
 

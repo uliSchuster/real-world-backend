@@ -52,5 +52,5 @@ mkUser email uName imageUrl bio =
   User
     <$> DT.mkEmail email
     <*> DUN.mkUsername uName
-    <*> (URI.mkURI <$> imageUrl)
+    <*> mapM URI.mkURI imageUrl
     <*> mapM (Just . UserBio) bio

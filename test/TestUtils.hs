@@ -3,7 +3,9 @@
 {-# LANGUAGE NoImplicitPrelude #-}
 
 module TestUtils
-  ( Utf8Text1 (..),
+  ( SafeChar (..),
+    SafeText (..),
+    Utf8Text1 (..),
     latin1Chars,
     PrintableLatin1 (..),
     PrintableText (..),
@@ -23,6 +25,22 @@ import qualified RIO.Text as T
 import Test.QuickCheck
 import qualified Test.QuickCheck.Instances.List as QL
 import qualified Test.QuickCheck.Utf8 as QCU
+
+-- English ASCII alphanum
+newtype SafeChar = SafeChar {getSafeChar :: Char}
+  deriving (Eq, Show)
+
+instance Arbitrary SafeChar where
+  arbitrary =
+    SafeChar <$> elements (['a' .. 'z'] <> ['A' .. 'Z'] <> ['0' .. '9'])
+
+newtype SafeText = SafeText {getSafeText :: Text} deriving (Eq, Show)
+
+instance Arbitrary SafeText where
+  arbitrary = do
+    sc <- listOf1 (arbitrary :: Gen SafeChar)
+    let ss = getSafeChar <$> sc
+    return $ SafeText (T.pack ss)
 
 -- A nonempty UTF8 String
 newtype Utf8Text1 = Utf8Text1 {getUtf8Text1 :: Text}
