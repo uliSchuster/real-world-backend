@@ -14,8 +14,8 @@
 --
 -- Resources used in the Conduit ReST API
 module Presenter.Resources.ToResource
-  ( ToResource,
-    toResource,
+  ( ToResource
+  , toResource
   )
 where
 

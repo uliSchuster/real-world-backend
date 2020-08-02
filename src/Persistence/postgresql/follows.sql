@@ -1,19 +1,17 @@
-drop table if exists cond.follows;
+DROP TABLE IF EXISTS cond.follows;
 
-create table cond.follows (
-     follower_fk integer not null
-    ,followee_fk integer not null
-    ,primary key (follower_fk, followee_fk)
-    ,foreign key (follower_fk) references cond.users (id)
-        on update cascade
-        on delete cascade
-    ,foreign key (followee_fk) references cond.users (id)
-        on update cascade
-        on delete cascade
+CREATE TABLE cond.follows (
+    follower_fk integer NOT NULL,
+    followee_fk integer NOT NULL,
+    PRIMARY KEY (follower_fk, followee_fk),
+    FOREIGN KEY (follower_fk) REFERENCES cond.users (id) ON UPDATE CASCADE ON DELETE CASCADE,
+    FOREIGN KEY (followee_fk) REFERENCES cond.users (id) ON UPDATE CASCADE ON DELETE CASCADE
 );
 
-alter table cond.follows
-  owner to conduit_all;
+ALTER TABLE cond.follows OWNER TO conduit_all;
 
-insert into cond.follows (follower_fk, followee_fk) values(1, 2);
-insert into cond.follows (follower_fk, followee_fk) values(3, 2);
+INSERT INTO cond.follows (follower_fk, followee_fk)
+    VALUES (1, 2);
+
+INSERT INTO cond.follows (follower_fk, followee_fk)
+    VALUES (3, 2);

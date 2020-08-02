@@ -1,22 +1,27 @@
-drop table if exists cond.articles_tags;
+DROP TABLE IF EXISTS cond.articles_tags;
 
-create table cond.articles_tags (
-     article_fk integer not null
-    ,tag_fk integer not null
-    ,primary key (article_fk, tag_fk)
-    ,foreign key (article_fk) references cond.articles (id)
-        on update cascade
-        on delete cascade
-    ,foreign key (tag_fk) references cond.tags (id)
-        on update cascade
-        on delete cascade
+CREATE TABLE cond.articles_tags (
+    article_fk integer NOT NULL,
+    tag_fk integer NOT NULL,
+    PRIMARY KEY (article_fk, tag_fk),
+    FOREIGN KEY (article_fk) REFERENCES cond.articles (id) ON UPDATE CASCADE ON DELETE CASCADE,
+    FOREIGN KEY (tag_fk) REFERENCES cond.tags (id) ON UPDATE CASCADE ON DELETE CASCADE
 );
 
-alter table cond.articles_tags
-  owner to conduit_all;
+ALTER TABLE cond.articles_tags OWNER TO conduit_all;
 
-insert into cond.articles_tags (article_fk, tag_fk) values(1, 1);
-insert into cond.articles_tags (article_fk, tag_fk) values(2, 1);
-insert into cond.articles_tags (article_fk, tag_fk) values(2, 2);
-insert into cond.articles_tags (article_fk, tag_fk) values(3, 2);
-insert into cond.articles_tags (article_fk, tag_fk) values(3, 3);
+INSERT INTO cond.articles_tags (article_fk, tag_fk)
+    VALUES (1, 1);
+
+INSERT INTO cond.articles_tags (article_fk, tag_fk)
+    VALUES (2, 1);
+
+INSERT INTO cond.articles_tags (article_fk, tag_fk)
+    VALUES (2, 2);
+
+INSERT INTO cond.articles_tags (article_fk, tag_fk)
+    VALUES (3, 2);
+
+INSERT INTO cond.articles_tags (article_fk, tag_fk)
+    VALUES (3, 3);
+

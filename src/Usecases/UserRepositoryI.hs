@@ -13,14 +13,14 @@
 -- should not depend on the implementation of the persistence mechanism.
 -- Therefore, the persistence interface is defined here in the form of a type -- class.
 module Usecases.UserRepositoryI
-  ( UserRepositoryI (),
-    readUser,
+  ( UserRepositoryI()
+  , readUser
   )
 where
 
-import qualified Domain.User as DU
-import qualified Domain.Username as DUN
-import RIO
+import qualified Domain.User                   as DU
+import qualified Domain.Username               as DUN
+import           RIO
 
 -- | Interface of the actual persistence engine employed by this use case.
 -- Must be implemented by the outermost application ring.

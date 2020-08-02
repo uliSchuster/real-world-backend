@@ -13,17 +13,17 @@
 --
 -- Domain data types and business logic to describe a blog user.
 module Domain.User
-  ( UserBio (..),
-    User (..),
-    mkUser,
+  ( UserBio(..)
+  , User(..)
+  , mkUser
   )
 where
 
-import qualified Domain.Types as DT
-import qualified Domain.Username as DUN
-import RIO
-import qualified Text.Email.Validate as Email
-import qualified Text.URI as URI
+import qualified Domain.Types                  as DT
+import qualified Domain.Username               as DUN
+import           RIO
+import qualified Text.Email.Validate           as Email
+import qualified Text.URI                      as URI
 
 newtype UserBio = UserBio {getUserBio :: Text}
   deriving (Eq, Show, Ord, IsString, Semigroup, Monoid, Display, Hashable)
@@ -38,19 +38,15 @@ data User
   deriving (Eq, Show)
 
 -- | Construct a valid `User` from Text values.
-mkUser ::
-  -- | Email
-  Text ->
-  -- | Username
-  Text ->
-  -- | Image URL
-  Maybe Text ->
-  -- | User Bio
-  Maybe Text ->
-  Maybe User
+mkUser
+  :: Text -- ^ Email
+  -> Text   -- ^ Username
+  -> Maybe Text -- ^ Image URL
+  -> Maybe Text   -- ^ User Bio
+  -> Maybe User
 mkUser email uName imageUrl bio =
   User
     <$> DT.mkEmail email
     <*> DUN.mkUsername uName
-    <*> mapM URI.mkURI imageUrl
+    <*> mapM URI.mkURI        imageUrl
     <*> mapM (Just . UserBio) bio

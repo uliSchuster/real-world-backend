@@ -13,12 +13,12 @@
 --
 -- Domain data types for blog contents.
 module Domain.Content
-  ( Description (..),
-    Body (..),
+  ( Description(..)
+  , Body(..)
   )
 where
 
-import RIO
+import           RIO
 
 -- | Wrapper type for the description of an article. So far, there are no
 -- constraints on the text that makes up the description.

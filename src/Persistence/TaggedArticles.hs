@@ -26,29 +26,32 @@
 -- See https://github.com/tomjaguarpaw/haskell-opaleye and the (outdated)
 -- tutorial here: https://www.haskelltutorials.com/opaleye/index.html
 module Persistence.TaggedArticles
-  ( TaggedArticleT (..),
-    TaggedArticleR,
-    TaggedArticle,
-    TagArrayT (..),
-    TagArrayF,
-    TagArray,
-    allTaggedArticlesQ,
-    articleTagsQ,
-    findAllTaggedArticles,
+  ( TaggedArticleT(..)
+  , TaggedArticleR
+  , TaggedArticle
+  , TagArrayT(..)
+  , TagArrayF
+  , TagArray
+  , allTaggedArticlesQ
+  , articleTagsQ
+  , findAllTaggedArticles
   )
 where
 
-import Control.Arrow ((<<<), arr, returnA)
-import qualified Data.Profunctor.Product as PP
-import Data.Profunctor.Product.TH (makeAdaptorAndInstance)
-import qualified Database.PostgreSQL.Simple as PGS
-import qualified Opaleye as OE
-import Opaleye ((.===))
-import qualified Persistence.Articles as PA
-import Persistence.DbConfig (schemaName)
-import Persistence.PersistenceUtils
-import qualified Persistence.Tags as PT
-import RIO
+import           Control.Arrow                  ( (<<<)
+                                                , arr
+                                                , returnA
+                                                )
+import qualified Data.Profunctor.Product       as PP
+import           Data.Profunctor.Product.TH     ( makeAdaptorAndInstance )
+import qualified Database.PostgreSQL.Simple    as PGS
+import qualified Opaleye                       as OE
+import           Opaleye                        ( (.===) )
+import qualified Persistence.Articles          as PA
+import           Persistence.DbConfig           ( schemaName )
+import           Persistence.PersistenceUtils
+import qualified Persistence.Tags              as PT
+import           RIO
 
 --------------------
 -- Table Setup
@@ -63,10 +66,9 @@ data TaggedArticleT articleKey tagKey
   deriving (Show)
 
 -- | Record that Opaleye uses to write to the "favorites" table.
-type TaggedArticleW =
-  TaggedArticleT
-    PA.ArticleIdField -- article FK
-    PT.TagIdField -- tag FK
+type TaggedArticleW
+  = TaggedArticleT PA.ArticleIdField -- article FK
+                                     PT.TagIdField -- tag FK
 
 -- | Record that Opaleye reads from the "favorites" table.
 type TaggedArticleR = TaggedArticleW
@@ -74,13 +76,13 @@ type TaggedArticleR = TaggedArticleW
 -- | Typesafe Haskell record to interface with the application. Under the hood,
 -- Opaleye converts between this application record and the above PostgreSQL
 -- read and write records.
-type TaggedArticle =
-  TaggedArticleT
-    PA.ArticleId -- article FK
-    PT.TagId -- tag FK
+type TaggedArticle
+  = TaggedArticleT PA.ArticleId -- article FK
+                                PT.TagId -- tag FK
 
 instance Display TaggedArticle where
   display = displayShow
+
 
 -- | Template Haskell helper to create the mapping function between PostgreSQL
 -- records and the Haskell record used below.
@@ -90,16 +92,14 @@ $(makeAdaptorAndInstance "pTaggedArticle" ''TaggedArticleT)
 -- PostgreSQL records and the Haskell record. For each record, the function
 -- specifies the name of the table column and the constraints.
 taggedArticlesTable :: OE.Table TaggedArticleW TaggedArticleR
-taggedArticlesTable =
-  OE.tableWithSchema
-    schemaName
-    "articles_tags"
-    ( pTaggedArticle
-        TaggedArticle
-          { articleFk = PA.pArticleId (PA.ArticleId (OE.tableField "article_fk")),
-            tagFk = PT.pTagId (PT.TagId (OE.tableField "tag_fk"))
-          }
-    )
+taggedArticlesTable = OE.tableWithSchema
+  schemaName
+  "articles_tags"
+  (pTaggedArticle TaggedArticle
+    { articleFk = PA.pArticleId (PA.ArticleId (OE.tableField "article_fk"))
+    , tagFk     = PT.pTagId (PT.TagId (OE.tableField "tag_fk"))
+    }
+  )
 
 -- | To aggregate an article's tags into an array.
 newtype TagArrayT a = TagArray {getTagArray :: a}
@@ -143,7 +143,7 @@ articleTagsQ =
 -- Naming convention: DB retrievals are called "find".
 findAllTaggedArticles :: PGS.ConnectInfo -> IO [TaggedArticle]
 findAllTaggedArticles connInfo = do
-  conn <- PGS.connect connInfo
+  conn   <- PGS.connect connInfo
   result <- OE.runSelect conn allTaggedArticlesQ
   PGS.close conn
   return result

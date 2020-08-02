@@ -11,16 +11,16 @@
 --
 -- Domain data types and business logic to describe a blog article.
 module Domain.Article
-  ( Article (..)
+  ( Article(..)
   )
 where
 
-import qualified Data.Time as T
-import qualified Domain.Content as DC
-import qualified Domain.Tag as DTG
-import qualified Domain.Title as DT
-import qualified Domain.User as DU
-import RIO
+import qualified Data.Time                     as T
+import qualified Domain.Content                as DC
+import qualified Domain.Tag                    as DTG
+import qualified Domain.Title                  as DT
+import qualified Domain.User                   as DU
+import           RIO
 
 -- | The `Article` type is a record with strongly typed fields. There is no
 -- field for the article's slug, because the slug can be computed on the fly

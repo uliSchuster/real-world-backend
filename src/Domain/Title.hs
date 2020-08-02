@@ -21,15 +21,15 @@
 -- In addition, the title text is canonicalized: No leading or trailing
 -- whitespace, exactly one whitespace character between words.
 module Domain.Title
-  ( Title (), -- do not export the data constructor
-    pattern Title,
-    getTitle,
-    mkTitle,
+  ( Title() -- do not export the data constructor
+  , pattern Title
+  , getTitle
+  , mkTitle
   )
 where
 
-import Domain.ValidationUtils
-import RIO
+import           Domain.ValidationUtils
+import           RIO
 
 -- | Type that encapsulates a title string. Garanteed to have valid characters
 -- only.

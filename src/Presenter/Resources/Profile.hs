@@ -19,17 +19,18 @@
 --
 -- Profile resource used in the Conduit ReST API
 module Presenter.Resources.Profile
-  ( Profile (..),
-    TR.toResource,
+  ( Profile(..)
+  , TR.toResource
   )
 where
 
-import qualified Data.Aeson as J
-import qualified Domain.User as DU
-import qualified Domain.Username as DUN
-import qualified Presenter.Resources.ToResource as TR
-import RIO
-import qualified Text.URI as URI
+import qualified Data.Aeson                    as J
+import qualified Domain.User                   as DU
+import qualified Domain.Username               as DUN
+import qualified Presenter.Resources.ToResource
+                                               as TR
+import           RIO
+import qualified Text.URI                      as URI
 
 -- {
 --   "profile": {
@@ -50,10 +51,8 @@ data Profile
 
 instance TR.ToResource DU.User Profile where
   toResource :: DU.User -> Profile
-  toResource du =
-    Profile
-      { username = DUN.getUsername . DU.userName $ du,
-        bio = DU.getUserBio <$> DU.userBio du,
-        image = URI.render <$> DU.userImageUrl du,
-        following = False -- TODO: Map following status once login is available.
-      }
+  toResource du = Profile { username  = DUN.getUsername . DU.userName $ du
+                          , bio       = DU.getUserBio <$> DU.userBio du
+                          , image     = URI.render <$> DU.userImageUrl du
+                          , following = False -- TODO: Map following status once login is available.
+                          }

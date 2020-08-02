@@ -2,15 +2,15 @@
 {-# LANGUAGE OverloadedStrings #-}
 
 module Persistence.DbConfig
-  ( schemaName,
-    DbConfig (..),
-    HasDbConnInfo (),
-    connInfoL
+  ( schemaName
+  , DbConfig(..)
+  , HasDbConnInfo()
+  , connInfoL
   )
 where
 
-import qualified Database.PostgreSQL.Simple as PGS
-import RIO
+import qualified Database.PostgreSQL.Simple    as PGS
+import           RIO
 
 -- | Name of the PostgreSQL schema of the DB.
 schemaName :: String
@@ -31,4 +31,4 @@ instance HasDbConnInfo PGS.ConnectInfo where
   connInfoL = id
 
 instance HasDbConnInfo DbConfig where
-  connInfoL = lens connInfo (\x y -> x {connInfo = y})
+  connInfoL = lens connInfo (\x y -> x { connInfo = y })

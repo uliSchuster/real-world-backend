@@ -13,13 +13,13 @@
 -- Uses an abstract repository to retrieve the persisted tags. Filters them and
 -- logs errors for those tags that could not be properly loaded from the store.
 module Usecases.TagUsecases
-  ( getAllTags,
+  ( getAllTags
   )
 where
 
-import qualified Domain.Tag as DT
-import RIO
-import Usecases.TagRepositoryI
+import qualified Domain.Tag                    as DT
+import           RIO
+import           Usecases.TagRepositoryI
 
 -- | Use the tag-repository configured at application-level to read all tags.
 -- For those tags that fail to map on the domain type, log an error.
@@ -33,4 +33,4 @@ getAllTags = do
 logInvalidTag :: (HasLogFunc cfg) => Either Text DT.Tag -> RIO cfg ()
 logInvalidTag it = case it of
   Right _ -> return ()
-  Left e -> logError $ display e
+  Left  e -> logError $ display e

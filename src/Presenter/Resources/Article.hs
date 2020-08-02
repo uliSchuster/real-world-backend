@@ -19,22 +19,23 @@
 --
 -- Article resource used in the Conduit ReST API
 module Presenter.Resources.Article
-  ( Article (..),
-    TR.toResource
+  ( Article(..)
+  , TR.toResource
   )
 where
 
-import qualified Data.Aeson as J
-import qualified Data.Time as T
-import qualified Presenter.Resources.Profile as RP
-import qualified Presenter.Resources.ToResource as TR
-import qualified Domain.Article as DA
-import qualified Domain.Slug as DS
-import qualified Domain.Title as DT
-import qualified Domain.Content as DC
-import qualified Domain.Tag as DT
+import qualified Data.Aeson                    as J
+import qualified Data.Time                     as T
+import qualified Presenter.Resources.Profile   as RP
+import qualified Presenter.Resources.ToResource
+                                               as TR
+import qualified Domain.Article                as DA
+import qualified Domain.Slug                   as DS
+import qualified Domain.Title                  as DT
+import qualified Domain.Content                as DC
+import qualified Domain.Tag                    as DT
 
-import RIO
+import           RIO
 
 -- {
 --   "article": {
@@ -73,16 +74,15 @@ data Article
 
 instance TR.ToResource DA.Article Article where
   toResource :: DA.Article -> Article
-  toResource da =
-    Article
-      { slug = DS.getSlug . DS.mkSlug . DA.articleTitle $ da,
-        title = DT.getTitle . DA.articleTitle $ da,
-        description = DC.getDescription . DA.articleDescription $ da,
-        body = DC.getBody . DA.articleBody $ da,
-        createdAt = DA.articleCreatedAt da,
-        updatedAt = DA.articleModifiedAt da,
-        author = TR.toResource . DA.articleAuthor $ da,
-        favorited = False, -- TODO: Include favories with user auth
-        favoritesCount = 0, -- TODO: Include favories with user auth
-        tagList = DT.getTag <$> DA.articleTags da
-      }
+  toResource da = Article
+    { slug           = DS.getSlug . DS.mkSlug . DA.articleTitle $ da
+    , title          = DT.getTitle . DA.articleTitle $ da
+    , description    = DC.getDescription . DA.articleDescription $ da
+    , body           = DC.getBody . DA.articleBody $ da
+    , createdAt      = DA.articleCreatedAt da
+    , updatedAt      = DA.articleModifiedAt da
+    , author         = TR.toResource . DA.articleAuthor $ da
+    , favorited      = False -- TODO: Include favories with user auth
+    , favoritesCount = 0 -- TODO: Include favories with user auth
+    , tagList        = DT.getTag <$> DA.articleTags da
+    }

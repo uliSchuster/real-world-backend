@@ -17,32 +17,35 @@
 --
 -- Abstract collection-like interface to the underlying persistence layer.
 module Persistence.ArticleRepository
-  ( maxReadCount,
-    readArticles,
-    toDomain,
-    findAllArticlesSortedByModification,
-    findArticlesCountSortedByModification,
-    findLimitedSortedArticlesWithAuthorsAndTags
+  ( maxReadCount
+  , readArticles
+  , toDomain
+  , findAllArticlesSortedByModification
+  , findArticlesCountSortedByModification
+  , findLimitedSortedArticlesWithAuthorsAndTags
   )
 where
 
-import Control.Arrow (returnA)
-import Control.Error.Util (note)
-import qualified Data.Either.Validation as VAL
-import qualified Database.PostgreSQL.Simple as PGS
-import qualified Domain.Article as DA
-import qualified Domain.Content as DC
-import qualified Domain.Tag as DTG
-import qualified Domain.Title as DT
-import qualified Domain.User as DU
-import qualified Opaleye as OE
-import Opaleye ((.==), (.===))
-import qualified Persistence.Articles as PA
-import qualified Persistence.DbConfig as DBC
-import qualified Persistence.TaggedArticles as PTA
-import qualified Persistence.Tags as PT
-import qualified Persistence.Users as PU
-import RIO
+import           Control.Arrow                  ( returnA )
+import           Control.Error.Util             ( note )
+import qualified Data.Either.Validation        as VAL
+import qualified Database.PostgreSQL.Simple    as PGS
+import qualified Domain.Article                as DA
+import qualified Domain.Content                as DC
+import qualified Domain.Tag                    as DTG
+import qualified Domain.Title                  as DT
+import qualified Domain.User                   as DU
+import qualified Opaleye                       as OE
+import           Opaleye                        ( (.==)
+                                                , (.===)
+                                                )
+import qualified Persistence.Articles          as PA
+import qualified Persistence.DbConfig          as DBC
+import qualified Persistence.TaggedArticles    as PTA
+import qualified Persistence.Tags              as PT
+import qualified Persistence.Users             as PU
+import           RIO
+
 
 -- | Maximum number of articles that can be read at a time.
 maxReadCount :: Int
@@ -55,17 +58,21 @@ maxReadCount = 100
 -- Returns an empty list if there are no articles to read, or if the offset it
 -- past the last article in the repository.
 -- TODO: Make offset queries work.
-readArticles ::
-  (DBC.HasDbConnInfo cfg) =>
-  -- | Number of articles to read. Must be less than
-  Int ->
-  -- | Offset to start reading from. Must be <= `maxReadCount`.
-  Int ->
-  RIO cfg (Either Text [DA.Article])
+readArticles
+  :: (DBC.HasDbConnInfo cfg)
+  => Int -- ^ Number of articles to read. Must be less than `maxReadCount`.
+  -> Int   -- ^ Offset to start reading from..
+  -> RIO cfg (Either Text [DA.Article])
 readArticles limit offset = do
-  connInfo <- view DBC.connInfoL
-  articlesAuthorsTags <- liftIO $ findLimitedSortedArticlesWithAuthorsAndTags connInfo limit
-  return $ VAL.validationToEither . sequenceA $ VAL.eitherToValidation . toDomain <$> articlesAuthorsTags
+  connInfo            <- view DBC.connInfoL
+  articlesAuthorsTags <- liftIO
+    $ findLimitedSortedArticlesWithAuthorsAndTags connInfo limit
+  return
+    $   VAL.validationToEither
+    .   sequenceA
+    $   VAL.eitherToValidation
+    .   toDomain
+    <$> articlesAuthorsTags
 
 -- | Convert records retrieved from the database into an `DA.Article` domein
 -- value.
@@ -79,16 +86,30 @@ toDomain (a, u, ts) =
     <*> Right (PA.articleUpdatedAt a)
     <*> user
     <*> tagList
-  where
-    tagList = note "A persisted tag is invalid." $ sequence (DTG.mkTag <$> PTA.getTagArray ts)
-    user =
-      note ("The user " <> PU.userUsername u <> " stored with database ID " <> tshow (PU.userKey u) <> " is invalid.") $
-        DU.mkUser
-          (PU.userEmail u)
-          (PU.userUsername u)
-          (PU.userImageUrl u)
-          (PU.userBio u)
-    title = note ("The article title " <> PA.articleTitle a <> " stored with database ID " <> tshow (PA.articleKey a) <> " is invalid.") $ DT.mkTitle (PA.articleTitle a)
+ where
+  tagList = note "A persisted tag is invalid."
+    $ sequence (DTG.mkTag <$> PTA.getTagArray ts)
+  user =
+    note
+        (  "The user "
+        <> PU.userUsername u
+        <> " stored with database ID "
+        <> tshow (PU.userKey u)
+        <> " is invalid."
+        )
+      $ DU.mkUser (PU.userEmail u)
+                  (PU.userUsername u)
+                  (PU.userImageUrl u)
+                  (PU.userBio u)
+  title =
+    note
+        (  "The article title "
+        <> PA.articleTitle a
+        <> " stored with database ID "
+        <> tshow (PA.articleKey a)
+        <> " is invalid."
+        )
+      $ DT.mkTitle (PA.articleTitle a)
 
 --------------------
 -- DB Access
@@ -102,21 +123,23 @@ toDomain (a, u, ts) =
 -- constrained search.
 findAllArticlesSortedByModification :: PGS.ConnectInfo -> IO [PA.Article]
 findAllArticlesSortedByModification connInfo = do
-  conn <- PGS.connect connInfo
+  conn   <- PGS.connect connInfo
   result <- OE.runSelect conn PA.allArticlesSortedQ
   PGS.close conn
   return result
 
-findArticlesCountSortedByModification :: PGS.ConnectInfo -> Int -> IO [PA.Article]
+findArticlesCountSortedByModification
+  :: PGS.ConnectInfo -> Int -> IO [PA.Article]
 findArticlesCountSortedByModification connInfo count = do
-  conn <- PGS.connect connInfo
+  conn   <- PGS.connect connInfo
   result <- OE.runSelect conn $ PA.articlesCountSortedQ count
   PGS.close conn
   return result
 
-findLimitedSortedArticlesWithAuthorsAndTags :: PGS.ConnectInfo -> Int -> IO [(PA.Article, PU.User, PTA.TagArray)]
+findLimitedSortedArticlesWithAuthorsAndTags
+  :: PGS.ConnectInfo -> Int -> IO [(PA.Article, PU.User, PTA.TagArray)]
 findLimitedSortedArticlesWithAuthorsAndTags connInfo limit = do
-  conn <- PGS.connect connInfo
+  conn   <- PGS.connect connInfo
   result <- OE.runSelect conn $ articlesWithAuthorsAndTagsCountSortedQ limit
   PGS.close conn
   return result
@@ -149,9 +172,14 @@ articlesWithAuthorsAndTagsQ = proc () -> do
   returnA -< (article, user, PTA.TagArray ts)
 
 -- | Retrieve all articles with associated tags, sorted by modification date.
-allArticlesWithAuthorsAndTagsSortedQ :: OE.Select (PA.ArticleR, PU.UserR, PTA.TagArrayF)
-allArticlesWithAuthorsAndTagsSortedQ = OE.orderBy (OE.desc (\(a, _, _) -> PA.articleCreatedAt a)) articlesWithAuthorsAndTagsQ
+allArticlesWithAuthorsAndTagsSortedQ
+  :: OE.Select (PA.ArticleR, PU.UserR, PTA.TagArrayF)
+allArticlesWithAuthorsAndTagsSortedQ = OE.orderBy
+  (OE.desc (\(a, _, _) -> PA.articleCreatedAt a))
+  articlesWithAuthorsAndTagsQ
 
 -- | Retrieve the first `count` articles with associated tags.
-articlesWithAuthorsAndTagsCountSortedQ :: Int -> OE.Select (PA.ArticleR, PU.UserR, PTA.TagArrayF)
-articlesWithAuthorsAndTagsCountSortedQ count = OE.limit count allArticlesWithAuthorsAndTagsSortedQ
+articlesWithAuthorsAndTagsCountSortedQ
+  :: Int -> OE.Select (PA.ArticleR, PU.UserR, PTA.TagArrayF)
+articlesWithAuthorsAndTagsCountSortedQ count =
+  OE.limit count allArticlesWithAuthorsAndTagsSortedQ

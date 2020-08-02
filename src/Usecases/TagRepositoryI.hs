@@ -13,13 +13,13 @@
 -- should not depend on the implementation of the persistence mechanism.
 -- Therefore, the persistence interface is defined here in the form of a type -- class.
 module Usecases.TagRepositoryI
-  ( TagRepositoryI (),
-    readAllTags,
+  ( TagRepositoryI()
+  , readAllTags
   )
 where
 
-import qualified Domain.Tag as DT
-import RIO
+import qualified Domain.Tag                    as DT
+import           RIO
 
 -- | Interface of the actual persistence engine employed by this use case.
 -- Must be implemented by the outermost application ring.

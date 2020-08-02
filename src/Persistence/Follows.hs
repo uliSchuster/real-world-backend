@@ -26,19 +26,19 @@
 -- See https://github.com/tomjaguarpaw/haskell-opaleye and the (outdated)
 -- tutorial here: https://www.haskelltutorials.com/opaleye/index.html
 module Persistence.Follows
-  ( Follows,
-    findAllFollows,
+  ( Follows
+  , findAllFollows
   )
 where
 
-import qualified Control.Arrow ()
-import qualified Data.Profunctor.Product ()
-import Data.Profunctor.Product.TH (makeAdaptorAndInstance)
-import qualified Database.PostgreSQL.Simple as PGS
-import qualified Opaleye as OE
-import Persistence.DbConfig (schemaName)
-import qualified Persistence.Users as PU
-import RIO
+import qualified Control.Arrow                  ( )
+import qualified Data.Profunctor.Product        ( )
+import           Data.Profunctor.Product.TH     ( makeAdaptorAndInstance )
+import qualified Database.PostgreSQL.Simple    as PGS
+import qualified Opaleye                       as OE
+import           Persistence.DbConfig           ( schemaName )
+import qualified Persistence.Users             as PU
+import           RIO
 
 --------------------
 -- Table Setup
@@ -72,16 +72,14 @@ $(makeAdaptorAndInstance "pFollows" ''FollowsT)
 -- PostgreSQL records and the Haskell record. For each record, the function
 -- specifies the name of the table column and the constraints.
 followsTable :: OE.Table FollowsW FollowsR
-followsTable =
-  OE.tableWithSchema
-    schemaName
-    "follows"
-    ( pFollows
-        Follows
-          { followerFk = PU.pUserId (PU.UserId (OE.tableField "follower_fk")),
-            followeeFk = PU.pUserId (PU.UserId (OE.tableField "followee_fk"))
-          }
-    )
+followsTable = OE.tableWithSchema
+  schemaName
+  "follows"
+  (pFollows Follows
+    { followerFk = PU.pUserId (PU.UserId (OE.tableField "follower_fk"))
+    , followeeFk = PU.pUserId (PU.UserId (OE.tableField "followee_fk"))
+    }
+  )
 
 --------------------
 -- Queries
@@ -99,7 +97,7 @@ selectFollows = OE.selectTable followsTable
 -- Naming convention: DB retrievals are called "find".
 findAllFollows :: PGS.ConnectInfo -> IO [Follows]
 findAllFollows connInfo = do
-  conn <- PGS.connect connInfo
+  conn   <- PGS.connect connInfo
   result <- OE.runSelect conn selectFollows
   PGS.close conn
   return result

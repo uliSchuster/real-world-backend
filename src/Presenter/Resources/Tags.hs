@@ -19,15 +19,16 @@
 --
 -- Tag and Tag-list Resources used in the Conduit ReST API
 module Presenter.Resources.Tags
-  ( TagList (..),
-    TR.toResource,
+  ( TagList(..)
+  , TR.toResource
   )
 where
 
-import qualified Data.Aeson as J
-import qualified Domain.Tag as DT
-import qualified Presenter.Resources.ToResource as TR
-import RIO
+import qualified Data.Aeson                    as J
+import qualified Domain.Tag                    as DT
+import qualified Presenter.Resources.ToResource
+                                               as TR
+import           RIO
 
 newtype TagList = TagList {tags :: [Text]}
   deriving (Show, Eq, Generic)

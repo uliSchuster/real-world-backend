@@ -11,18 +11,14 @@
 --
 -- Utility functions to simplify using Opaleye and PostfreSQL-simple
 module Persistence.PersistenceUtils
-  ( F,
-    FNull,
+  ( F
+  , FNull
   )
 where
 
-import qualified Opaleye as OE
+import qualified Opaleye                       as OE
 
 -- | Type synonyms for convenience
-type F field =
-  -- | Opaleye type for a non-nullable DB field.
-  OE.Field field
+type F field = OE.Field field -- ^ Opaleye type for a non-nullable DB field.
 
-type FNull field =
-  -- | Nullable DB field
-  OE.FieldNullable field
+type FNull field = OE.FieldNullable field   -- ^ Nullable DB field

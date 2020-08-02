@@ -17,17 +17,17 @@
 -- See https://github.com/tomjaguarpaw/haskell-opaleye and the (outdated)
 -- tutorial here: https://www.haskelltutorials.com/opaleye/index.html
 module Usecases.ArticleUsecases
-  ( ArticleQueryOptions (..),
-    ArticleFilter (..),
-    getArticles,
+  ( ArticleQueryOptions(..)
+  , ArticleFilter(..)
+  , getArticles
   )
 where
 
-import qualified Domain.Article as DA
-import qualified Domain.Tag as DT
-import qualified Domain.Username as DU
-import RIO
-import Usecases.ArticleRepositoryI
+import qualified Domain.Article                as DA
+import qualified Domain.Tag                    as DT
+import qualified Domain.Username               as DU
+import           RIO
+import           Usecases.ArticleRepositoryI
 
 data ArticleFilter
   = ArticleFilter
@@ -47,6 +47,9 @@ data ArticleQueryOptions
 
 -- | Get a given number of articles from the repositiry, sorted by publication
 -- date.
-getArticles :: ArticleRepositoryI cfg => ArticleQueryOptions -> RIO cfg (Either Text [DA.Article])
-getArticles ArticleQueryOptions {articleLimit = limit, articleOffset = offset} =
-  readArticles limit offset
+getArticles
+  :: ArticleRepositoryI cfg
+  => ArticleQueryOptions
+  -> RIO cfg (Either Text [DA.Article])
+getArticles ArticleQueryOptions { articleLimit = limit, articleOffset = offset }
+  = readArticles limit offset

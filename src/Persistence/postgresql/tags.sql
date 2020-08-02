@@ -1,13 +1,17 @@
-drop table if exists cond.tags;
+DROP TABLE IF EXISTS cond.tags;
 
-create table cond.tags (
-     id serial primary key
-    ,tagname text not null unique
+CREATE TABLE cond.tags (
+    id serial PRIMARY KEY,
+    tagname text NOT NULL UNIQUE
 );
 
-alter table cond.tags
-  owner to conduit_all;
+ALTER TABLE cond.tags OWNER TO conduit_all;
 
-insert into cond.tags (id, tagname) values(1, 'Start');
-insert into cond.tags (id, tagname) values(2, 'Test');
-insert into cond.tags (id, tagname) values(3, 'Architecture');
+INSERT INTO cond.tags (id, tagname)
+    VALUES (1, 'Start');
+
+INSERT INTO cond.tags (id, tagname)
+    VALUES (2, 'Test');
+
+INSERT INTO cond.tags (id, tagname)
+    VALUES (3, 'Architecture');

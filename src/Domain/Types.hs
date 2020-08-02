@@ -11,12 +11,12 @@
 --
 -- Helper functions for domain types from third-party libraries
 module Domain.Types
-  ( mkEmail,
+  ( mkEmail
   )
 where
 
-import RIO
-import qualified Text.Email.Validate as Email
+import           RIO
+import qualified Text.Email.Validate           as Email
 
 -- | Parse a text string into an RFC-compliant email-address.
 mkEmail :: Text -> Maybe Email.EmailAddress

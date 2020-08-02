@@ -20,16 +20,17 @@
 -- an article title. It relies on the contraints on character set and word
 -- spacing enforced by the `Domain.Title` type, and adds a length constraint.
 module Domain.Slug
-  ( Slug (), -- Do not export data constructor.
-    pattern Slug,
-    getSlug,
-    mkSlug,
+  ( Slug()
+  , -- Do not export data constructor.
+    pattern Slug
+  , getSlug
+  , mkSlug
   )
 where
 
-import Domain.Title
-import RIO
-import qualified RIO.Text as T
+import           Domain.Title
+import           RIO
+import qualified RIO.Text                      as T
 
 -- | Maximum length of a slug. Must be limited because `Domain.Title` is not.
 maxSlugLength :: Int
@@ -44,6 +45,7 @@ slugSeparator = "-"
 -- arbitrarily.
 newtype Slug = Slug_ {getSlug :: Text}
   deriving (Eq, Show, Ord, IsString, Display, Hashable)
+
 
 -- | Pattern synonym to allow pattern matching on the `Slug` type even though
 -- the data constructor is hidden.
@@ -61,7 +63,8 @@ mkSlug :: Title -> Slug
 mkSlug (Title t) =
   Slug_
     $ T.intercalate slugSeparator
-      . T.words
-      . T.toLower
-      . T.take maxSlugLength
+    . T.words
+    . T.toLower
+    . T.take maxSlugLength
     $ t
+

@@ -21,18 +21,19 @@
 -- The username must be a single word with Latin-1 alphanumeric characters
 -- and between some minimum and maximum length.
 module Domain.Username
-  ( Username (), -- Do not export the data constructor
-    pattern Username,
-    getUsername,
-    mkUsername,
-    minUsernameLength,
-    maxUsernameLength,
+  ( Username()
+  , -- Do not export the data constructor
+    pattern Username
+  , getUsername
+  , mkUsername
+  , minUsernameLength
+  , maxUsernameLength
   )
 where
 
-import Domain.ValidationUtils
-import RIO
-import qualified RIO.Text as T
+import           Domain.ValidationUtils
+import           RIO
+import qualified RIO.Text                      as T
 
 -- | Limit minimum and maximum length of the user name so that it can function
 -- as a unique identifier for users, for DB lookups, in authentication
@@ -69,6 +70,6 @@ pattern Username name <- Username_ name
 -- trailing space from the input string.
 mkUsername :: Text -> Maybe Username
 mkUsername u = do
-  canonical <- valLatin1PrintableNonSpace . T.strip $ u
+  canonical  <- valLatin1PrintableNonSpace . T.strip $ u
   valInitial <- valInitialLatin1Letter canonical
   Username_ <$> valUsernameLength valInitial

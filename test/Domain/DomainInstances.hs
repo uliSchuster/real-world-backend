@@ -3,25 +3,25 @@
 {-# LANGUAGE NoImplicitPrelude #-}
 
 module Domain.DomainInstances
-  ( ValidEmailAddress (..),
-    ValidURI (..),
-    ValidUsername (..),
-    ValidTitle (..),
-    ValidTag (..),
+  ( ValidEmailAddress(..)
+  , ValidURI(..)
+  , ValidUsername(..)
+  , ValidTitle(..)
+  , ValidTag(..)
   )
 where
 
-import Control.Monad
-import qualified Data.Char as C
-import Data.Maybe
-import qualified Domain.Tag as DT
-import qualified Domain.Username as DUN
-import RIO
-import qualified RIO.Text as T
-import Test.QuickCheck
-import qualified TestUtils as TU
-import qualified Text.Email.Validate as Email
-import qualified Text.URI as URI
+import           Control.Monad
+import qualified Data.Char                     as C
+import           Data.Maybe
+import qualified Domain.Tag                    as DT
+import qualified Domain.Username               as DUN
+import           RIO
+import qualified RIO.Text                      as T
+import           Test.QuickCheck
+import qualified TestUtils                     as TU
+import qualified Text.Email.Validate           as Email
+import qualified Text.URI                      as URI
 
 newtype ValidEmailAddress
   = ValidEmailAddress {getValidEmailAddress :: Email.EmailAddress}
@@ -30,12 +30,12 @@ newtype ValidEmailAddress
 instance Arbitrary ValidEmailAddress where
   arbitrary =
     ValidEmailAddress
-      <$> ( do
-              (TU.SafeText localAdr) <- arbitrary
-              (TU.SafeText hostName) <- arbitrary
-              tld <- elements [".com", ".org", ".de", ".fr", ".berlin"]
-              return $ T.encodeUtf8 (localAdr <> "@" <> hostName <> tld)
-          )
+      <$>           (do
+                      (TU.SafeText localAdr) <- arbitrary
+                      (TU.SafeText hostName) <- arbitrary
+                      tld <- elements [".com", ".org", ".de", ".fr", ".berlin"]
+                      return $ T.encodeUtf8 (localAdr <> "@" <> hostName <> tld)
+                    )
       `suchThatMap` Email.emailAddress
 
 newtype ValidURI = ValidURI {getValidURI :: URI.URI}
@@ -48,18 +48,15 @@ instance Arbitrary ValidURI where
     (TU.AlphaNumText hostName) <- arbitrary
     let uri = do
           scheme <- URI.mkScheme sc
-          host <- URI.mkHost (hostName <> "." <> tld)
+          host   <- URI.mkHost (hostName <> "." <> tld)
           -- path <- URI.mkPathPiece pathPiece
-          return $
-            URI.URI
-              { URI.uriScheme = Just scheme,
-                URI.uriAuthority =
-                  Right
-                    (URI.Authority Nothing host Nothing),
-                URI.uriPath = Nothing,
-                URI.uriQuery = [],
-                URI.uriFragment = Nothing
-              }
+          return $ URI.URI
+            { URI.uriScheme    = Just scheme
+            , URI.uriAuthority = Right (URI.Authority Nothing host Nothing)
+            , URI.uriPath      = Nothing
+            , URI.uriQuery     = []
+            , URI.uriFragment  = Nothing
+            }
     return $ ValidURI (fromJust uri)
 
 -- Newtype wrapper to create an Arbitrary instance.
@@ -68,8 +65,8 @@ newtype ValidUsername = ValidUsername {getValidUsername :: Text}
 
 instance Arbitrary ValidUsername where
   arbitrary = do
-    uNameSize <- choose (DUN.minUsernameLength - 1, DUN.maxUsernameLength - 1)
-    ps <- replicateM uNameSize (arbitrary :: Gen TU.PrintableLatin1)
+    uNameSize   <- choose (DUN.minUsernameLength - 1, DUN.maxUsernameLength - 1)
+    ps          <- replicateM uNameSize (arbitrary :: Gen TU.PrintableLatin1)
     firstLetter <- arbitrary :: Gen TU.AlphaLatin1
     let ss = TU.getPrintableLatin1 <$> ps -- unwrap
     let fl = TU.getAlphaLatin1 firstLetter
@@ -91,8 +88,14 @@ newtype ValidTag = ValidTag {getValidTag :: Text}
 
 instance Arbitrary ValidTag where
   arbitrary = do
-    tagSize <- choose (DT.minTagLength - 2, DT.maxTagLength - 2)
+    tagSize     <- choose (DT.minTagLength - 2, DT.maxTagLength - 2)
     firstLetter <- TU.getAlphaLatin1 <$> (arbitrary :: Gen TU.AlphaLatin1)
-    lastLetter <- TU.getAlphaLatin1 <$> (arbitrary :: Gen TU.AlphaLatin1)
-    ts <- replicateM tagSize (frequency [(10, TU.getAlphaLatin1 <$> (arbitrary :: Gen TU.AlphaLatin1)), (1, elements [C.chr 32, C.chr 160])])
+    lastLetter  <- TU.getAlphaLatin1 <$> (arbitrary :: Gen TU.AlphaLatin1)
+    ts          <- replicateM
+      tagSize
+      (frequency
+        [ (10, TU.getAlphaLatin1 <$> (arbitrary :: Gen TU.AlphaLatin1))
+        , (1 , elements [C.chr 32, C.chr 160])
+        ]
+      )
     return $ ValidTag (T.pack $ (firstLetter : ts) ++ [lastLetter])

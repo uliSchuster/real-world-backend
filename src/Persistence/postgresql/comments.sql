@@ -1,23 +1,21 @@
-drop table if exists cond.comments;
+DROP TABLE IF EXISTS cond.comments;
 
-create table cond.comments (
-     id serial primary key
-    ,article_fk integer not null
-    ,author_fk integer not null
-    ,body text not null
-    ,created_at timestamptz not null default current_timestamp
-    ,updated_at timestamptz not null default current_timestamp
-    ,unique (article_fk, author_fk, body)
-    ,foreign key (article_fk) references cond.articles (id)
-        on update cascade
-        on delete cascade
-    ,foreign key (author_fk) references cond.users (id)
-        on update cascade
-        on delete cascade
+CREATE TABLE cond.comments (
+    id serial PRIMARY KEY,
+    article_fk integer NOT NULL,
+    author_fk integer NOT NULL,
+    body text NOT NULL,
+    created_at timestamptz NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at timestamptz NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    UNIQUE (article_fk, author_fk, body),
+    FOREIGN KEY (article_fk) REFERENCES cond.articles (id) ON UPDATE CASCADE ON DELETE CASCADE,
+    FOREIGN KEY (author_fk) REFERENCES cond.users (id) ON UPDATE CASCADE ON DELETE CASCADE
 );
 
-alter table cond.comments
-  owner to conduit_all;
+ALTER TABLE cond.comments OWNER TO conduit_all;
 
-insert into cond.comments (id, article_fk, author_fk, body) values(1, 1, 2, 'This is a test comment');
-insert into cond.comments (id, article_fk, author_fk, body) values(2, 1, 3, 'An architectural comment');
+INSERT INTO cond.comments (id, article_fk, author_fk, body)
+    VALUES (1, 1, 2, 'This is a test comment');
+
+INSERT INTO cond.comments (id, article_fk, author_fk, body)
+    VALUES (2, 1, 3, 'An architectural comment');

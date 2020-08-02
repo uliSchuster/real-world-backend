@@ -13,21 +13,21 @@
 --
 -- Abstract collection-like interface to the underlying persistence layer.
 module Persistence.TagRepository
-  ( readAllTags,
+  ( readAllTags
   )
 where
 
-import qualified Domain.Tag as DT
-import qualified Persistence.DbConfig as DBC
-import qualified Persistence.Tags as PT
-import RIO
+import qualified Domain.Tag                    as DT
+import qualified Persistence.DbConfig          as DBC
+import qualified Persistence.Tags              as PT
+import           RIO
 
 -- | Returns all tags stored in the underlying persistence mechanism
 -- Naming convention: Read repository operations are called "read".
 readAllTags :: (DBC.HasDbConnInfo cfg) => RIO cfg [Either Text DT.Tag]
 readAllTags = do
   connInfo <- view DBC.connInfoL
-  pTags <- liftIO $ PT.findAllTags connInfo
+  pTags    <- liftIO $ PT.findAllTags connInfo
   return $ toDomain <$> pTags
 
 -- | Helper function that converts the data obtained from the DB into a
@@ -38,4 +38,10 @@ readAllTags = do
 toDomain :: PT.Tag -> Either Text DT.Tag
 toDomain (PT.Tag (PT.TagId dbId) pt) = case DT.mkTag pt of
   Just tag -> Right tag
-  Nothing -> Left $ "The tag " <> pt <> " at database ID " <> tshow dbId <> " is invalid."
+  Nothing ->
+    Left
+      $  "The tag "
+      <> pt
+      <> " at database ID "
+      <> tshow dbId
+      <> " is invalid."

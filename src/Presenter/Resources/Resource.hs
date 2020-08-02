@@ -15,16 +15,16 @@
 --
 -- Resources used in the Conduit ReST API
 module Presenter.Resources.Resource
-  ( Resource (..),
+  ( Resource(..)
   )
 where
 
-import qualified Data.Aeson as J
-import qualified Presenter.Resources.Article as RA
-import qualified Presenter.Resources.Comment as RC
-import qualified Presenter.Resources.Profile as RP
-import qualified Presenter.Resources.Tags as RT
-import RIO
+import qualified Data.Aeson                    as J
+import qualified Presenter.Resources.Article   as RA
+import qualified Presenter.Resources.Comment   as RC
+import qualified Presenter.Resources.Profile   as RP
+import qualified Presenter.Resources.Tags      as RT
+import           RIO
 
 data Resource
   = Profile RP.Profile
@@ -35,8 +35,8 @@ data Resource
   deriving (Eq, Show, Generic)
 
 instance J.ToJSON Resource where
-  toJSON (Profile p) = J.object [("profile", J.toJSON p)]
-  toJSON (Article a) = J.toJSON a
+  toJSON (Profile  p ) = J.object [("profile", J.toJSON p)]
+  toJSON (Article  a ) = J.toJSON a
   toJSON (Articles as) = J.object [("articles", J.toJSON as)]
-  toJSON (Comment c) = J.toJSON c
-  toJSON (Tags t) = J.toJSON t
+  toJSON (Comment  c ) = J.toJSON c
+  toJSON (Tags     t ) = J.toJSON t

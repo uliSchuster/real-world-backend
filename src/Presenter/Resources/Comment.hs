@@ -13,14 +13,14 @@
 --
 -- Comment resource used in the Conduit ReST API
 module Presenter.Resources.Comment
-  ( Comment (..),
+  ( Comment(..)
   )
 where
 
-import qualified Data.Aeson as J
-import qualified Data.Time as DT
-import qualified Presenter.Resources.Profile as RP
-import RIO
+import qualified Data.Aeson                    as J
+import qualified Data.Time                     as DT
+import qualified Presenter.Resources.Profile   as RP
+import           RIO
 
 -- {
 --   "comment": {
@@ -36,7 +36,7 @@ import RIO
 --     }
 --   }
 -- }
-data Comment = Comment 
+data Comment = Comment
     { id :: Integer,
      createdAt :: DT.UTCTime,
      updatedAt :: DT.UTCTime,

@@ -17,21 +17,21 @@
 -- Command-line parsing uses the optparse-applicative package:
 -- https://www.stackage.org/lts-16.7/package/optparse-applicative-0.15.1.0
 module UI.CommandLine.CLI
-  ( Command (..),
-    ProfileCmd (..),
-    ArticleCmd (..),
-    parseCmdLine,
-    parseStrings
+  ( Command(..)
+  , ProfileCmd(..)
+  , ArticleCmd(..)
+  , parseCmdLine
+  , parseStrings
   )
 where
 
-import qualified Control.Error.Util as EUTL
-import qualified Domain.Tag as DT
-import qualified Domain.Username as DUN
-import qualified Options.Applicative as O
-import RIO
-import qualified RIO.Text as T
-import qualified Usecases.ArticleUsecases as UA
+import qualified Control.Error.Util            as EUTL
+import qualified Domain.Tag                    as DT
+import qualified Domain.Username               as DUN
+import qualified Options.Applicative           as O
+import           RIO
+import qualified RIO.Text                      as T
+import qualified Usecases.ArticleUsecases      as UA
 
 -- | All possible commands the user can input via the command line.
 data Command
@@ -63,53 +63,38 @@ parseStrings :: [String] -> O.ParserResult Command
 parseStrings = O.execParserPure O.defaultPrefs cmdLineParserSpec
 
 info' :: O.Parser a -> String -> O.ParserInfo a
-info' p desc =
-  O.info
-    (O.helper <*> versionOption <*> p)
-    ( O.fullDesc
-        <> O.progDesc desc
-        <> O.header
-          "Conduit - A simple blogging application and a playground to learn Haskell programming for the real world."
-    )
+info' p desc = O.info
+  (O.helper <*> versionOption <*> p)
+  (  O.fullDesc
+  <> O.progDesc desc
+  <> O.header
+       "Conduit - A simple blogging application and a playground to learn Haskell programming for the real world."
+  )
 
 cmdLineParserSpec :: O.ParserInfo Command
 cmdLineParserSpec = info' cmdLineParser "Blogging made too simple."
-  where
-    cmdLineParser :: O.Parser Command
-    cmdLineParser =
-      O.helper <*> versionOption
-        <*> O.hsubparser
-          ( O.command
-              "user"
-              ( O.info
-                  userCmdParser
-                  (O.progDesc "Register or login a user.")
-              )
-              <> O.command
-                "profile"
-                ( O.info
-                    profileCmdParser
-                    (O.progDesc "Inspect and modify a user profile.")
-                )
-              <> O.command
-                "article"
-                ( O.info
-                    articleCmdParser
-                    (O.progDesc "Publish, update and follow articles.")
-                )
-              <> O.command
-                "comment"
-                ( O.info
-                    commentCmdParser
-                    (O.progDesc "Create and update comments.")
-                )
-              <> O.command
-                "tag"
-                ( O.info
-                    tagCmdParser
-                    (O.progDesc "Inspect available tags.")
-                )
-          )
+ where
+  cmdLineParser :: O.Parser Command
+  cmdLineParser = O.helper <*> versionOption <*> O.hsubparser
+    (  O.command "user"
+                 (O.info userCmdParser (O.progDesc "Register or login a user."))
+    <> O.command
+         "profile"
+         (O.info profileCmdParser
+                 (O.progDesc "Inspect and modify a user profile.")
+         )
+    <> O.command
+         "article"
+         (O.info articleCmdParser
+                 (O.progDesc "Publish, update and follow articles.")
+         )
+    <> O.command
+         "comment"
+         (O.info commentCmdParser (O.progDesc "Create and update comments."))
+    <> O.command
+         "tag"
+         (O.info tagCmdParser (O.progDesc "Inspect available tags."))
+    )
 
 versionOption :: O.Parser (a -> a)
 versionOption =
@@ -123,61 +108,66 @@ userCmdParser = undefined
 profileCmdParser :: O.Parser Command
 profileCmdParser =
   Profile
-    <$> ( ShowProfile
-            <$> O.argument usernameReader (O.metavar "<username>" <> O.help "Username of the profile to show.")
+    <$> (ShowProfile <$> O.argument
+          usernameReader
+          (O.metavar "<username>" <> O.help "Username of the profile to show.")
         )
 
 articleCmdParser :: O.Parser Command
 articleCmdParser =
   Article
-    <$> ( GetArticleCmd
-            <$> ( UA.ArticleQueryOptions
-                    <$> O.option
-                      O.auto
-                      ( O.long "limit"
-                          <> O.short 'l'
-                          <> O.metavar "<limit>"
-                          <> O.value 20
-                          <> O.help "Maximum number of articles to show."
-                      )
-                    <*> O.option
-                      O.auto
-                      ( O.long "offset"
-                          <> O.short 'o'
-                          <> O.metavar "<offset>"
-                          <> O.value 0
-                          <> O.help "Offset from where on to show articles, ordered by date."
-                      )
-                    <*> ( UA.ArticleFilter
-                            <$> O.optional
-                              ( O.option
-                                  usernameReader
-                                  ( O.long "author"
-                                      <> O.short 'a'
-                                      <> O.metavar "<username>"
-                                      <> O.help "Only show articles by the given author."
-                                  )
-                              )
-                            <*> O.optional
-                              ( O.option
-                                  usernameReader
-                                  ( O.long "favoritedBy"
-                                      <> O.short 'f'
-                                      <> O.metavar "<username>"
-                                      <> O.help "Only show articles favorited by the given user."
-                                  )
-                              )
-                            <*> O.optional
-                              ( O.option
-                                  tagReader
-                                  ( O.long "tag"
-                                      <> O.short 't'
-                                      <> O.metavar "<tagname>"
-                                      <> O.help "Only show articles tagged with the given tag."
-                                  )
-                              )
+    <$> (   GetArticleCmd
+        <$> (   UA.ArticleQueryOptions
+            <$> O.option
+                  O.auto
+                  (  O.long "limit"
+                  <> O.short 'l'
+                  <> O.metavar "<limit>"
+                  <> O.value 20
+                  <> O.help "Maximum number of articles to show."
+                  )
+            <*> O.option
+                  O.auto
+                  (  O.long "offset"
+                  <> O.short 'o'
+                  <> O.metavar "<offset>"
+                  <> O.value 0
+                  <> O.help
+                       "Offset from where on to show articles, ordered by date."
+                  )
+            <*> (   UA.ArticleFilter
+                <$> O.optional
+                      (O.option
+                        usernameReader
+                        (  O.long "author"
+                        <> O.short 'a'
+                        <> O.metavar "<username>"
+                        <> O.help
+                             "Only show articles by the given author."
                         )
+                      )
+                <*> O.optional
+                      (O.option
+                        usernameReader
+                        (  O.long "favoritedBy"
+                        <> O.short 'f'
+                        <> O.metavar "<username>"
+                        <> O.help
+                             "Only show articles favorited by the given user."
+                        )
+                      )
+                <*> O.optional
+                      (O.option
+                        tagReader
+                        (  O.long "tag"
+                        <> O.short 't'
+                        <> O.metavar "<tagname>"
+                        <> O.help
+                             "Only show articles tagged with the given tag."
+                        )
+                      )
                 )
+            )
         )
 
 commentCmdParser :: O.Parser Command
@@ -189,9 +179,9 @@ tagCmdParser :: O.Parser Command
 tagCmdParser = pure Tag
 
 usernameReader :: O.ReadM DUN.Username
-usernameReader = O.eitherReader $
-  \s -> EUTL.note ("Not a valid username: " ++ s) (DUN.mkUsername $ T.pack s)
+usernameReader = O.eitherReader $ \s ->
+  EUTL.note ("Not a valid username: " ++ s) (DUN.mkUsername $ T.pack s)
 
 tagReader :: O.ReadM DT.Tag
-tagReader = O.eitherReader $
-  \s -> EUTL.note ("Not a valid tagname: " ++ s) (DT.mkTag $ T.pack s)
+tagReader = O.eitherReader
+  $ \s -> EUTL.note ("Not a valid tagname: " ++ s) (DT.mkTag $ T.pack s)
