@@ -1,4 +1,7 @@
+{-# LANGUAGE DeriveAnyClass #-}
 {-# LANGUAGE DeriveGeneric #-}
+{-# LANGUAGE InstanceSigs #-}
+{-# LANGUAGE MultiParamTypeClasses #-}
 {-# LANGUAGE NoImplicitPrelude #-}
 
 -- |
@@ -10,16 +13,27 @@
 -- Stability   :  unstable
 -- Lang. Ext.  :  NoImplicitPrelude - Use RIO instead
 --             :  DeriveGeneric - To automatically derive JSON mappers
+--             :  DeriveAnyClass - To include ToJSON in th deriving clause
+--             :  InstanceSigs - Write signatures for class instance functions
+--             :  MultiParamTypeClasses - The Resource class has two parameters
 --
 -- Article resource used in the Conduit ReST API
 module Presenter.Resources.Article
   ( Article (..),
+    TR.toResource
   )
 where
 
 import qualified Data.Aeson as J
-import qualified Data.Time as DT
+import qualified Data.Time as T
 import qualified Presenter.Resources.Profile as RP
+import qualified Presenter.Resources.ToResource as TR
+import qualified Domain.Article as DA
+import qualified Domain.Slug as DS
+import qualified Domain.Title as DT
+import qualified Domain.Content as DC
+import qualified Domain.Tag as DT
+
 import RIO
 
 -- {
@@ -48,12 +62,27 @@ data Article
         description :: Text,
         body :: Text,
         tagList :: [Text],
-        createdAt :: DT.UTCTime,
-        updatedAt :: DT.UTCTime,
+        createdAt :: T.UTCTime,
+        updatedAt :: T.UTCTime,
         favorited :: Bool,
         favoritesCount :: Integer,
         author :: RP.Profile
       }
-  deriving (Show, Eq, Generic)
+  deriving (Show, Eq, Generic, J.ToJSON)
 
-instance J.ToJSON Article
+
+instance TR.ToResource DA.Article Article where
+  toResource :: DA.Article -> Article
+  toResource da =
+    Article
+      { slug = DS.getSlug . DS.mkSlug . DA.articleTitle $ da,
+        title = DT.getTitle . DA.articleTitle $ da,
+        description = DC.getDescription . DA.articleDescription $ da,
+        body = DC.getBody . DA.articleBody $ da,
+        createdAt = DA.articleCreatedAt da,
+        updatedAt = DA.articleModifiedAt da,
+        author = TR.toResource . DA.articleAuthor $ da,
+        favorited = False, -- TODO: Include favories with user auth
+        favoritesCount = 0, -- TODO: Include favories with user auth
+        tagList = DT.getTag <$> DA.articleTags da
+      }

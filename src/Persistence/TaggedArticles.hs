@@ -26,18 +26,27 @@
 -- See https://github.com/tomjaguarpaw/haskell-opaleye and the (outdated)
 -- tutorial here: https://www.haskelltutorials.com/opaleye/index.html
 module Persistence.TaggedArticles
-  ( TaggedArticle,
+  ( TaggedArticleT (..),
+    TaggedArticleR,
+    TaggedArticle,
+    TagArrayT (..),
+    TagArrayF,
+    TagArray,
+    allTaggedArticlesQ,
+    articleTagsQ,
     findAllTaggedArticles,
   )
 where
 
-import qualified Control.Arrow ()
-import qualified Data.Profunctor.Product ()
+import Control.Arrow ((<<<), arr, returnA)
+import qualified Data.Profunctor.Product as PP
 import Data.Profunctor.Product.TH (makeAdaptorAndInstance)
 import qualified Database.PostgreSQL.Simple as PGS
 import qualified Opaleye as OE
+import Opaleye ((.===))
 import qualified Persistence.Articles as PA
 import Persistence.DbConfig (schemaName)
+import Persistence.PersistenceUtils
 import qualified Persistence.Tags as PT
 import RIO
 
@@ -92,23 +101,49 @@ taggedArticlesTable =
           }
     )
 
+-- | To aggregate an article's tags into an array.
+newtype TagArrayT a = TagArray {getTagArray :: a}
+  deriving (Eq, Show, Display)
+
+$(makeAdaptorAndInstance "pTagArray" ''TagArrayT)
+
+type TagArrayF = TagArrayT (F (OE.SqlArray OE.SqlText))
+
+type TagArray = TagArrayT [Text]
+
 --------------------
 -- Queries
 --------------------
 
--- | Retrieve all follow relations.
-selectTaggedArticles :: OE.Select TaggedArticleR
-selectTaggedArticles = OE.selectTable taggedArticlesTable
+-- | Query all article-tag relations.
+allTaggedArticlesQ :: OE.Select TaggedArticleR
+allTaggedArticlesQ = OE.selectTable taggedArticlesTable
+
+-- | Join article-ids and tag names for all articles.
+articleTagNamesQ :: OE.Select (PA.ArticleIdField, F OE.SqlText)
+articleTagNamesQ = proc () -> do
+  TaggedArticle {articleFk = aId, tagFk = tFk} <- allTaggedArticlesQ -< ()
+  PT.Tag {PT.tagKey = tId, PT.tagName = tn} <- PT.allTagsQ -< ()
+  OE.restrict -< tFk .=== tId
+  returnA -< (aId, tn)
+
+-- | Aggregate all tag names for all articles
+articleTagsQ :: OE.Select (F OE.SqlInt8, F (OE.SqlArray OE.SqlText))
+articleTagsQ =
+  OE.aggregate (PP.p2 (OE.groupBy, OE.arrayAgg)) $
+    arr (first PA.getArticleId) <<< articleTagNamesQ
 
 --------------------
 -- DB Access
 --------------------
+
+-- TODO: Use Bracket or ResourceT to handle DB resources.
 
 -- | Find all tagged articles stored in the DB and return them.
 -- Naming convention: DB retrievals are called "find".
 findAllTaggedArticles :: PGS.ConnectInfo -> IO [TaggedArticle]
 findAllTaggedArticles connInfo = do
   conn <- PGS.connect connInfo
-  result <- OE.runSelect conn selectTaggedArticles
+  result <- OE.runSelect conn allTaggedArticlesQ
   PGS.close conn
   return result

@@ -32,22 +32,21 @@ module Persistence.Users
     UserId,
     pUserId,
     UserT (..),
+    UserR,
     User,
-    findAllUsers,
-    findUser,
+    allUsersQ,
+    userByNameQ,
   )
 where
 
-import Control.Arrow ((<<<), arr, returnA)
+import Control.Arrow (returnA)
 import qualified Data.Profunctor.Product ()
 import Data.Profunctor.Product.TH (makeAdaptorAndInstance)
-import qualified Database.PostgreSQL.Simple as PGS
 import qualified Opaleye as OE
 import Opaleye ((.==))
 import Persistence.DbConfig (schemaName)
 import Persistence.PersistenceUtils
 import RIO
-import RIO.List as L
 
 --------------------
 -- Dedicated User ID
@@ -171,27 +170,3 @@ userByNameQ = proc uName -> do
   row <- allUsersQ -< ()
   OE.restrict -< userUsername row .== uName
   returnA -< row
-
---------------------
--- DB Access
---------------------
--- Functions in the IO Monad that perform the actual database access, given a
--- connection string. These functions use Opaleye primitive that perform the
--- mapping between Haskell records and Opaleye PostgreSQL records.
-
--- | Find all users stored in the DB and return them.
--- Naming convention: DB retrievals are called "find".
-findAllUsers :: PGS.ConnectInfo -> IO [User]
-findAllUsers connInfo = do
-  conn <- PGS.connect connInfo
-  result <- OE.runSelect conn allUsersQ
-  PGS.close conn
-  return result
-
--- | Find the user with given user name.
-findUser :: PGS.ConnectInfo -> Text -> IO (Maybe User)
-findUser connInfo uName = do
-  conn <- PGS.connect connInfo
-  result <- OE.runSelect conn (userByNameQ <<< arr (const $ OE.sqlStrictText uName))
-  PGS.close conn
-  return $ L.headMaybe result

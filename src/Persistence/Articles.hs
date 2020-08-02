@@ -31,8 +31,12 @@ module Persistence.Articles
     OptionalArticleIdField,
     ArticleId,
     pArticleId,
+    ArticleT (..),
+    ArticleR,
     Article,
-    findAllArticles,
+    allArticlesQ,
+    allArticlesSortedQ,
+    articlesCountSortedQ,
   )
 where
 
@@ -40,7 +44,6 @@ import qualified Control.Arrow ()
 import qualified Data.Profunctor.Product ()
 import Data.Profunctor.Product.TH (makeAdaptorAndInstance)
 import qualified Data.Time as T
-import qualified Database.PostgreSQL.Simple as PGS
 import qualified Opaleye as OE
 import Persistence.DbConfig (schemaName)
 import Persistence.PersistenceUtils (F)
@@ -141,19 +144,13 @@ articlesTable =
 --------------------
 
 -- | Retrieve all articles.
-selectArticles :: OE.Select ArticleR
-selectArticles = OE.selectTable articlesTable
+allArticlesQ :: OE.Select ArticleR
+allArticlesQ = OE.selectTable articlesTable
 
---------------------
--- DB Access
---------------------
--- Functions in the IO Monad that perform the actual database access.
+-- | Retrieve all articles, sorted by modification date.
+allArticlesSortedQ :: OE.Select ArticleR
+allArticlesSortedQ = OE.orderBy (OE.desc articleCreatedAt) $ OE.selectTable articlesTable
 
--- | Find all articles stored in the DB and return them.
--- Naming convention: DB retrievals are called "find".
-findAllArticles :: PGS.ConnectInfo -> IO [Article]
-findAllArticles connInfo = do
-  conn <- PGS.connect connInfo
-  result <- OE.runSelect conn selectArticles
-  PGS.close conn
-  return result
+-- | Retrieve the first count articles
+articlesCountSortedQ :: Int -> OE.Select ArticleR
+articlesCountSortedQ count = OE.limit count allArticlesSortedQ

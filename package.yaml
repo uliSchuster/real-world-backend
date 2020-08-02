@@ -32,7 +32,6 @@ dependencies:
 - QuickCheck
 - quickcheck-instances
 - quickcheck-text
-- checkers
 - text-latin1
 - profunctors
 - product-profunctors
@@ -42,6 +41,7 @@ dependencies:
 - aeson
 - aeson-pretty
 - errors
+- either
 
 ghc-options:
 - -Wall

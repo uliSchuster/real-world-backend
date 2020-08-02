@@ -7,24 +7,23 @@ module Main
   )
 where
 
+import qualified Debug.Trace as D
 import qualified AppConfig as APC
 import qualified Data.Aeson as J
 import qualified Data.Aeson.Encode.Pretty as JPP
 import qualified Database.PostgreSQL.Simple as PGS
 import qualified Domain.Username as DUN
 import qualified Persistence.DbConfig as DBC
-import qualified Persistence.TagRepository as TRepo
-import qualified Persistence.UserRepository as URepo
+import qualified Presenter.Resources.Article as RA
 import qualified Presenter.Resources.Profile as RP
-import qualified Presenter.Resources.Tags as RT
 import qualified Presenter.Resources.Resource as RR
+import qualified Presenter.Resources.Tags as RT
 import RIO
 import RIO.ByteString.Lazy (toStrict)
 import qualified UI.CommandLine.CLI as CLI
+import qualified Usecases.ArticleUsecases as UCA
 import qualified Usecases.ProfileUsecases as UCP
-import qualified Usecases.TagRepositoryI as TRepoI
 import qualified Usecases.TagUsecases as UCT
-import qualified Usecases.UserRepositoryI as URepoI
 
 -- | Simple error type with error message, to be returned to the user.
 -- This error handling is preliminary. It must be improved to allow for
@@ -51,13 +50,6 @@ dBConnInfo =
         PGS.connectUser = "cond"
       }
 
--- Wire dependencies.
-instance TRepoI.TagRepositoryI APC.AppConfig where
-  readAllTags = TRepo.readAllTags
-
-instance URepoI.UserRepositoryI APC.AppConfig where
-  readUser = URepo.readUser
-
 -- Helper function to run the main application logic.
 -- This function is a very preliminary sketch. The goal later on is to properly
 -- isolate the different IO subsystems (logging, command line, web server, DB).
@@ -82,7 +74,8 @@ conduitApp = do
     CLI.User -> undefined
     (CLI.Profile profileCmd) -> case profileCmd of
       (CLI.ShowProfile uName) -> getProfileResource uName
-    CLI.Article -> undefined
+    (CLI.Article articleCmd) -> case articleCmd of
+      (CLI.GetArticleCmd aQuery) -> getArticleResource aQuery
     CLI.Comment -> undefined
     CLI.Tag -> getTagResource
   let dispResult = displayResult result
@@ -119,7 +112,14 @@ getTagResource :: RIO APC.AppConfig (Either ApplicationError RR.Resource)
 getTagResource = do
   dTags <- UCT.getAllTags
   let tagList = RT.toResource dTags
-  return $ Right (RR.Tags tagList)
+  return $ Right (RR.Tags tagList) -- TODO: Error handling.
+
+getArticleResource :: UCA.ArticleQueryOptions -> RIO APC.AppConfig (Either ApplicationError RR.Resource)
+getArticleResource qOpts = do
+  articlesOrError <- UCA.getArticles qOpts
+  case articlesOrError of
+    Left e -> return $ Left $ NotFound e
+    Right a -> D.trace "Success: Returing article resource." return $ Right $ RR.Articles $ RA.toResource <$> a
 
 displayResult :: (J.ToJSON l, J.ToJSON r) => Either l r -> Utf8Builder
 displayResult res = displayBytesUtf8 . toStrict $ out

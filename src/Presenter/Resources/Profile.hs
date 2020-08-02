@@ -1,3 +1,4 @@
+{-# LANGUAGE DeriveAnyClass #-}
 {-# LANGUAGE DeriveGeneric #-}
 {-# LANGUAGE InstanceSigs #-}
 {-# LANGUAGE MultiParamTypeClasses #-}
@@ -12,6 +13,7 @@
 -- Stability   :  unstable
 -- Lang. Ext.  :  NoImplicitPrelude - Use RIO instead
 --             :  DeriveGeneric - To automatically derive JSON mappers
+--             :  DeriveAnyClass - To include ToJSON in th deriving clause
 --             :  InstanceSigs - Write signatures for class instance functions
 --             :  MultiParamTypeClasses - The Resource class has two parameters
 --
@@ -44,9 +46,7 @@ data Profile
         image :: Maybe Text,
         following :: Bool
       }
-  deriving (Show, Eq, Generic)
-
-instance J.ToJSON Profile
+  deriving (Show, Eq, Generic, J.ToJSON)
 
 instance TR.ToResource DU.User Profile where
   toResource :: DU.User -> Profile

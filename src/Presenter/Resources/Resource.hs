@@ -29,11 +29,14 @@ import RIO
 data Resource
   = Profile RP.Profile
   | Article RA.Article
+  | Articles [RA.Article]
   | Comment RC.Comment
   | Tags RT.TagList
   deriving (Eq, Show, Generic)
 
 instance J.ToJSON Resource where
   toJSON (Profile p) = J.object [("profile", J.toJSON p)]
+  toJSON (Article a) = J.toJSON a
+  toJSON (Articles as) = J.object [("articles", J.toJSON as)]
+  toJSON (Comment c) = J.toJSON c
   toJSON (Tags t) = J.toJSON t
-  toJSON x = J.toJSON x

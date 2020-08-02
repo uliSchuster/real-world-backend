@@ -26,13 +26,15 @@
 -- See https://github.com/tomjaguarpaw/haskell-opaleye and the (outdated)
 -- tutorial here: https://www.haskelltutorials.com/opaleye/index.html
 module Persistence.Tags
-  ( TagT (..),
-    TagIdT (..),
+  ( TagIdT (..),
     TagIdField,
     OptionalTagIdField,
     TagId,
     pTagId,
+    TagT (..),
+    TagR,
     Tag,
+    allTagsQ,
     findAllTags,
   )
 where
@@ -50,7 +52,7 @@ import RIO
 -- Dedicated Tag ID
 --------------------
 
-newtype TagIdT a = TagId {getTagIdT :: a}
+newtype TagIdT a = TagId {getTagId :: a}
   deriving (Eq, Show, Display)
 
 $(makeAdaptorAndInstance "pTagId" ''TagIdT)
@@ -67,7 +69,7 @@ type TagId = TagIdT Int64
 
 -- | Polymorphic type for the "tags" table.
 data TagT tKey tName
-  = TagD
+  = Tag
       { tagKey :: tKey,
         tagName :: tName
       }
@@ -108,7 +110,7 @@ tagsTable =
     schemaName
     "tags"
     ( pTag
-        TagD
+        Tag
           { tagKey = pTagId (TagId (OE.tableField "id")),
             tagName = OE.tableField "tagname"
           }
@@ -119,8 +121,8 @@ tagsTable =
 --------------------
 
 -- | Retrieve all comments.
-selectTagss :: OE.Select TagR
-selectTagss = OE.selectTable tagsTable
+allTagsQ :: OE.Select TagR
+allTagsQ = OE.selectTable tagsTable
 
 --------------------
 -- DB Access
@@ -132,6 +134,6 @@ selectTagss = OE.selectTable tagsTable
 findAllTags :: PGS.ConnectInfo -> IO [Tag]
 findAllTags connInfo = do
   conn <- PGS.connect connInfo
-  result <- OE.runSelect conn selectTagss
+  result <- OE.runSelect conn allTagsQ
   PGS.close conn
   return result

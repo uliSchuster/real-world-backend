@@ -36,6 +36,6 @@ readAllTags = do
 -- conform to the domain restrictions. For now, we do it in the simples
 -- possible way: return an error message.
 toDomain :: PT.Tag -> Either Text DT.Tag
-toDomain (PT.TagD (PT.TagId dbId) pt) = case DT.mkTag pt of
+toDomain (PT.Tag (PT.TagId dbId) pt) = case DT.mkTag pt of
   Just tag -> Right tag
   Nothing -> Left $ "The tag " <> pt <> " at database ID " <> tshow dbId <> " is invalid."

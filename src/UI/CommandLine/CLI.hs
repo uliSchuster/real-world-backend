@@ -19,27 +19,35 @@
 module UI.CommandLine.CLI
   ( Command (..),
     ProfileCmd (..),
+    ArticleCmd (..),
     parseCmdLine,
+    parseStrings
   )
 where
 
 import qualified Control.Error.Util as EUTL
+import qualified Domain.Tag as DT
 import qualified Domain.Username as DUN
 import qualified Options.Applicative as O
 import RIO
 import qualified RIO.Text as T
+import qualified Usecases.ArticleUsecases as UA
 
 -- | All possible commands the user can input via the command line.
 data Command
   = User
   | Profile ProfileCmd
-  | Article
+  | Article ArticleCmd
   | Comment
   | Tag
   deriving (Eq, Show)
 
 newtype ProfileCmd
   = ShowProfile DUN.Username
+  deriving (Eq, Show)
+
+newtype ArticleCmd
+  = GetArticleCmd UA.ArticleQueryOptions
   deriving (Eq, Show)
 
 --- | FollowUser Text
@@ -49,6 +57,10 @@ newtype ProfileCmd
 -- the user's instruction for the application what to do.
 parseCmdLine :: IO Command
 parseCmdLine = O.execParser cmdLineParserSpec
+
+-- | For testing the command line parser in apure setting.
+parseStrings :: [String] -> O.ParserResult Command
+parseStrings = O.execParserPure O.defaultPrefs cmdLineParserSpec
 
 info' :: O.Parser a -> String -> O.ParserInfo a
 info' p desc =
@@ -116,7 +128,57 @@ profileCmdParser =
         )
 
 articleCmdParser :: O.Parser Command
-articleCmdParser = undefined
+articleCmdParser =
+  Article
+    <$> ( GetArticleCmd
+            <$> ( UA.ArticleQueryOptions
+                    <$> O.option
+                      O.auto
+                      ( O.long "limit"
+                          <> O.short 'l'
+                          <> O.metavar "<limit>"
+                          <> O.value 20
+                          <> O.help "Maximum number of articles to show."
+                      )
+                    <*> O.option
+                      O.auto
+                      ( O.long "offset"
+                          <> O.short 'o'
+                          <> O.metavar "<offset>"
+                          <> O.value 0
+                          <> O.help "Offset from where on to show articles, ordered by date."
+                      )
+                    <*> ( UA.ArticleFilter
+                            <$> O.optional
+                              ( O.option
+                                  usernameReader
+                                  ( O.long "author"
+                                      <> O.short 'a'
+                                      <> O.metavar "<username>"
+                                      <> O.help "Only show articles by the given author."
+                                  )
+                              )
+                            <*> O.optional
+                              ( O.option
+                                  usernameReader
+                                  ( O.long "favoritedBy"
+                                      <> O.short 'f'
+                                      <> O.metavar "<username>"
+                                      <> O.help "Only show articles favorited by the given user."
+                                  )
+                              )
+                            <*> O.optional
+                              ( O.option
+                                  tagReader
+                                  ( O.long "tag"
+                                      <> O.short 't'
+                                      <> O.metavar "<tagname>"
+                                      <> O.help "Only show articles tagged with the given tag."
+                                  )
+                              )
+                        )
+                )
+        )
 
 commentCmdParser :: O.Parser Command
 commentCmdParser = undefined
@@ -129,3 +191,7 @@ tagCmdParser = pure Tag
 usernameReader :: O.ReadM DUN.Username
 usernameReader = O.eitherReader $
   \s -> EUTL.note ("Not a valid username: " ++ s) (DUN.mkUsername $ T.pack s)
+
+tagReader :: O.ReadM DT.Tag
+tagReader = O.eitherReader $
+  \s -> EUTL.note ("Not a valid tagname: " ++ s) (DT.mkTag $ T.pack s)

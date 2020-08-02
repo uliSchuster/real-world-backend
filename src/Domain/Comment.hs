@@ -19,7 +19,6 @@ module Domain.Comment
 where
 
 import qualified Data.Time as DT
-import Domain.Article
 import Domain.Content
 import Domain.User
 import RIO
