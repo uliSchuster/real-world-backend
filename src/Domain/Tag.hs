@@ -19,16 +19,16 @@
 -- In addition, the title text is canonicalized: No leading or trailing
 -- whitespace, exactly one whitespace character between words.
 module Domain.Tag
-  ( minTagLength,
-    maxTagLength,
-    Tag (Tag),
-    getTag,
-    mkTag,
+  ( minTagLength
+  , maxTagLength
+  , Tag(Tag)
+  , getTag
+  , mkTag
   )
 where
 
-import Domain.ValidationUtils
-import RIO
+import           Domain.ValidationUtils
+import           RIO
 
 minTagLength :: Int
 minTagLength = 3

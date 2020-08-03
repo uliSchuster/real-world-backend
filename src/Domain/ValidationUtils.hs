@@ -13,18 +13,19 @@
 --
 -- Functions to normalize and validate text input.
 module Domain.ValidationUtils
-  ( toCanonicText,
-    valNonEmpty,
-    valLatin1Letters,
-    valLatin1PrintableNonSpace,
-    valInitialLatin1Letter,
-    valLength,
+  ( toCanonicText
+  , valNonEmpty
+  , valLatin1Letters
+  , valLatin1LettersNoWhitespace
+  , valLatin1PrintableNonSpace
+  , valInitialLatin1Letter
+  , valLength
   )
 where
 
-import RIO
-import qualified RIO.Text as T
-import qualified Text.Latin1 as TL1
+import           RIO
+import qualified RIO.Text                      as T
+import qualified Text.Latin1                   as TL1
 
 -- | Remove leading and trailing whitespace. Ensure that words in the string are
 -- separated by exactly one space each.
@@ -33,37 +34,37 @@ toCanonicText = T.intercalate " " . T.words . T.strip
 
 -- | Ensure that the input text is not the empty string.
 valNonEmpty :: Text -> Maybe Text
-valNonEmpty t
-  | T.null t = Nothing
-  | otherwise = Just t
+valNonEmpty t | T.null t  = Nothing
+              | otherwise = Just t
 
 -- | Ensure that the input text contains only alphanumeric and whitespace
 -- Latin-1 characters.
 valLatin1Letters :: Text -> Maybe Text
-valLatin1Letters t
-  | isValid t = Just t
-  | otherwise = Nothing
-  where
-    isValid = T.all (\s -> TL1.isAlphaNum s || TL1.isWhiteSpace s)
+valLatin1Letters t | isValid t = Just t
+                   | otherwise = Nothing
+  where isValid = T.all (\s -> TL1.isAlphaNum s || TL1.isWhiteSpace s)
+
+-- | Ensure that the input text contains only alphanumeric Latin-1 characters 
+-- but not whitespace.
+valLatin1LettersNoWhitespace :: Text -> Maybe Text
+valLatin1LettersNoWhitespace t | isValid t = Just t
+                               | otherwise = Nothing
+  where isValid = T.all TL1.isAlphaNum
 
 -- | Ensure that the input text contains only printable Latin-1 characters, but
 -- no whitespace.
 valLatin1PrintableNonSpace :: Text -> Maybe Text
-valLatin1PrintableNonSpace t
-  | isValid t = Just t
-  | otherwise = Nothing
-  where
-    isValid = T.all (\s -> TL1.isPrintable s && not (TL1.isWhiteSpace s))
+valLatin1PrintableNonSpace t | isValid t = Just t
+                             | otherwise = Nothing
+  where isValid = T.all (\s -> TL1.isPrintable s && not (TL1.isWhiteSpace s))
 
 -- | Ensure that the first character of the input string is alphanumeric.
 valInitialLatin1Letter :: Text -> Maybe Text
-valInitialLatin1Letter t
-  | TL1.isAlpha . flip T.index 0 $ t = Just t
-  | otherwise = Nothing
+valInitialLatin1Letter t | TL1.isAlpha . flip T.index 0 $ t = Just t
+                         | otherwise                        = Nothing
 
 -- | Ensure that the input text satisfies the constraints on its minimum and
 -- maximum length.
 valLength :: Int -> Int -> Text -> Maybe Text
-valLength minL maxL t
-  | T.length t >= minL && T.length t <= maxL = Just t
-  | otherwise = Nothing
+valLength minL maxL t | T.length t >= minL && T.length t <= maxL = Just t
+                      | otherwise = Nothing

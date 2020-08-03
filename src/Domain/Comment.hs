@@ -11,18 +11,18 @@
 --
 -- Domain data types and business logic to describe a blog comment.
 module Domain.Comment
-  ( Comment (..),
+  ( Comment(..)
+  ,
     -- Reexport for convenience
-    module Domain.Content,
-    module Domain.User,
+    module Domain.Content
+  , module Domain.User
   )
 where
 
-import qualified Data.Time as DT
-import Domain.Article
-import Domain.Content
-import Domain.User
-import RIO
+import qualified Data.Time                     as DT
+import           Domain.Content
+import           Domain.User
+import           RIO
 
 data Comment
   = Comment

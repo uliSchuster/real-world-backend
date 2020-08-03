@@ -3,26 +3,45 @@
 {-# LANGUAGE NoImplicitPrelude #-}
 
 module TestUtils
-  ( Utf8Text1 (..),
-    latin1Chars,
-    PrintableLatin1 (..),
-    PrintableText (..),
-    alphaChars,
-    AlphaLatin1 (..),
-    alphaNumChars,
-    AlphaNumLatin1 (..),
-    AlphaNumText (..),
-    AlphaNumSentence (..),
-    punctuationChars,
-    PunctuationLatin1,
+  ( SafeChar(..)
+  , SafeText(..)
+  , Utf8Text1(..)
+  , latin1Chars
+  , PrintableLatin1(..)
+  , PrintableText(..)
+  , alphaChars
+  , AlphaLatin1(..)
+  , alphaNumChars
+  , AlphaNumLatin1(..)
+  , AlphaNumText(..)
+  , AlphaNumSentence(..)
+  , punctuationChars
+  , PunctuationLatin1
   )
 where
 
-import RIO
-import qualified RIO.Text as T
-import Test.QuickCheck
-import qualified Test.QuickCheck.Instances.List as QL
-import qualified Test.QuickCheck.Utf8 as QCU
+import           RIO
+import qualified RIO.Text                      as T
+import           Test.QuickCheck
+import qualified Test.QuickCheck.Instances.List
+                                               as QL
+import qualified Test.QuickCheck.Utf8          as QCU
+
+-- English ASCII alphanum
+newtype SafeChar = SafeChar {getSafeChar :: Char}
+  deriving (Eq, Show)
+
+instance Arbitrary SafeChar where
+  arbitrary =
+    SafeChar <$> elements (['a' .. 'z'] <> ['A' .. 'Z'] <> ['0' .. '9'])
+
+newtype SafeText = SafeText {getSafeText :: Text} deriving (Eq, Show)
+
+instance Arbitrary SafeText where
+  arbitrary = do
+    sc <- listOf1 (arbitrary :: Gen SafeChar)
+    let ss = getSafeChar <$> sc
+    return $ SafeText (T.pack ss)
 
 -- A nonempty UTF8 String
 newtype Utf8Text1 = Utf8Text1 {getUtf8Text1 :: Text}
@@ -33,7 +52,12 @@ instance Arbitrary Utf8Text1 where
 
 -- A list of most (all?) printable Latin-1 characters.
 latin1Chars :: String
-latin1Chars = ['a' .. 'z'] <> ['A' .. 'Z'] <> ['0' .. '9'] <> "\"!#$%&'()*+,-./:;<=>?[\\]^_`{|}~" <> "¡¢£¤¥¦§¨©ª«¬®¯°±²³´µ¶·¸¹º»¼½¾¿ÀÁÂÃÄÅÆÇÈÉÊËÌÍÎÏÐÑÒÓÔÕÖ×ØÙÚÛÜÝÞßàáâãäåæçèéêëìíîïðñòóôõö÷øùúûüýþÿ"
+latin1Chars =
+  ['a' .. 'z']
+    <> ['A' .. 'Z']
+    <> ['0' .. '9']
+    <> "\"!#$%&'()*+,-./:;<=>?[\\]^_`{|}~"
+    <> "¡¢£¤¥¦§¨©ª«¬®¯°±²³´µ¶·¸¹º»¼½¾¿ÀÁÂÃÄÅÆÇÈÉÊËÌÍÎÏÐÑÒÓÔÕÖ×ØÙÚÛÜÝÞßàáâãäåæçèéêëìíîïðñòóôõö÷øùúûüýþÿ"
 
 -- Wrapper for a printable Latin-1 character, for use in QuickCheck properties.
 -- The wrapper is necessary to define a separate `Arbitrary` instance.
@@ -56,7 +80,10 @@ instance Arbitrary PrintableText where
 
 -- A list of most (all?) alphabetic Latin-1 characters.
 alphaChars :: String
-alphaChars = ['a' .. 'z'] <> ['A' .. 'Z'] <> "ÀÁÂÃÄÅÆÇÈÉÊËÌÍÎÏÐÑÒÓÔÕÖØÙÚÛÜÝÞßàáâãäåæçèéêëìíîïðñòóôõöøùúûüýþÿ"
+alphaChars =
+  ['a' .. 'z']
+    <> ['A' .. 'Z']
+    <> "ÀÁÂÃÄÅÆÇÈÉÊËÌÍÎÏÐÑÒÓÔÕÖØÙÚÛÜÝÞßàáâãäåæçèéêëìíîïðñòóôõöøùúûüýþÿ"
 
 -- Wrapper for an alphabetic Latin-1 character, for use in QuickCheck
 -- properties, again wrapped to create an `Arbitrary` instance.
@@ -68,7 +95,11 @@ instance Arbitrary AlphaLatin1 where
 
 -- A list of most (all?) alphanumeric Latin-1 characters.
 alphaNumChars :: String
-alphaNumChars = ['a' .. 'z'] <> ['A' .. 'Z'] <> ['0' .. '9'] <> "ÀÁÂÃÄÅÆÇÈÉÊËÌÍÎÏÐÑÒÓÔÕÖØÙÚÛÜÝÞßàáâãäåæçèéêëìíîïðñòóôõöøùúûüýþÿ"
+alphaNumChars =
+  ['a' .. 'z']
+    <> ['A' .. 'Z']
+    <> ['0' .. '9']
+    <> "ÀÁÂÃÄÅÆÇÈÉÊËÌÍÎÏÐÑÒÓÔÕÖØÙÚÛÜÝÞßàáâãäåæçèéêëìíîïðñòóôõöøùúûüýþÿ"
 
 -- Wrapper for an alphanumeric Latin-1 character, for use in QuickCheck
 -- properties, again wrapped to create an `Arbitrary` instance.
@@ -121,13 +152,14 @@ instance Arbitrary Latin1Phrase where
   arbitrary = do
     phrases <- listOf1 (arbitrary :: Gen AlphaNumSentence)
     let phraseList = getAlphaNumSentence <$> phrases
-    punctuation <- QL.setLength (length phraseList) (arbitrary :: Gen PunctuationLatin1)
+    punctuation <- QL.setLength (length phraseList)
+                                (arbitrary :: Gen PunctuationLatin1)
     let punctList = T.singleton . getPunctuationLatin1 <$> punctuation
-    let phrase = merge phraseList punctList
+    let phrase    = merge phraseList punctList
     return $ Latin1Phrase (T.unwords phrase)
 
 -- | Lazily merge two lists.
 -- See: https://stackoverflow.com/a/3987188/4090111
 merge :: [a] -> [a] -> [a]
-merge [] ys = ys
+merge []       ys = ys
 merge (x : xs) ys = x : merge ys xs

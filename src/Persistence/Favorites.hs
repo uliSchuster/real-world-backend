@@ -19,26 +19,27 @@
 --             :  TemplateHaskell - Lets Opaleye generate the mapping function
 --             :  NoImplicitPrelude - Use RIO instead
 --             :  GeneralizedNewtypeDeriving - Simplify newtype usage
+--             :  OverloadedStrings - Use Text literals
 --
 -- Database interface for the "favorites" relation, using the Opaleye mapper and
 -- typesafe query and data manipulation DSL.
 -- See https://github.com/tomjaguarpaw/haskell-opaleye and the (outdated)
 -- tutorial here: https://www.haskelltutorials.com/opaleye/index.html
 module Persistence.Favorites
-  ( Favorite,
-    getAllFavorites,
+  ( Favorite
+  , findAllFavorites
   )
 where
 
-import qualified Control.Arrow ()
-import qualified Data.Profunctor.Product ()
-import Data.Profunctor.Product.TH (makeAdaptorAndInstance)
-import qualified Database.PostgreSQL.Simple as PGS
-import qualified Opaleye as OE
-import qualified Persistence.Articles as PA
-import Persistence.DbConfig (schemaName)
-import qualified Persistence.Users as PU
-import RIO
+import qualified Control.Arrow                  ( )
+import qualified Data.Profunctor.Product        ( )
+import           Data.Profunctor.Product.TH     ( makeAdaptorAndInstance )
+import qualified Database.PostgreSQL.Simple    as PGS
+import qualified Opaleye                       as OE
+import qualified Persistence.Articles          as PA
+import           Persistence.DbConfig           ( schemaName )
+import qualified Persistence.Users             as PU
+import           RIO
 
 --------------------
 -- Table Setup
@@ -53,10 +54,9 @@ data FavoriteT userKey articleKey
   deriving (Show)
 
 -- | Record that Opaleye uses to write to the "favorites" table.
-type FavoriteW =
-  FavoriteT
-    PU.UserIdField -- reader FK
-    PA.ArticleIdField -- favorite FK
+type FavoriteW
+  = FavoriteT PU.UserIdField -- reader FK
+                             PA.ArticleIdField -- favorite FK
 
 -- | Record that Opaleye reads from the "favorites" table.
 type FavoriteR = FavoriteW
@@ -64,10 +64,9 @@ type FavoriteR = FavoriteW
 -- | Typesafe Haskell record to interface with the application. Under the hood,
 -- Opaleye converts between this application record and the above PostgreSQL
 -- read and write records.
-type Favorite =
-  FavoriteT
-    PU.UserId -- reader
-    PA.ArticleId -- favorite
+type Favorite
+  = FavoriteT PU.UserId -- reader
+                        PA.ArticleId -- favorite
 
 instance Display Favorite where
   display = displayShow
@@ -80,16 +79,14 @@ $(makeAdaptorAndInstance "pFavorite" ''FavoriteT)
 -- PostgreSQL records and the Haskell record. For each record, the function
 -- specifies the name of the table column and the constraints.
 favoritesTable :: OE.Table FavoriteW FavoriteR
-favoritesTable =
-  OE.tableWithSchema
-    schemaName
-    "favorites"
-    ( pFavorite
-        Favorite
-          { readerFk = PU.pUserId (PU.UserId (OE.tableField "reader_fk")),
-            articleFk = PA.pArticleId (PA.ArticleId (OE.tableField "favorite_fk"))
-          }
-    )
+favoritesTable = OE.tableWithSchema
+  schemaName
+  "favorites"
+  (pFavorite Favorite
+    { readerFk  = PU.pUserId (PU.UserId (OE.tableField "reader_fk"))
+    , articleFk = PA.pArticleId (PA.ArticleId (OE.tableField "favorite_fk"))
+    }
+  )
 
 --------------------
 -- Queries
@@ -103,9 +100,11 @@ selectFavorites = OE.selectTable favoritesTable
 -- DB Access
 --------------------
 
-getAllFavorites :: PGS.ConnectInfo -> IO [Favorite]
-getAllFavorites connInfo = do
-  conn <- PGS.connect connInfo
+-- | Find all favorites stored in the DB and return them.
+-- Naming convention: DB retrievals are called "find".
+findAllFavorites :: PGS.ConnectInfo -> IO [Favorite]
+findAllFavorites connInfo = do
+  conn   <- PGS.connect connInfo
   result <- OE.runSelect conn selectFavorites
   PGS.close conn
   return result

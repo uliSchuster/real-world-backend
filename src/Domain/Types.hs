@@ -9,16 +9,15 @@
 -- Stability   :  unstable
 -- Lang. Ext.  :  NoImplicitPrelude - Use RIO instead
 --
--- Utility functions to simplify using Opaleye and PostfreSQL-simple
-module Persistence.PersistenceUtils
-  ( F
-  , FNull
+-- Helper functions for domain types from third-party libraries
+module Domain.Types
+  ( mkEmail
   )
 where
 
-import qualified Opaleye                       as OE
+import           RIO
+import qualified Text.Email.Validate           as Email
 
--- | Type synonyms for convenience
-type F field = OE.Field field -- ^ Opaleye type for a non-nullable DB field.
-
-type FNull field = OE.FieldNullable field   -- ^ Nullable DB field
+-- | Parse a text string into an RFC-compliant email-address.
+mkEmail :: Text -> Maybe Email.EmailAddress
+mkEmail = Email.emailAddress . encodeUtf8
