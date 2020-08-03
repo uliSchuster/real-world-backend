@@ -19,15 +19,16 @@
 module UI.CommandLine.CLI
   ( Command(..)
   , ProfileCmd(..)
-  , ArticleCmd(..)
+  , ArticlesCmd(..)
   , parseCmdLine
   , parseStrings
   )
 where
 
 import qualified Control.Error.Util            as EUTL
-import qualified Domain.Tag                    as DT
+import qualified Domain.Tag                    as DTG
 import qualified Domain.Username               as DUN
+import qualified Domain.Title                  as DT
 import qualified Options.Applicative           as O
 import           RIO
 import qualified RIO.Text                      as T
@@ -37,7 +38,8 @@ import qualified Usecases.ArticleUsecases      as UA
 data Command
   = User
   | Profile ProfileCmd
-  | Article ArticleCmd
+  | Articles ArticlesCmd
+  | Article DT.Slug
   | Comment
   | Tag
   deriving (Eq, Show)
@@ -46,8 +48,8 @@ newtype ProfileCmd
   = ShowProfile DUN.Username
   deriving (Eq, Show)
 
-newtype ArticleCmd
-  = GetArticleCmd UA.ArticleQueryOptions
+newtype ArticlesCmd
+  = GetArticlesCmd UA.ArticleQueryOptions
   deriving (Eq, Show)
 
 --- | FollowUser Text
@@ -84,9 +86,15 @@ cmdLineParserSpec = info' cmdLineParser "Blogging made too simple."
                  (O.progDesc "Inspect and modify a user profile.")
          )
     <> O.command
-         "article"
-         (O.info articleCmdParser
+         "articles"
+         (O.info articlesCmdParser
                  (O.progDesc "Publish, update and follow articles.")
+         )
+    <> O.command
+         "article"
+         (O.info
+           articleCmdParser
+           (O.progDesc "Retrieve a specific article, identified by its slug.")
          )
     <> O.command
          "comment"
@@ -113,10 +121,10 @@ profileCmdParser =
           (O.metavar "<username>" <> O.help "Username of the profile to show.")
         )
 
-articleCmdParser :: O.Parser Command
-articleCmdParser =
-  Article
-    <$> (   GetArticleCmd
+articlesCmdParser :: O.Parser Command
+articlesCmdParser =
+  Articles
+    <$> (   GetArticlesCmd
         <$> (   UA.ArticleQueryOptions
             <$> O.option
                   O.auto
@@ -170,6 +178,12 @@ articleCmdParser =
             )
         )
 
+
+articleCmdParser :: O.Parser Command
+articleCmdParser = Article <$> O.argument
+  slugReader
+  (O.metavar "<slug>" <> O.help "Slug of the article to show.")
+
 commentCmdParser :: O.Parser Command
 commentCmdParser = undefined
 
@@ -182,6 +196,10 @@ usernameReader :: O.ReadM DUN.Username
 usernameReader = O.eitherReader $ \s ->
   EUTL.note ("Not a valid username: " ++ s) (DUN.mkUsername $ T.pack s)
 
-tagReader :: O.ReadM DT.Tag
+tagReader :: O.ReadM DTG.Tag
 tagReader = O.eitherReader
-  $ \s -> EUTL.note ("Not a valid tagname: " ++ s) (DT.mkTag $ T.pack s)
+  $ \s -> EUTL.note ("Not a valid tagname: " ++ s) (DTG.mkTag $ T.pack s)
+
+slugReader :: O.ReadM DT.Slug
+slugReader = O.eitherReader
+  $ \s -> EUTL.note ("Not a valid slug: " ++ s) (DT.mkSlugFromText $ T.pack s)

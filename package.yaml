@@ -51,6 +51,7 @@ ghc-options:
 - -Wincomplete-uni-patterns
 - -Wpartial-fields
 - -Wredundant-constraints
+- -fwarn-tabs
 
 library:
   source-dirs: src

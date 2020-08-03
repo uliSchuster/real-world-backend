@@ -16,6 +16,7 @@ module Domain.ValidationUtils
   ( toCanonicText
   , valNonEmpty
   , valLatin1Letters
+  , valLatin1LettersNoWhitespace
   , valLatin1PrintableNonSpace
   , valInitialLatin1Letter
   , valLength
@@ -42,6 +43,13 @@ valLatin1Letters :: Text -> Maybe Text
 valLatin1Letters t | isValid t = Just t
                    | otherwise = Nothing
   where isValid = T.all (\s -> TL1.isAlphaNum s || TL1.isWhiteSpace s)
+
+-- | Ensure that the input text contains only alphanumeric Latin-1 characters 
+-- but not whitespace.
+valLatin1LettersNoWhitespace :: Text -> Maybe Text
+valLatin1LettersNoWhitespace t | isValid t = Just t
+                               | otherwise = Nothing
+  where isValid = T.all TL1.isAlphaNum
 
 -- | Ensure that the input text contains only printable Latin-1 characters, but
 -- no whitespace.

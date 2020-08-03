@@ -114,7 +114,7 @@ tagsTable = OE.tableWithSchema
 -- Queries
 --------------------
 
--- | Retrieve all comments.
+-- | Retrieve all tags.
 allTagsQ :: OE.Select TagR
 allTagsQ = OE.selectTable tagsTable
 

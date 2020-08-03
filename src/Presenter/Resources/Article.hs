@@ -30,7 +30,6 @@ import qualified Presenter.Resources.Profile   as RP
 import qualified Presenter.Resources.ToResource
                                                as TR
 import qualified Domain.Article                as DA
-import qualified Domain.Slug                   as DS
 import qualified Domain.Title                  as DT
 import qualified Domain.Content                as DC
 import qualified Domain.Tag                    as DT
@@ -75,7 +74,7 @@ data Article
 instance TR.ToResource DA.Article Article where
   toResource :: DA.Article -> Article
   toResource da = Article
-    { slug           = DS.getSlug . DS.mkSlug . DA.articleTitle $ da
+    { slug           = DT.getSlug . DT.mkSlug . DA.articleTitle $ da
     , title          = DT.getTitle . DA.articleTitle $ da
     , description    = DC.getDescription . DA.articleDescription $ da
     , body           = DC.getBody . DA.articleBody $ da

@@ -13,6 +13,7 @@ import qualified Data.Aeson                    as J
 import qualified Data.Aeson.Encode.Pretty      as JPP
 import qualified Database.PostgreSQL.Simple    as PGS
 import qualified Domain.Username               as DUN
+import qualified Domain.Title                  as DT
 import qualified Persistence.DbConfig          as DBC
 import qualified Presenter.Resources.Article   as RA
 import qualified Presenter.Resources.Profile   as RP
@@ -67,8 +68,9 @@ conduitApp = do
     CLI.User                 -> undefined
     (CLI.Profile profileCmd) -> case profileCmd of
       (CLI.ShowProfile uName) -> getProfileResource uName
-    (CLI.Article articleCmd) -> case articleCmd of
-      (CLI.GetArticleCmd aQuery) -> getArticleResource aQuery
+    (CLI.Article  slug       ) -> getArticleResource slug
+    (CLI.Articles articlesCmd) -> case articlesCmd of
+      (CLI.GetArticlesCmd aQuery) -> getArticleResources aQuery
     CLI.Comment -> undefined
     CLI.Tag     -> getTagResource
   let dispResult = displayResult result
@@ -109,18 +111,21 @@ getTagResource = do
   return $ Right (RR.Tags tagList) -- TODO: Error handling.
 
 getArticleResource
+  :: DT.Slug -> RIO APC.AppConfig (Either ApplicationError RR.Resource)
+getArticleResource slug = do
+  articleOrError <- UCA.getArticle slug
+  case articleOrError of
+    Left  e -> return $ Left $ NotFound e
+    Right a -> return $ Right (RR.Article $ RA.toResource a)
+
+getArticleResources
   :: UCA.ArticleQueryOptions
   -> RIO APC.AppConfig (Either ApplicationError RR.Resource)
-getArticleResource qOpts = do
+getArticleResources qOpts = do
   articlesOrError <- UCA.getArticles qOpts
   case articlesOrError of
-    Left e -> return $ Left $ NotFound e
-    Right a ->
-      D.trace "Success: Returing article resource." return
-        $   Right
-        $   RR.Articles
-        $   RA.toResource
-        <$> a
+    Left  e -> return $ Left $ NotFound e
+    Right a -> return $ Right $ RR.Articles $ RA.toResource <$> a
 
 displayResult :: (J.ToJSON l, J.ToJSON r) => Either l r -> Utf8Builder
 displayResult res = displayBytesUtf8 . toStrict $ out

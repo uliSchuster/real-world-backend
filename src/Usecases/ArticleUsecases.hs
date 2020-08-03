@@ -20,12 +20,14 @@ module Usecases.ArticleUsecases
   ( ArticleQueryOptions(..)
   , ArticleFilter(..)
   , getArticles
+  , getArticle
   )
 where
 
 import qualified Domain.Article                as DA
-import qualified Domain.Tag                    as DT
+import qualified Domain.Tag                    as DTG
 import qualified Domain.Username               as DU
+import qualified Domain.Title                  as DT
 import           RIO
 import           Usecases.ArticleRepositoryI
 
@@ -33,7 +35,7 @@ data ArticleFilter
   = ArticleFilter
       { author :: !(Maybe DU.Username),
         favoritedBy :: !(Maybe DU.Username),
-        tag :: !(Maybe DT.Tag)
+        tag :: !(Maybe DTG.Tag)
       }
   deriving (Eq, Show)
 
@@ -53,3 +55,8 @@ getArticles
   -> RIO cfg (Either Text [DA.Article])
 getArticles ArticleQueryOptions { articleLimit = limit, articleOffset = offset }
   = readArticles limit offset
+
+-- | Get a specific article identified by its slug.
+getArticle
+  :: ArticleRepositoryI cfg => DT.Slug -> RIO cfg (Either Text DA.Article)
+getArticle = readArticle

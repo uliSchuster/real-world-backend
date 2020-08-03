@@ -19,6 +19,7 @@
 module Persistence.ArticleRepository
   ( maxReadCount
   , readArticles
+  , readArticle
   , toDomain
   , findAllArticlesSortedByModification
   , findArticlesCountSortedByModification
@@ -26,7 +27,9 @@ module Persistence.ArticleRepository
   )
 where
 
-import           Control.Arrow                  ( returnA )
+import           Control.Arrow                  ( returnA
+                                                , arr
+                                                )
 import           Control.Error.Util             ( note )
 import qualified Data.Either.Validation        as VAL
 import qualified Database.PostgreSQL.Simple    as PGS
@@ -38,13 +41,16 @@ import qualified Domain.User                   as DU
 import qualified Opaleye                       as OE
 import           Opaleye                        ( (.==)
                                                 , (.===)
+                                                , (.++)
                                                 )
 import qualified Persistence.Articles          as PA
 import qualified Persistence.DbConfig          as DBC
 import qualified Persistence.TaggedArticles    as PTA
 import qualified Persistence.Tags              as PT
 import qualified Persistence.Users             as PU
+import           Persistence.PersistenceUtils
 import           RIO
+import           RIO.List                       ( headMaybe )
 
 
 -- | Maximum number of articles that can be read at a time.
@@ -73,6 +79,21 @@ readArticles limit offset = do
     $   VAL.eitherToValidation
     .   toDomain
     <$> articlesAuthorsTags
+
+-- | Read a single article identified by its slug from the repository.
+-- The slug uniquely identifies an article.
+readArticle
+  :: (DBC.HasDbConnInfo cfg)
+  => DT.Slug -- ^ Slug that uniquely identifies this article.
+  -> RIO cfg (Either Text DA.Article)
+readArticle slug = do
+  connInfo       <- view DBC.connInfoL
+  articleOrMaybe <- liftIO $ findArticleBySlug connInfo slug
+  case articleOrMaybe of
+    Nothing ->
+      return $ Left ("No article with slug " <> DT.getSlug slug <> " found.")
+    Just article -> return $ toDomain article
+
 
 -- | Convert records retrieved from the database into an `DA.Article` domein
 -- value.
@@ -144,6 +165,24 @@ findLimitedSortedArticlesWithAuthorsAndTags connInfo limit = do
   PGS.close conn
   return result
 
+findArticleBySlug
+  :: PGS.ConnectInfo
+  -> DT.Slug
+  -> IO (Maybe (PA.Article, PU.User, PTA.TagArray))
+findArticleBySlug connInfo slug = do
+  conn   <- PGS.connect connInfo
+  result <-
+    OE.runSelect
+      conn
+      (   arr (const (OE.sqlStrictText rTitle))
+      >>> articlesWithAuthorAndTagsByTitleQ
+      ) :: IO [(PA.Article, PU.User, PTA.TagArray)]
+  PGS.close conn
+  return $ headMaybe result
+ where
+  titleFromSlug = DT.reconstructTitleFromSlug slug
+  rTitle        = DT.getTitle titleFromSlug
+
 --------------------
 -- Complex Queries
 --------------------
@@ -183,3 +222,11 @@ articlesWithAuthorsAndTagsCountSortedQ
   :: Int -> OE.Select (PA.ArticleR, PU.UserR, PTA.TagArrayF)
 articlesWithAuthorsAndTagsCountSortedQ count =
   OE.limit count allArticlesWithAuthorsAndTagsSortedQ
+
+-- | Query for articles whose title starts with the title provided as paramter.
+-- Case insensitive search.
+articlesWithAuthorAndTagsByTitleQ :: OE.SelectArr (F OE.SqlText) (PA.ArticleR, PU.UserR, PTA.TagArrayF)
+articlesWithAuthorAndTagsByTitleQ = proc title -> do
+  (art, auth, tags) <- articlesWithAuthorsAndTagsQ -< ()
+  OE.restrict -< OE.ilike (PA.articleTitle art) (title .++ OE.sqlStrictText "%")
+  returnA -< (art, auth, tags)
