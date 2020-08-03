@@ -34,6 +34,10 @@ dependencies:
 - quickcheck-text
 - checkers
 - text-latin1
+- profunctors
+- product-profunctors
+- postgresql-simple
+- opaleye
 
 ghc-options:
 - -Wall
