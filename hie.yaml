@@ -1,0 +1,9 @@
+cradle:
+  stack:
+    - path: "./src/"
+      component: "real-world-server:lib"
+    - path: "./app/Main.hs"
+      component: "real-world-server:exe:real-world-server-exe"
+    - path: "./test/"
+      component: "real-world-server:test:real-world-server-test"
+  none: ".Setup.hs"

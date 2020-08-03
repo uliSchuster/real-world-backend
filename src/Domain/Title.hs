@@ -50,4 +50,7 @@ pattern Title t <- Title_ t
 
 -- Smart constructor to guarantee a well-formed title string.
 mkTitle :: Text -> Maybe Title
-mkTitle t = Title_ . toCanonicText <$> valLatin1Letters t
+mkTitle t = do
+  vl <- valLatin1Letters t
+  vn <- valNonEmpty vl
+  return $ (Title_ . toCanonicText) vn

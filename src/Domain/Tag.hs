@@ -19,7 +19,9 @@
 -- In addition, the title text is canonicalized: No leading or trailing
 -- whitespace, exactly one whitespace character between words.
 module Domain.Tag
-  ( Tag (Tag),
+  ( minTagLength,
+    maxTagLength,
+    Tag (Tag),
     getTag,
     mkTag,
   )

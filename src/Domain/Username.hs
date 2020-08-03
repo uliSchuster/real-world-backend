@@ -25,6 +25,8 @@ module Domain.Username
     pattern UserName,
     getUserName,
     mkUserName,
+    minUserNameLength,
+    maxUserNameLength
   )
 where
 
