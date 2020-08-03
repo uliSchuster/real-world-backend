@@ -1,0 +1,108 @@
+** user **
+__________________________________________________________________
+| id | username | email | bio | image_url | password_hash | salt |
+------------------------------------------------------------------
+PK: id
+Nullable: bio, image_url
+Uniqueness: id, username, email must each be unique (a candidate key). 
+
+- username and email can be updated -> we need a separate, unique and durable user ID
+
+** user_authentication **
+- The specification uses the email as authentication claim. In a more advanced model, we could factor out the identity claim.
+- To avoid redundancy, merge the authentication information into the user relation.
+
+** follows **
+_______________________________
+| follower_id  | followee_id  |
+| (FK user id) | (FK user_id) |
+-------------------------------
+PK: {follower_id, followee_id}
+Nullable: None
+Uniqueness: PK -- the relation is all key
+
+- Models that a given user can follow zero or more other users.
+
+** article **
+____________________________________________________________________________
+| id | author       | title | description | body | created_at | updated_at |
+|    | (FK user id) |       |             |      |            |            |
+----------------------------------------------------------------------------
+PK: article id
+Uniqueness: id and {author, title} must be unique (my provision, not derived from the specification). However, the title might be altered later on, which is why I introduced the unique id.
+Nullable: None
+
+- The title slug can be derived from the title and thus does not need to be stored.
+- title and description can be updated. Therefore, they are not suitable as primary key. Instead, we use a synthetic id.
+
+** favorite **
+__________________________________
+| reader       | favorite        |
+| (FK user id) | (FK article id) |
+----------------------------------
+PK: {reader, favorite}
+Uniqueness: PK -- the relation is all key
+Nullable: None
+
+- Models the M:N relation between users and articles: Any number of users can mark any number of articles to be their favorites.
+
+** comment **
+_____________________________________________
+| id | article_id     | author       | body |
+|    | (FK article id | (FK user id) |      |
+---------------------------------------------
+PK: comment id
+Uniqueness: {article_id, author, body}. Again, the id is not strictly necessary but serves to simplify handling as the body can be arbitrarily long.
+Nullable: None
+
+** tag **
+________________
+| id | tagname |
+----------------
+PK: tag id
+Uniqueness: tagname - Thus, the id is redundant, because each tagname is its own candidate key. We could thus directly associate tags with articles in the below article_tag relation. However, this would make it more difficult (?) to retrieve a list of all tags if there are many more articles than tags.
+Nullable: None
+
+** article_tag **
+_________________________________
+| article_id      | tag_id      |
+| (FK article id) | (FK tag id) |
+---------------------------------
+PK: {article_id, tag_id}
+Uniqueness: PK -- the relation is all key
+Nullable: None
+
+- Models the M:N relation between articles and tags.
+
+***********
+Open Issues
+- So far, the data model is derived by intuition. Is it properly normalized up to Boyce-Codd Normal Form (BCNF)?
+- Do we need other technical fields; e.g., for multi-version concurrency control (MVCC)?
+
+** Normalization **
+* 1NF: "Existence of the key"
+According to Codd:
+- Eliminate repeating groups in individual tables: OK
+- Create a separate table for each set of related data: OK
+- Identify each set of related data with a primary key: OK? The synthetic primary keys I introduced result from considerations bout updates, they are not strictly necessary.
+
+According to Date:
+- There's no top-to-bottom ordering to the rows. OK
+- There's no left-to-right ordering to the columns. OK
+- There are no duplicate rows. OK
+- Every row-and-column intersection contains exactly one value from the applicable domain (and nothing else). OK
+- All columns are regular; i.e., rows have no hidden components such as row IDs, object IDs, or hidden timestamps. NOK - see the discussion on synthetic ids above.
+
+* 2NF: "Every attribute depends on the whole key"
+- It is in first normal form. (OK)
+- It does not have any non-prime attribute that is functionally dependent on any proper subset of any candidate key of the relation. A non-prime attribute of a relation is an attribute that is not a part of any candidate key of the relation. OK
+
+* 3NF: "No transitive dependencies on the key"
+- It is in 2NF (OK)
+- Every non-prime attribute is non-transitively dependent on every key of the relation. OK
+ 
+* BCNF "Each attribute represents a fact about the key, the whole key, and nothing but the key."
+A relation R is considered to be in Boyce–Codd normal form (BCNF) if, for every one of its dependencies X → Y, one of the following conditions hold true:
+- X → Y is a trivial functional dependency (i.e., Y is a subset of X)
+- X is a superkey for R
+The user table does not satisfy BCNF in my regard (does it?) because of the synthetic key.
