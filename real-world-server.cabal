@@ -4,17 +4,17 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: 084447740bdc46be6c59472a7c1b24f695007abfde18f3c1e8fc8a50f2b936e6
+-- hash: da6d67b193e9270680cbe264a66d15f2210288044a69c0ece32aef9d74687315
 
 name:           real-world-server
 version:        0.1.0.0
 description:    Please see the README on Github at <https://github.com/uliSchuster/real-world-backend#readme>
-homepage:       https://github.com/githubuser/real-world-server#readme
-bug-reports:    https://github.com/githubuser/real-world-server/issues
+homepage:       https://github.com/uliSchuster/real-world-backend#readme
+bug-reports:    https://github.com/uliSchuster/real-world-backend/issues
 author:         Ulrich Schuster, Mona Lux
 maintainer:     real-world-study-group@ugsmail.mailworks.org
 copyright:      2020 Ulrich Schuster, Mona Lux
-license:        Apache License 2.0
+license:        Apache-2.0
 license-file:   LICENSE
 build-type:     Simple
 extra-source-files:
@@ -23,10 +23,19 @@ extra-source-files:
 
 source-repository head
   type: git
-  location: https://github.com/githubuser/real-world-server
+  location: https://github.com/uliSchuster/real-world-backend
 
 library
   exposed-modules:
+      Domain.Article
+      Domain.Comment
+      Domain.Content
+      Domain.Slug
+      Domain.Tag
+      Domain.Title
+      Domain.User
+      Domain.Username
+      Domain.ValidationUtils
       Import
       Run
       Types
@@ -37,8 +46,14 @@ library
       src
   ghc-options: -Wall -Wcompat -Widentities -Wincomplete-record-updates -Wincomplete-uni-patterns -Wpartial-fields -Wredundant-constraints
   build-depends:
-      base >=4.11 && <10
-    , rio >=0.1.12.0
+      QuickCheck
+    , base >=4.11 && <10
+    , email-validate
+    , modern-uri
+    , quickcheck-instances
+    , rio
+    , text-latin1
+    , time
   default-language: Haskell2010
 
 executable real-world-server-exe
@@ -49,10 +64,16 @@ executable real-world-server-exe
       app
   ghc-options: -Wall -Wcompat -Widentities -Wincomplete-record-updates -Wincomplete-uni-patterns -Wpartial-fields -Wredundant-constraints -threaded -rtsopts -with-rtsopts=-N
   build-depends:
-      base >=4.11 && <10
+      QuickCheck
+    , base >=4.11 && <10
+    , email-validate
+    , modern-uri
     , optparse-simple
+    , quickcheck-instances
     , real-world-server
-    , rio >=0.1.12.0
+    , rio
+    , text-latin1
+    , time
   default-language: Haskell2010
 
 test-suite real-world-server-test
@@ -65,8 +86,14 @@ test-suite real-world-server-test
       test
   ghc-options: -Wall -Wcompat -Widentities -Wincomplete-record-updates -Wincomplete-uni-patterns -Wpartial-fields -Wredundant-constraints -threaded -rtsopts -with-rtsopts=-N
   build-depends:
-      base >=4.11 && <10
+      QuickCheck
+    , base >=4.11 && <10
+    , email-validate
     , hspec
+    , modern-uri
+    , quickcheck-instances
     , real-world-server
-    , rio >=0.1.12.0
+    , rio
+    , text-latin1
+    , time
   default-language: Haskell2010
