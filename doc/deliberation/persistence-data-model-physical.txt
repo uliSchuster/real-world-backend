@@ -1,4 +1,4 @@
-** user **
+** users **
 __________________________________________________________________
 | id | username | email | bio | image_url | password_hash | salt |
 ------------------------------------------------------------------
@@ -14,7 +14,7 @@ Uniqueness: id, username, email must each be unique (a candidate key).
 
 ** follows **
 _______________________________
-| follower_id  | followee_id  |
+| follower_fk  | followee_fk  |
 | (FK user id) | (FK user_id) |
 -------------------------------
 PK: {follower_id, followee_id}
@@ -23,52 +23,52 @@ Uniqueness: PK -- the relation is all key
 
 - Models that a given user can follow zero or more other users.
 
-** article **
+** articles **
 ____________________________________________________________________________
-| id | author       | title | description | body | created_at | updated_at |
+| id | author_fk    | title | description | body | created_at | updated_at |
 |    | (FK user id) |       |             |      |            |            |
 ----------------------------------------------------------------------------
-PK: article id
+PK: id
 Uniqueness: id and {author, title} must be unique (my provision, not derived from the specification). However, the title might be altered later on, which is why I introduced the unique id.
 Nullable: None
 
 - The title slug can be derived from the title and thus does not need to be stored.
 - title and description can be updated. Therefore, they are not suitable as primary key. Instead, we use a synthetic id.
 
-** favorite **
+** favorites **
 __________________________________
-| reader       | favorite        |
+| reader_fk    | favorite_fk     |
 | (FK user id) | (FK article id) |
 ----------------------------------
-PK: {reader, favorite}
+PK: {reader_fk, favorite_fk}
 Uniqueness: PK -- the relation is all key
 Nullable: None
 
 - Models the M:N relation between users and articles: Any number of users can mark any number of articles to be their favorites.
 
-** comment **
-_____________________________________________
-| id | article_id     | author       | body |
-|    | (FK article id | (FK user id) |      |
----------------------------------------------
-PK: comment id
+** comments **
+______________________________________________
+| id | article_fk      | author_fk    | body |
+|    | (FK article id) | (FK user id) |      |
+----------------------------------------------
+PK: id
 Uniqueness: {article_id, author, body}. Again, the id is not strictly necessary but serves to simplify handling as the body can be arbitrarily long.
 Nullable: None
 
-** tag **
+** tags **
 ________________
 | id | tagname |
 ----------------
-PK: tag id
+PK: id
 Uniqueness: tagname - Thus, the id is redundant, because each tagname is its own candidate key. We could thus directly associate tags with articles in the below article_tag relation. However, this would make it more difficult (?) to retrieve a list of all tags if there are many more articles than tags.
 Nullable: None
 
-** article_tag **
+** articles_tags **
 _________________________________
-| article_id      | tag_id      |
+| article_fk      | tag_fk      |
 | (FK article id) | (FK tag id) |
 ---------------------------------
-PK: {article_id, tag_id}
+PK: {article_fk, tag_fk}
 Uniqueness: PK -- the relation is all key
 Nullable: None
 
