@@ -1,5 +1,9 @@
+{-# LANGUAGE NoImplicitPrelude #-}
+{-# LANGUAGE OverloadedStrings #-}
+
 module Persistence.DbConfig
-  ( DbConfig (..),
+  ( schemaName,
+    DbConfig (..),
     HasDbConnInfo (),
     connInfoL
   )
@@ -7,6 +11,10 @@ where
 
 import qualified Database.PostgreSQL.Simple as PGS
 import RIO
+
+-- | Name of the PostgreSQL schema of the DB.
+schemaName :: String
+schemaName = "cond"
 
 -- | Configuration of the PostgreSQL DBMS.
 -- So far, we connect to the DB via a simple connection string.
