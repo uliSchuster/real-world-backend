@@ -26,22 +26,26 @@
 -- See https://github.com/tomjaguarpaw/haskell-opaleye and the (outdated)
 -- tutorial here: https://www.haskelltutorials.com/opaleye/index.html
 module Persistence.Comments
-  ( Comment
-  , findAllComments
+  ( CommentIdT(..)
+  , CommentT(..)
+  , CommentR
+  , CommentW
+  , Comment
+  , allCommentsQ
   )
 where
 
 import qualified Control.Arrow                  ( )
 import qualified Data.Profunctor.Product        ( )
 import           Data.Profunctor.Product.TH     ( makeAdaptorAndInstance )
-import qualified Data.Time                     as T
 import qualified Database.PostgreSQL.Simple    as PGS
 import qualified Opaleye                       as OE
-import qualified Persistence.Articles          as PA
 import           Persistence.DbConfig           ( schemaName )
 import           Persistence.PersistenceUtils
+import qualified Persistence.Articles          as PA
 import qualified Persistence.Users             as PU
 import           RIO
+import qualified Data.Time                     as T
 
 -----------------------
 -- Dedicated Comment ID
@@ -64,12 +68,12 @@ type CommentId = CommentIdT Int64
 -- | Polymorphic type for the "comment" table.
 data CommentT cKey aKey uKey body timestamp
   = Comment
-      { commentKey :: cKey,
-        commentArticleFk :: aKey,
-        commentAuthorFk :: uKey,
-        commentBody :: body,
-        commentCreatedAt :: timestamp, -- TODO: Same type? Both optional?
-        commentUpdatedAt :: timestamp
+      { commentKey :: !cKey
+      , commentArticleFk :: !aKey
+      , commentAuthorFk :: !uKey
+      , commentBody :: !body
+      , commentCreatedAt :: !timestamp -- TODO: Same type? Both optional?
+      , commentUpdatedAt :: !timestamp
       }
   deriving (Show)
 
@@ -130,8 +134,8 @@ commentsTable = OE.tableWithSchema
 --------------------
 
 -- | Retrieve all comments.
-selectComments :: OE.Select CommentR
-selectComments = OE.selectTable commentsTable
+allCommentsQ :: OE.Select CommentR
+allCommentsQ = OE.selectTable commentsTable
 
 --------------------
 -- DB Access
@@ -143,6 +147,6 @@ selectComments = OE.selectTable commentsTable
 findAllComments :: PGS.ConnectInfo -> IO [Comment]
 findAllComments connInfo = do
   conn   <- PGS.connect connInfo
-  result <- OE.runSelect conn selectComments
+  result <- OE.runSelect conn allCommentsQ
   PGS.close conn
   return result

@@ -5,7 +5,6 @@ module Domain.TestSlug where
 
 import qualified Data.Maybe                    as DM
 import qualified Domain.DomainInstances        as DI
-import           Domain.Slug
 import           Domain.Title
 import           RIO
 import qualified Test.Tasty.HUnit              as HU

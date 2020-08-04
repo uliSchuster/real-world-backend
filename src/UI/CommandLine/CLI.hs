@@ -41,6 +41,7 @@ data Command
   | Articles ArticlesCmd
   | Article DT.Slug
   | Comment
+  | Comments DT.Slug
   | Tag
   deriving (Eq, Show)
 
@@ -99,6 +100,14 @@ cmdLineParserSpec = info' cmdLineParser "Blogging made too simple."
     <> O.command
          "comment"
          (O.info commentCmdParser (O.progDesc "Create and update comments."))
+    <> O.command
+         "comments"
+         (O.info
+           commentsCmdParser
+           (O.progDesc
+             "Retrieve comments of a specific article, identified by its slug."
+           )
+         )
     <> O.command
          "tag"
          (O.info tagCmdParser (O.progDesc "Inspect available tags."))
@@ -186,6 +195,11 @@ articleCmdParser = Article <$> O.argument
 
 commentCmdParser :: O.Parser Command
 commentCmdParser = undefined
+
+commentsCmdParser :: O.Parser Command
+commentsCmdParser = Comments <$> O.argument
+  slugReader
+  (O.metavar "<slug>" <> O.help "Slug of the commented article.")
 
 -- | Parse the command line when the "tag" subcommand is given. Currently, there
 -- are no options to parse here, we simply list all available tags.

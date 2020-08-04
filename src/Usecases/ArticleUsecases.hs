@@ -21,10 +21,12 @@ module Usecases.ArticleUsecases
   , ArticleFilter(..)
   , getArticles
   , getArticle
+  , getArticleComments
   )
 where
 
 import qualified Domain.Article                as DA
+import qualified Domain.Comment                as DC
 import qualified Domain.Tag                    as DTG
 import qualified Domain.Username               as DU
 import qualified Domain.Title                  as DT
@@ -60,3 +62,8 @@ getArticles ArticleQueryOptions { articleLimit = limit, articleOffset = offset }
 getArticle
   :: ArticleRepositoryI cfg => DT.Slug -> RIO cfg (Either Text DA.Article)
 getArticle = readArticle
+
+-- | Get all comments that pertain to an article that is identified by its slug.
+getArticleComments
+  :: ArticleRepositoryI cfg => DT.Slug -> RIO cfg (Either Text [DC.Comment])
+getArticleComments = readArticleComments

@@ -46,5 +46,6 @@ instance URepoI.UserRepositoryI AppConfig where
   readUser = URepo.readUser
 
 instance ARepoI.ArticleRepositoryI AppConfig where
-  readArticles = ARepo.readArticles
-  readArticle  = ARepo.readArticle
+  readArticles        = ARepo.readArticles
+  readArticle         = ARepo.readArticle
+  readArticleComments = ARepo.readArticleComments

@@ -16,10 +16,12 @@ module Usecases.ArticleRepositoryI
   ( ArticleRepositoryI()
   , readArticles
   , readArticle
+  , readArticleComments
   )
 where
 
 import qualified Domain.Article                as DA
+import qualified Domain.Comment                as DC
 import qualified Domain.Title                  as DT
 import           RIO
 
@@ -33,3 +35,6 @@ class ArticleRepositoryI articleRepo where
   readArticle
     :: DT.Slug -- ^ Slug that uniquely identifies this article.
     -> RIO articleRepo (Either Text DA.Article)
+  readArticleComments
+    :: DT.Slug -- ^ Slug that uniquely identifies the commented article.
+    -> RIO articleRepo (Either Text [DC.Comment])

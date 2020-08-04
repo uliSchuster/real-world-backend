@@ -1,4 +1,7 @@
+{-# LANGUAGE DeriveAnyClass #-}
 {-# LANGUAGE DeriveGeneric #-}
+{-# LANGUAGE InstanceSigs #-}
+{-# LANGUAGE MultiParamTypeClasses #-}
 {-# LANGUAGE NoImplicitPrelude #-}
 
 -- |
@@ -10,17 +13,25 @@
 -- Stability   :  unstable
 -- Lang. Ext.  :  NoImplicitPrelude - Use RIO instead
 --             :  DeriveGeneric - To automatically derive JSON mappers
+--             :  DeriveAnyClass - To include ToJSON in th deriving clause
+--             :  InstanceSigs - Write signatures for class instance functions
+--             :  MultiParamTypeClasses - The Resource class has two parameters
 --
 -- Comment resource used in the Conduit ReST API
 module Presenter.Resources.Comment
   ( Comment(..)
+  , TR.toResource
   )
 where
 
 import qualified Data.Aeson                    as J
-import qualified Data.Time                     as DT
+import qualified Data.Time                     as T
 import qualified Presenter.Resources.Profile   as RP
-import           RIO
+import qualified Presenter.Resources.ToResource
+                                               as TR
+import qualified Domain.Comment                as DC
+import qualified Domain.Content                as DCO
+import           RIO                     hiding ( id )
 
 -- {
 --   "comment": {
@@ -37,11 +48,18 @@ import           RIO
 --   }
 -- }
 data Comment = Comment
-    { id :: Integer,
-     createdAt :: DT.UTCTime,
-     updatedAt :: DT.UTCTime,
-     body :: Text,
-     author :: RP.Profile }
-   deriving (Show, Eq, Generic)
+    { id :: !Integer,
+     createdAt :: !T.UTCTime,
+     updatedAt :: !T.UTCTime,
+     body :: !Text,
+     author :: !RP.Profile }
+   deriving (Show, Eq, Generic, J.ToJSON)
 
-instance J.ToJSON Comment
+instance TR.ToResource DC.Comment Comment where
+  toResource :: DC.Comment -> Comment
+  toResource dc = Comment { id        = DC.getCommentId . DC.commentId $ dc
+                          , body      = DCO.getBody . DC.commentBody $ dc
+                          , createdAt = DC.commentCreatedAt dc
+                          , updatedAt = DC.commentModifiedAt dc
+                          , author    = TR.toResource . DC.commentAuthor $ dc
+                          }
