@@ -71,13 +71,13 @@ type ArticleId = ArticleIdT Int64
 -- | Polymorphic type for the "article" table.
 data ArticleT aKey uKey title description body timestamp
   = Article
-      { articleKey :: aKey,
-        articleAuthorFk :: uKey,
-        articleTitle :: title,
-        articleDescription :: description,
-        articleBody :: body,
-        articleCreatedAt :: timestamp, -- TODO: Same type? Both optional?
-        articleUpdatedAt :: timestamp
+      { articleKey :: !aKey,
+        articleAuthorFk :: !uKey,
+        articleTitle :: !title,
+        articleDescription :: !description,
+        articleBody :: !body,
+        articleCreatedAt :: !timestamp, -- TODO: Same type? Both optional?
+        articleUpdatedAt :: !timestamp
       }
   deriving (Show)
 
@@ -106,11 +106,12 @@ type ArticleR
 -- read and write records.
 type Article
   = ArticleT ArticleId -- article key
-    PU.UserId -- author FK
-    Text -- title
-    Text -- description
-    Text -- body
-    T.UTCTime -- timestamps
+                       PU.UserId -- author FK
+                                 Text -- title
+                                      Text -- description
+                                           Text -- body
+                                                T.UTCTime -- timestamps
+
 
 instance Display Article where
   display = displayShow

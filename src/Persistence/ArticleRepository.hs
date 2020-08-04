@@ -20,35 +20,33 @@ module Persistence.ArticleRepository
   ( maxReadCount
   , readArticles
   , readArticle
-  , toDomain
-  , findAllArticlesSortedByModification
-  , findArticlesCountSortedByModification
-  , findLimitedSortedArticlesWithAuthorsAndTags
+  , readArticleComments
   )
 where
 
 import           Control.Arrow                  ( returnA
                                                 , arr
                                                 )
-import           Control.Error.Util             ( note )
-import qualified Data.Either.Validation        as VAL
 import qualified Database.PostgreSQL.Simple    as PGS
-import qualified Domain.Article                as DA
-import qualified Domain.Content                as DC
-import qualified Domain.Tag                    as DTG
-import qualified Domain.Title                  as DT
-import qualified Domain.User                   as DU
 import qualified Opaleye                       as OE
 import           Opaleye                        ( (.==)
                                                 , (.===)
                                                 , (.++)
                                                 )
-import qualified Persistence.Articles          as PA
-import qualified Persistence.DbConfig          as DBC
-import qualified Persistence.TaggedArticles    as PTA
-import qualified Persistence.Tags              as PT
-import qualified Persistence.Users             as PU
 import           Persistence.PersistenceUtils
+import qualified Persistence.DbConfig          as DBC
+import qualified Persistence.Articles          as PA
+import qualified Persistence.Comments          as PC
+import qualified Persistence.TaggedArticles    as PTA
+import qualified Persistence.Users             as PU
+import qualified Domain.Article                as DA
+import qualified Domain.Comment                as DCO
+import qualified Domain.Content                as DC
+import qualified Domain.Tag                    as DTG
+import qualified Domain.Title                  as DT
+import qualified Domain.User                   as DU
+import qualified Data.Either.Validation        as VAL
+import           Control.Error.Util             ( note )
 import           RIO
 import           RIO.List                       ( headMaybe )
 
@@ -77,7 +75,7 @@ readArticles limit offset = do
     $   VAL.validationToEither
     .   sequenceA
     $   VAL.eitherToValidation
-    .   toDomain
+    .   toArticle
     <$> articlesAuthorsTags
 
 -- | Read a single article identified by its slug from the repository.
@@ -92,71 +90,86 @@ readArticle slug = do
   case articleOrMaybe of
     Nothing ->
       return $ Left ("No article with slug " <> DT.getSlug slug <> " found.")
-    Just article -> return $ toDomain article
+    Just article -> return $ toArticle article
 
+-- | Read all comments that pertain to a given article that is identified by 
+-- its slug.
+readArticleComments
+  :: (DBC.HasDbConnInfo cfg)
+  => DT.Slug -- ^ Slug that uniquely identifies the commented article.
+  -> RIO cfg (Either Text [DCO.Comment])
+readArticleComments slug = do
+  connInfo        <- view DBC.connInfoL
+  commentsAuthors <- liftIO $ findArticleCommentsBySlug connInfo slug
+  return
+    $   VAL.validationToEither
+    .   sequenceA
+    $   VAL.eitherToValidation
+    .   toComment
+    <$> commentsAuthors
 
--- | Convert records retrieved from the database into an `DA.Article` domein
--- value.
-toDomain :: (PA.Article, PU.User, PTA.TagArray) -> Either Text DA.Article
-toDomain (a, u, ts) =
+toTitle :: Text -> PA.ArticleId -> Either Text DT.Title
+toTitle t tId =
+  note
+      (  "The article title "
+      <> t
+      <> " stored with database ID "
+      <> tshow tId
+      <> " is invalid."
+      )
+    $ DT.mkTitle t
+
+toUser :: PU.User -> Either Text DU.User
+toUser u =
+  note
+      (  "The user "
+      <> PU.userUsername u
+      <> " stored with database ID "
+      <> tshow (PU.userKey u)
+      <> " is invalid."
+      )
+    $ DU.mkUser (PU.userEmail u)
+                (PU.userUsername u)
+                (PU.userImageUrl u)
+                (PU.userBio u)
+
+-- | Convert article, user and tag records retrieved from the database into an
+-- `DA.Article` domain value.
+toArticle :: (PA.Article, PU.User, PTA.TagArray) -> Either Text DA.Article
+toArticle (a, u, ts) =
   DA.Article
-    <$> title
+    <$> toTitle (PA.articleTitle a) (PA.articleKey a)
     <*> Right (DC.Description $ PA.articleDescription a)
     <*> Right (DC.Body $ PA.articleBody a)
     <*> Right (PA.articleCreatedAt a)
     <*> Right (PA.articleUpdatedAt a)
-    <*> user
+    <*> toUser u
     <*> tagList
  where
   tagList = note "A persisted tag is invalid."
     $ sequence (DTG.mkTag <$> PTA.getTagArray ts)
-  user =
-    note
-        (  "The user "
-        <> PU.userUsername u
-        <> " stored with database ID "
-        <> tshow (PU.userKey u)
-        <> " is invalid."
-        )
-      $ DU.mkUser (PU.userEmail u)
-                  (PU.userUsername u)
-                  (PU.userImageUrl u)
-                  (PU.userBio u)
-  title =
-    note
-        (  "The article title "
-        <> PA.articleTitle a
-        <> " stored with database ID "
-        <> tshow (PA.articleKey a)
-        <> " is invalid."
-        )
-      $ DT.mkTitle (PA.articleTitle a)
+
+-- | Convert comment and user records retrieved from the database into a
+-- `DCO.Comment` domain value.
+toComment :: (PC.Comment, PU.User) -> Either Text DCO.Comment
+toComment (c, u) =
+  DCO.Comment
+    <$> Right (DCO.mkCommentIdFromInt64 . PC.getCommentId $ PC.commentKey c)
+    <*> Right (DC.Body $ PC.commentBody c)
+    <*> Right (PC.commentCreatedAt c)
+    <*> Right (PC.commentUpdatedAt c)
+    <*> toUser u
+
 
 --------------------
 -- DB Access
 --------------------
 -- Functions in the IO Monad that perform the actual database access.
-
--- | Find all articles stored in the DB and return them.
--- Sorted by descending modification date (youngest first).
 -- Naming convention: DB retrievals are called "find".
--- This function might return a very large number of articles. Prefer the
--- constrained search.
-findAllArticlesSortedByModification :: PGS.ConnectInfo -> IO [PA.Article]
-findAllArticlesSortedByModification connInfo = do
-  conn   <- PGS.connect connInfo
-  result <- OE.runSelect conn PA.allArticlesSortedQ
-  PGS.close conn
-  return result
 
-findArticlesCountSortedByModification
-  :: PGS.ConnectInfo -> Int -> IO [PA.Article]
-findArticlesCountSortedByModification connInfo count = do
-  conn   <- PGS.connect connInfo
-  result <- OE.runSelect conn $ PA.articlesCountSortedQ count
-  PGS.close conn
-  return result
-
+-- | Join article with its author and its tags. Return a sorted list with the 
+-- first `limit` articles, sorted by creation data with the newest article 
+-- first.
 findLimitedSortedArticlesWithAuthorsAndTags
   :: PGS.ConnectInfo -> Int -> IO [(PA.Article, PU.User, PTA.TagArray)]
 findLimitedSortedArticlesWithAuthorsAndTags connInfo limit = do
@@ -165,6 +178,8 @@ findLimitedSortedArticlesWithAuthorsAndTags connInfo limit = do
   PGS.close conn
   return result
 
+-- | Find an article by its slug and return the article jointly with its author 
+-- and all associated tags.
 findArticleBySlug
   :: PGS.ConnectInfo
   -> DT.Slug
@@ -183,22 +198,27 @@ findArticleBySlug connInfo slug = do
   titleFromSlug = DT.reconstructTitleFromSlug slug
   rTitle        = DT.getTitle titleFromSlug
 
+-- | Find all comments that pertain to a given article identified by its slug. 
+-- Together with each comment, return the comment's author.
+findArticleCommentsBySlug
+  :: PGS.ConnectInfo -> DT.Slug -> IO [(PC.Comment, PU.User)]
+findArticleCommentsBySlug connInfo slug = do
+  conn   <- PGS.connect connInfo
+  result <-
+    OE.runSelect
+      conn
+      (arr (const (OE.sqlStrictText rTitle)) >>> articleCommentsByTitleQ) :: IO
+      [(PC.Comment, PU.User)]
+  PGS.close conn
+  return result
+ where
+  titleFromSlug = DT.reconstructTitleFromSlug slug
+  rTitle        = DT.getTitle titleFromSlug
+
+
 --------------------
 -- Complex Queries
 --------------------
-articlesWithAuthorQ :: Int -> OE.Select (PA.ArticleR, PU.UserR)
-articlesWithAuthorQ count = proc () -> do
-  articles <- PA.articlesCountSortedQ count -< ()
-  users <- PU.allUsersQ -< ()
-  OE.restrict -< (PU.getUserId . PA.articleAuthorFk $ articles) .== (PU.getUserId . PU.userKey $ users)
-  returnA -< (articles, users)
-
-tagsForArticlesQ :: OE.Select (PT.TagR, PTA.TaggedArticleR)
-tagsForArticlesQ = proc () -> do
-  tags <- PT.allTagsQ -< ()
-  taggedArticles <- PTA.allTaggedArticlesQ -< ()
-  OE.restrict -< (PT.getTagId . PT.tagKey $ tags) .== (PT.getTagId . PTA.tagFk $ taggedArticles)
-  returnA -< (tags, taggedArticles)
 
 -- | Retrieve all articles with corresponding author and array of tags.
 articlesWithAuthorsAndTagsQ :: OE.Select (PA.ArticleR, PU.UserR, PTA.TagArrayF)
@@ -230,3 +250,14 @@ articlesWithAuthorAndTagsByTitleQ = proc title -> do
   (art, auth, tags) <- articlesWithAuthorsAndTagsQ -< ()
   OE.restrict -< OE.ilike (PA.articleTitle art) (title .++ OE.sqlStrictText "%")
   returnA -< (art, auth, tags)
+
+
+articleCommentsByTitleQ :: OE.SelectArr (F OE.SqlText) (PC.CommentR, PU.UserR)
+articleCommentsByTitleQ = proc title -> do
+  article <- PA.allArticlesQ -< ()
+  comment <- PC.allCommentsQ -< ()
+  author <- PU.allUsersQ -< ()
+  OE.restrict -< OE.ilike (PA.articleTitle article) (title .++ OE.sqlStrictText "%")
+  OE.restrict -< PA.articleKey article .=== PC.commentArticleFk comment
+  OE.restrict -< PC.commentAuthorFk comment .=== PU.userKey author
+  returnA -< (comment, author)

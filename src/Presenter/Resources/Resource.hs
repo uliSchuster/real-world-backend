@@ -31,6 +31,7 @@ data Resource
   | Article RA.Article
   | Articles [RA.Article]
   | Comment RC.Comment
+  | Comments [RC.Comment]
   | Tags RT.TagList
   deriving (Eq, Show, Generic)
 
@@ -39,4 +40,5 @@ instance J.ToJSON Resource where
   toJSON (Article  a ) = J.toJSON a
   toJSON (Articles as) = J.object [("articles", J.toJSON as)]
   toJSON (Comment  c ) = J.toJSON c
+  toJSON (Comments cs) = J.object [("comments", J.toJSON cs)]
   toJSON (Tags     t ) = J.toJSON t

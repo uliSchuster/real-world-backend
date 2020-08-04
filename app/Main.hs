@@ -7,7 +7,6 @@ module Main
   )
 where
 
-import qualified Debug.Trace                   as D
 import qualified AppConfig                     as APC
 import qualified Data.Aeson                    as J
 import qualified Data.Aeson.Encode.Pretty      as JPP
@@ -19,6 +18,7 @@ import qualified Presenter.Resources.Article   as RA
 import qualified Presenter.Resources.Profile   as RP
 import qualified Presenter.Resources.Resource  as RR
 import qualified Presenter.Resources.Tags      as RT
+import qualified Presenter.Resources.Comment   as RC
 import           RIO
 import           RIO.ByteString.Lazy            ( toStrict )
 import qualified UI.CommandLine.CLI            as CLI
@@ -71,8 +71,9 @@ conduitApp = do
     (CLI.Article  slug       ) -> getArticleResource slug
     (CLI.Articles articlesCmd) -> case articlesCmd of
       (CLI.GetArticlesCmd aQuery) -> getArticleResources aQuery
-    CLI.Comment -> undefined
-    CLI.Tag     -> getTagResource
+    CLI.Comment         -> undefined
+    (CLI.Comments slug) -> getArticleCommentsResource slug
+    CLI.Tag             -> getTagResource
   let dispResult = displayResult result
   logInfo dispResult
 
@@ -124,8 +125,17 @@ getArticleResources
 getArticleResources qOpts = do
   articlesOrError <- UCA.getArticles qOpts
   case articlesOrError of
-    Left  e -> return $ Left $ NotFound e
-    Right a -> return $ Right $ RR.Articles $ RA.toResource <$> a
+    Left  e  -> return $ Left $ NotFound e
+    Right as -> return $ Right $ RR.Articles $ RA.toResource <$> as
+
+getArticleCommentsResource
+  :: DT.Slug -> RIO APC.AppConfig (Either ApplicationError RR.Resource)
+getArticleCommentsResource slug = do
+  commentsOrError <- UCA.getArticleComments slug
+  case commentsOrError of
+    Left  e  -> return $ Left $ NotFound e
+    Right cs -> return $ Right $ RR.Comments $ RC.toResource <$> cs
+
 
 displayResult :: (J.ToJSON l, J.ToJSON r) => Either l r -> Utf8Builder
 displayResult res = displayBytesUtf8 . toStrict $ out
