@@ -38,7 +38,7 @@ ghc-options:
 - -fwarn-tabs
 
 executables:
-  real-world-server-exe:
+  conduit-server-exe:
     main:                Main.hs
     source-dirs:         conduit-server
     dependencies:
