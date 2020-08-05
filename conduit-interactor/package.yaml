@@ -18,7 +18,6 @@ description:         Please see the README on Github at <https://github.com/uliS
 dependencies:
 - base >= 4.11 && < 10
 - rio
-- text-latin1
 - errors
 - optparse-applicative
 
