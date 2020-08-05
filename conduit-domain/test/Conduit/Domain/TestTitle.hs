@@ -1,17 +1,18 @@
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE NoImplicitPrelude #-}
 
-module Domain.TestTitle where
+module Conduit.Domain.TestTitle where
 
 import           Data.Maybe
-import qualified Domain.DomainInstances        as DI
-import           Domain.Title
-import           Domain.ValidationUtils         ( toCanonicText )
-import           RIO
-import qualified RIO.Text                      as T
 import qualified Test.Tasty.HUnit              as HU
 import qualified TestUtils                     as TU
 import qualified Text.Latin1                   as TL1
+import qualified Conduit.Domain.DomainInstances
+                                               as DI
+import           Conduit.Domain.Title
+import           Conduit.Domain.ValidationUtils ( toCanonicText )
+import           RIO
+import qualified RIO.Text                      as T
 
 -- HUnit test cases -
 

@@ -1,13 +1,14 @@
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE NoImplicitPrelude #-}
 
-module Domain.TestSlug where
+module Conduit.Domain.TestSlug where
 
 import qualified Data.Maybe                    as DM
-import qualified Domain.DomainInstances        as DI
-import           Domain.Title
-import           RIO
 import qualified Test.Tasty.HUnit              as HU
+import qualified Conduit.Domain.DomainInstances
+                                               as DI
+import           Conduit.Domain.Title
+import           RIO
 
 -- HUnit test cases --
 

@@ -1,17 +1,18 @@
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE NoImplicitPrelude #-}
 
-module Domain.TestUser where
+module Conduit.Domain.TestUser where
 
 import qualified Data.Maybe                    as DM
-import qualified Domain.DomainInstances        as DI
-import           Domain.User
-import           RIO
-import qualified RIO.Text                      as T
 import           Test.QuickCheck.Instances.Text ( )
 import qualified Test.Tasty.HUnit              as HU
 import qualified Text.Email.Validate           as Email
 import qualified Text.URI                      as URI
+import qualified Conduit.Domain.DomainInstances
+                                               as DI
+import           Conduit.Domain.User
+import           RIO
+import qualified RIO.Text                      as T
 
 -- HUnit test cases --
 unit_validUser :: IO ()

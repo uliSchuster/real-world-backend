@@ -2,7 +2,7 @@
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE NoImplicitPrelude #-}
 
-module Domain.DomainInstances
+module Conduit.Domain.DomainInstances
   ( ValidEmailAddress(..)
   , ValidURI(..)
   , ValidUsername(..)
@@ -14,14 +14,15 @@ where
 import           Control.Monad
 import qualified Data.Char                     as C
 import           Data.Maybe
-import qualified Domain.Tag                    as DT
-import qualified Domain.Username               as DUN
-import           RIO
-import qualified RIO.Text                      as T
 import           Test.QuickCheck
 import qualified TestUtils                     as TU
 import qualified Text.Email.Validate           as Email
 import qualified Text.URI                      as URI
+
+import qualified Conduit.Domain.Tag            as DT
+import qualified Conduit.Domain.Username       as DUN
+import           RIO
+import qualified RIO.Text                      as T
 
 newtype ValidEmailAddress
   = ValidEmailAddress {getValidEmailAddress :: Email.EmailAddress}

@@ -1,16 +1,18 @@
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE NoImplicitPrelude #-}
 
-module Domain.TestTag where
+module Conduit.Domain.TestTag where
 
 import qualified Data.Maybe                    as DM
-import qualified Domain.DomainInstances        as DI
-import           Domain.Tag
-import           RIO
-import qualified RIO.Text                      as T
 import qualified Test.Tasty.HUnit              as HU
 import qualified TestUtils                     as TU
 import qualified Text.Latin1                   as TL1
+
+import qualified Conduit.Domain.DomainInstances
+                                               as DI
+import           Conduit.Domain.Tag
+import           RIO
+import qualified RIO.Text                      as T
 
 -- HUnit test cases --
 
