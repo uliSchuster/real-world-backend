@@ -1,4 +1,3 @@
-{-# LANGUAGE Arrows #-}
 {-# LANGUAGE FlexibleInstances #-}
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
 {-# LANGUAGE MultiParamTypeClasses #-}
@@ -13,9 +12,8 @@
 -- License     :  Apache License 2.0
 -- Maintainer  :  real-world-study-group@ugsmail.mailworks.org
 -- Stability   :  unstable
--- Lang. Ext.  :  Arrows - Required by Opaleye
---             :  FlexibleInstances - Required by Opaleye
---             :  MultiParamTypeClasses - Required by Opaleye
+-- Lang. Ext.  :  FlexibleInstances - For Opaleye table types
+--             :  MultiParamTypeClasses - For Opaleye table types
 --             :  TemplateHaskell - Lets Opaleye generate the mapping function
 --             :  NoImplicitPrelude - Use RIO instead
 --             :  GeneralizedNewtypeDeriving - Simplify newtype usage
@@ -25,7 +23,7 @@
 -- typesafe query and data manipulation DSL.
 -- See https://github.com/tomjaguarpaw/haskell-opaleye and the (outdated)
 -- tutorial here: https://www.haskelltutorials.com/opaleye/index.html
-module Conduit.Persistence.Articles
+module Conduit.Persistence.ArticlesTable
   ( ArticleIdT(..)
   , ArticleIdField
   , OptionalArticleIdField
@@ -35,12 +33,9 @@ module Conduit.Persistence.Articles
   , ArticleR
   , Article
   , allArticlesQ
-  , allArticlesSortedQ
-  , articlesCountSortedQ
   )
 where
 
-import qualified Control.Arrow                  ( )
 import qualified Data.Profunctor.Product        ( )
 import           Data.Profunctor.Product.TH     ( makeAdaptorAndInstance )
 import qualified Data.Time                     as T
@@ -48,7 +43,8 @@ import qualified Opaleye                       as OE
 import           Conduit.Persistence.DbConfig   ( schemaName )
 import           Conduit.Persistence.PersistenceUtils
                                                 ( F )
-import qualified Conduit.Persistence.Users     as PU
+import qualified Conduit.Persistence.UsersTable
+                                               as PU
 import           RIO
 
 
@@ -140,18 +136,9 @@ articlesTable = OE.tableWithSchema
   )
 
 --------------------
--- Queries
+-- Basic Query
 --------------------
 
 -- | Retrieve all articles.
 allArticlesQ :: OE.Select ArticleR
 allArticlesQ = OE.selectTable articlesTable
-
--- | Retrieve all articles, sorted by modification date.
-allArticlesSortedQ :: OE.Select ArticleR
-allArticlesSortedQ =
-  OE.orderBy (OE.desc articleCreatedAt) $ OE.selectTable articlesTable
-
--- | Retrieve the first count articles
-articlesCountSortedQ :: Int -> OE.Select ArticleR
-articlesCountSortedQ count = OE.limit count allArticlesSortedQ

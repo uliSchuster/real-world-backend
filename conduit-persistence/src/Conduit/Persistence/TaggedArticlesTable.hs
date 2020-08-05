@@ -1,4 +1,3 @@
-{-# LANGUAGE Arrows #-}
 {-# LANGUAGE FlexibleInstances #-}
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
 {-# LANGUAGE MultiParamTypeClasses #-}
@@ -13,9 +12,8 @@
 -- License     :  Apache License 2.0
 -- Maintainer  :  real-world-study-group@ugsmail.mailworks.org
 -- Stability   :  unstable
--- Lang. Ext.  :  Arrows - Required by Opaleye
---             :  FlexibleInstances - Required by Opaleye
---             :  MultiParamTypeClasses - Required by Opaleye
+-- Lang. Ext.  :  FlexibleInstances - For Opaleye table types
+--             :  MultiParamTypeClasses - For Opaleye table types
 --             :  TemplateHaskell - Lets Opaleye generate the mapping function
 --             :  NoImplicitPrelude - Use RIO instead
 --             :  GeneralizedNewtypeDeriving - Simplify newtype usage
@@ -25,7 +23,7 @@
 -- mapper and typesafe query and data manipulation DSL.
 -- See https://github.com/tomjaguarpaw/haskell-opaleye and the (outdated)
 -- tutorial here: https://www.haskelltutorials.com/opaleye/index.html
-module Conduit.Persistence.TaggedArticles
+module Conduit.Persistence.TaggedArticlesTable
   ( TaggedArticleT(..)
   , TaggedArticleR
   , TaggedArticle
@@ -33,24 +31,16 @@ module Conduit.Persistence.TaggedArticles
   , TagArrayF
   , TagArray
   , allTaggedArticlesQ
-  , articleTagsQ
-  , findAllTaggedArticles
   )
 where
 
-import           Control.Arrow                  ( (<<<)
-                                                , arr
-                                                , returnA
-                                                )
-import qualified Data.Profunctor.Product       as PP
 import           Data.Profunctor.Product.TH     ( makeAdaptorAndInstance )
-import qualified Database.PostgreSQL.Simple    as PGS
 import qualified Opaleye                       as OE
-import           Opaleye                        ( (.===) )
-import qualified Conduit.Persistence.Articles  as PA
+import qualified Conduit.Persistence.ArticlesTable
+                                               as PA
+import qualified Conduit.Persistence.TagsTable as PT
 import           Conduit.Persistence.DbConfig   ( schemaName )
 import           Conduit.Persistence.PersistenceUtils
-import qualified Conduit.Persistence.Tags      as PT
 import           RIO
 
 --------------------
@@ -111,26 +101,12 @@ type TagArrayF = TagArrayT (F (OE.SqlArray OE.SqlText))
 type TagArray = TagArrayT [Text]
 
 --------------------
--- Queries
+-- Basic Query
 --------------------
 
 -- | Query all article-tag relations.
 allTaggedArticlesQ :: OE.Select TaggedArticleR
 allTaggedArticlesQ = OE.selectTable taggedArticlesTable
-
--- | Join article-ids and tag names for all articles.
-articleTagNamesQ :: OE.Select (PA.ArticleIdField, F OE.SqlText)
-articleTagNamesQ = proc () -> do
-  TaggedArticle {articleFk = aId, tagFk = tFk} <- allTaggedArticlesQ -< ()
-  PT.Tag {PT.tagKey = tId, PT.tagName = tn} <- PT.allTagsQ -< ()
-  OE.restrict -< tFk .=== tId
-  returnA -< (aId, tn)
-
--- | Aggregate all tag names for all articles
-articleTagsQ :: OE.Select (F OE.SqlInt8, F (OE.SqlArray OE.SqlText))
-articleTagsQ =
-  OE.aggregate (PP.p2 (OE.groupBy, OE.arrayAgg)) $
-    arr (first PA.getArticleId) <<< articleTagNamesQ
 
 --------------------
 -- DB Access
@@ -140,9 +116,9 @@ articleTagsQ =
 
 -- | Find all tagged articles stored in the DB and return them.
 -- Naming convention: DB retrievals are called "find".
-findAllTaggedArticles :: PGS.ConnectInfo -> IO [TaggedArticle]
-findAllTaggedArticles connInfo = do
-  conn   <- PGS.connect connInfo
-  result <- OE.runSelect conn allTaggedArticlesQ
-  PGS.close conn
-  return result
+-- findAllTaggedArticles :: PGS.ConnectInfo -> IO [TaggedArticle]
+-- findAllTaggedArticles connInfo = do
+--   conn   <- PGS.connect connInfo
+--   result <- OE.runSelect conn allTaggedArticlesQ
+--   PGS.close conn
+--   return result

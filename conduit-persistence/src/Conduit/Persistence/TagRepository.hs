@@ -17,9 +17,11 @@ module Conduit.Persistence.TagRepository
   )
 where
 
+import qualified Database.PostgreSQL.Simple    as PGS
+import qualified Opaleye                       as OE
 import qualified Conduit.Domain.Tag            as DT
 import qualified Conduit.Persistence.DbConfig  as DBC
-import qualified Conduit.Persistence.Tags      as PT
+import qualified Conduit.Persistence.TagsTable as PT
 import           RIO
 
 -- | Returns all tags stored in the underlying persistence mechanism
@@ -27,7 +29,7 @@ import           RIO
 readAllTags :: (DBC.HasDbConnInfo cfg) => RIO cfg [Either Text DT.Tag]
 readAllTags = do
   connInfo <- view DBC.connInfoL
-  pTags    <- liftIO $ PT.findAllTags connInfo
+  pTags    <- liftIO $ findAllTags connInfo
   return $ toTag <$> pTags
 
 -- | Helper function that converts the data obtained from the DB into a
@@ -45,3 +47,17 @@ toTag (PT.Tag (PT.TagId dbId) pt) = case DT.mkTag pt of
       <> " at database ID "
       <> tshow dbId
       <> " is invalid."
+
+--------------------
+-- DB Access
+--------------------
+-- Functions in the IO Monad that perform the actual database access.
+
+-- | Find all tags stored in the DB and return them.
+-- Naming convention: DB retrievals are called "find".
+findAllTags :: PGS.ConnectInfo -> IO [PT.Tag]
+findAllTags connInfo = do
+  conn   <- PGS.connect connInfo
+  result <- OE.runSelect conn PT.allTagsQ
+  PGS.close conn
+  return result

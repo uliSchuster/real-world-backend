@@ -1,4 +1,3 @@
-{-# LANGUAGE Arrows #-}
 {-# LANGUAGE FlexibleInstances #-}
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
 {-# LANGUAGE MultiParamTypeClasses #-}
@@ -13,9 +12,8 @@
 -- License     :  Apache License 2.0
 -- Maintainer  :  real-world-study-group@ugsmail.mailworks.org
 -- Stability   :  unstable
--- Lang. Ext.  :  Arrows - Required by Opaleye
---             :  FlexibleInstances - Required by Opaleye
---             :  MultiParamTypeClasses - Required by Opaleye
+-- Lang. Ext.  :  FlexibleInstances - For Opaleye table types
+--             :  MultiParamTypeClasses - For Opaleye table types
 --             :  TemplateHaskell - Lets Opaleye generate the mapping function
 --             :  NoImplicitPrelude - Use RIO instead
 --             :  GeneralizedNewtypeDeriving - Simplify newtype usage
@@ -25,7 +23,7 @@
 -- typesafe query and data manipulation DSL.
 -- See https://github.com/tomjaguarpaw/haskell-opaleye and the (outdated)
 -- tutorial here: https://www.haskelltutorials.com/opaleye/index.html
-module Conduit.Persistence.Tags
+module Conduit.Persistence.TagsTable
   ( TagIdT(..)
   , TagIdField
   , OptionalTagIdField
@@ -35,14 +33,11 @@ module Conduit.Persistence.Tags
   , TagR
   , Tag
   , allTagsQ
-  , findAllTags
   )
 where
 
-import qualified Control.Arrow                  ( )
 import qualified Data.Profunctor.Product        ( )
 import           Data.Profunctor.Product.TH     ( makeAdaptorAndInstance )
-import qualified Database.PostgreSQL.Simple    as PGS
 import qualified Opaleye                       as OE
 import           Conduit.Persistence.DbConfig   ( schemaName )
 import           Conduit.Persistence.PersistenceUtils
@@ -111,23 +106,9 @@ tagsTable = OE.tableWithSchema
   )
 
 --------------------
--- Queries
+-- Basic Query
 --------------------
 
 -- | Retrieve all tags.
 allTagsQ :: OE.Select TagR
 allTagsQ = OE.selectTable tagsTable
-
---------------------
--- DB Access
---------------------
--- Functions in the IO Monad that perform the actual database access.
-
--- | Find all tags stored in the DB and return them.
--- Naming convention: DB retrievals are called "find".
-findAllTags :: PGS.ConnectInfo -> IO [Tag]
-findAllTags connInfo = do
-  conn   <- PGS.connect connInfo
-  result <- OE.runSelect conn allTagsQ
-  PGS.close conn
-  return result
