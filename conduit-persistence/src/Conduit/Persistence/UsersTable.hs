@@ -1,4 +1,3 @@
-{-# LANGUAGE Arrows #-}
 {-# LANGUAGE FlexibleInstances #-}
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
 {-# LANGUAGE MultiParamTypeClasses #-}
@@ -13,9 +12,8 @@
 -- License     :  Apache License 2.0
 -- Maintainer  :  real-world-study-group@ugsmail.mailworks.org
 -- Stability   :  unstable
--- Lang. Ext.  :  Arrows - Required by Opaleye
---             :  FlexibleInstances - Required by Opaleye
---             :  MultiParamTypeClasses - Required by Opaleye
+-- Lang. Ext.  :  FlexibleInstances - For Opaleye table types
+--             :  MultiParamTypeClasses - For Opaleye table types
 --             :  TemplateHaskell - Lets Opaleye generate the mapping function
 --             :  NoImplicitPrelude - Use RIO instead
 --             :  GeneralizedNewtypeDeriving - Simplify newtype usage
@@ -25,7 +23,7 @@
 -- typesafe query and data manipulation DSL.
 -- See https://github.com/tomjaguarpaw/haskell-opaleye and the (outdated)
 -- tutorial here: https://www.haskelltutorials.com/opaleye/index.html
-module Conduit.Persistence.Users
+module Conduit.Persistence.UsersTable
   ( UserIdT(..)
   , UserIdField
   , OptionalUserIdField
@@ -35,19 +33,15 @@ module Conduit.Persistence.Users
   , UserR
   , User
   , allUsersQ
-  , userByNameQ
   )
 where
 
-import           Control.Arrow                  ( returnA )
 import qualified Data.Profunctor.Product        ( )
 import           Data.Profunctor.Product.TH     ( makeAdaptorAndInstance )
 import qualified Opaleye                       as OE
-import           Opaleye                        ( (.==) )
 import           Conduit.Persistence.DbConfig   ( schemaName )
 import           Conduit.Persistence.PersistenceUtils
 import           RIO
-
 
 --------------------
 -- Dedicated User ID
@@ -150,20 +144,9 @@ userTable = OE.tableWithSchema
 -- $(makeLensesWith abbreviatedFields ''UserT)
 
 --------------------
--- Queries
+-- Basic Query
 --------------------
--- The queries below are written in the typesafe Opaleye query DSL. Opaleye
--- translates them into actual SQL statements that can be executed against the
--- DBMS. The query statements specified below are similar to prepared
--- statements; they need to be executed separately.
--- Queries return Opaleye PostgreSQL "Read" records.
 
 -- | Retrieve all users.
 allUsersQ :: OE.Select UserR
 allUsersQ = OE.selectTable userTable
-
-userByNameQ :: OE.SelectArr (F OE.SqlText) UserR
-userByNameQ = proc uName -> do
-  row <- allUsersQ -< ()
-  OE.restrict -< userUsername row .== uName
-  returnA -< row

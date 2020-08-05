@@ -1,4 +1,3 @@
-{-# LANGUAGE Arrows #-}
 {-# LANGUAGE FlexibleInstances #-}
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
 {-# LANGUAGE MultiParamTypeClasses #-}
@@ -13,9 +12,8 @@
 -- License     :  Apache License 2.0
 -- Maintainer  :  real-world-study-group@ugsmail.mailworks.org
 -- Stability   :  unstable
--- Lang. Ext.  :  Arrows - Required by Opaleye
---             :  FlexibleInstances - Required by Opaleye
---             :  MultiParamTypeClasses - Required by Opaleye
+-- Lang. Ext.  :  FlexibleInstances - For Opaleye table types
+--             :  MultiParamTypeClasses - For Opaleye table types
 --             :  TemplateHaskell - Lets Opaleye generate the mapping function
 --             :  NoImplicitPrelude - Use RIO instead
 --             :  GeneralizedNewtypeDeriving - Simplify newtype usage
@@ -25,7 +23,7 @@
 -- typesafe query and data manipulation DSL.
 -- See https://github.com/tomjaguarpaw/haskell-opaleye and the (outdated)
 -- tutorial here: https://www.haskelltutorials.com/opaleye/index.html
-module Conduit.Persistence.Comments
+module Conduit.Persistence.CommentsTable
   ( CommentIdT(..)
   , CommentT(..)
   , CommentR
@@ -35,17 +33,18 @@ module Conduit.Persistence.Comments
   )
 where
 
-import qualified Control.Arrow                  ( )
 import qualified Data.Profunctor.Product        ( )
 import           Data.Profunctor.Product.TH     ( makeAdaptorAndInstance )
-import qualified Database.PostgreSQL.Simple    as PGS
 import qualified Opaleye                       as OE
 import           Conduit.Persistence.DbConfig   ( schemaName )
 import           Conduit.Persistence.PersistenceUtils
-import qualified Conduit.Persistence.Articles  as PA
-import qualified Conduit.Persistence.Users     as PU
+import qualified Conduit.Persistence.ArticlesTable
+                                               as PA
+import qualified Conduit.Persistence.UsersTable
+                                               as PU
 import           RIO
 import qualified Data.Time                     as T
+
 
 -----------------------
 -- Dedicated Comment ID
@@ -130,7 +129,7 @@ commentsTable = OE.tableWithSchema
   )
 
 --------------------
--- Queries
+-- Basic Querry
 --------------------
 
 -- | Retrieve all comments.
@@ -144,9 +143,9 @@ allCommentsQ = OE.selectTable commentsTable
 
 -- | Find all comments stored in the DB and return them.
 -- Naming convention: DB retrievals are called "find".
-findAllComments :: PGS.ConnectInfo -> IO [Comment]
-findAllComments connInfo = do
-  conn   <- PGS.connect connInfo
-  result <- OE.runSelect conn allCommentsQ
-  PGS.close conn
-  return result
+-- findAllComments :: PGS.ConnectInfo -> IO [Comment]
+-- findAllComments connInfo = do
+--   conn   <- PGS.connect connInfo
+--   result <- OE.runSelect conn allCommentsQ
+--   PGS.close conn
+--   return result

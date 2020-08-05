@@ -26,7 +26,9 @@ where
 
 import           Control.Arrow                  ( returnA
                                                 , arr
+                                                , (<<<)
                                                 )
+import qualified Data.Profunctor.Product       as PP
 import qualified Database.PostgreSQL.Simple    as PGS
 import qualified Opaleye                       as OE
 import           Opaleye                        ( (.==)
@@ -35,11 +37,15 @@ import           Opaleye                        ( (.==)
                                                 )
 import           Conduit.Persistence.PersistenceUtils
 import qualified Conduit.Persistence.DbConfig  as DBC
-import qualified Conduit.Persistence.Articles  as PA
-import qualified Conduit.Persistence.Comments  as PC
-import qualified Conduit.Persistence.TaggedArticles
+import qualified Conduit.Persistence.ArticlesTable
+                                               as PA
+import qualified Conduit.Persistence.CommentsTable
+                                               as PC
+import qualified Conduit.Persistence.TagsTable as PT
+import qualified Conduit.Persistence.TaggedArticlesTable
                                                as PTA
-import qualified Conduit.Persistence.Users     as PU
+import qualified Conduit.Persistence.UsersTable
+                                               as PU
 import qualified Conduit.Domain.Article        as DA
 import qualified Conduit.Domain.Comment        as DCO
 import qualified Conduit.Domain.Content        as DC
@@ -50,6 +56,7 @@ import qualified Data.Either.Validation        as VAL
 import           Control.Error.Util             ( note )
 import           RIO
 import           RIO.List                       ( headMaybe )
+
 
 
 -- | Maximum number of articles that can be read at a time.
@@ -218,13 +225,27 @@ findArticleCommentsBySlug connInfo slug = do
 
 
 --------------------
--- Complex Queries
+-- Compound Queries
 --------------------
+
+-- | Join article-ids and tag names for all articles.
+articleTagNamesQ :: OE.Select (PA.ArticleIdField, F OE.SqlText)
+articleTagNamesQ = proc () -> do
+  PTA.TaggedArticle {PTA.articleFk = aId, PTA.tagFk = tFk} <- PTA.allTaggedArticlesQ -< ()
+  PT.Tag {PT.tagKey = tId, PT.tagName = tn} <- PT.allTagsQ -< ()
+  OE.restrict -< tFk .=== tId
+  returnA -< (aId, tn)
+
+-- | Aggregate all tag names for all articles
+articleTagsQ :: OE.Select (F OE.SqlInt8, F (OE.SqlArray OE.SqlText))
+articleTagsQ =
+  OE.aggregate (PP.p2 (OE.groupBy, OE.arrayAgg)) $
+    arr (first PA.getArticleId) <<< articleTagNamesQ
 
 -- | Retrieve all articles with corresponding author and array of tags.
 articlesWithAuthorsAndTagsQ :: OE.Select (PA.ArticleR, PU.UserR, PTA.TagArrayF)
 articlesWithAuthorsAndTagsQ = proc () -> do
-  (aId, ts) <- PTA.articleTagsQ -< ()
+  (aId, ts) <- articleTagsQ -< ()
   article <- PA.allArticlesQ -< ()
   user <- PU.allUsersQ -< ()
   OE.restrict -< (PA.getArticleId . PA.articleKey) article .== aId
