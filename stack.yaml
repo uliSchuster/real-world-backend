@@ -7,7 +7,7 @@
 # Resolver to choose a 'specific' stackage snapshot or a compiler version.
 # A snapshot resolver dictates the compiler version and the set of packages
 # to be used for project dependencies.
-resolver: lts-16.7
+resolver: lts-16.8
 
 # User packages to be built.
 # Various formats can be used as shown in the example below.
@@ -19,6 +19,11 @@ resolver: lts-16.7
 #   - auto-update
 #   - wai
 packages:
+- conduit-domain
+- conduit-usecases
+- conduit-persistence
+- conduit-presenter
+- conduit-interactor
 - .
 # Dependency packages to be pulled from upstream that are not in the resolver.
 # These entries can reference officially published versions as well as
