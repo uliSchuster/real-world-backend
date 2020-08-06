@@ -9,7 +9,6 @@ where
 
 import qualified Data.Aeson                    as J
 import qualified Data.Aeson.Encode.Pretty      as JPP
-import qualified Database.PostgreSQL.Simple    as PGS
 import qualified Conduit.Domain.Username       as DUN
 import qualified Conduit.Domain.Title          as DT
 import qualified Conduit.Usecases.ArticleUsecases
@@ -47,13 +46,13 @@ instance J.ToJSON ApplicationError
 
 -- | Connection string for the PostgreSQL DBMS. Here for development and
 -- experimentation. Should be loaded from a config file or the system environment later on.
-dBConnInfo :: DBC.DbConfig
-dBConnInfo = DBC.DbConfig $ PGS.ConnectInfo { PGS.connectHost     = "localhost"
-                                            , PGS.connectPort     = 5432
-                                            , PGS.connectDatabase = "conduit"
-                                            , PGS.connectPassword = "conduit"
-                                            , PGS.connectUser     = "cond"
-                                            }
+dBConnInfo :: DBC.DbConnectionInfo
+dBConnInfo = DBC.DbConnectionInfo { DBC.host     = "localhost"
+                                  , DBC.port     = 5432
+                                  , DBC.database = "conduit"
+                                  , DBC.password = "conduit"
+                                  , DBC.user     = "cond"
+                                  }
 
 -- Helper function to run the main application logic.
 -- This function is a very preliminary sketch. The goal later on is to properly
@@ -63,7 +62,9 @@ runApp app = do
   logOptions' <- logOptionsHandle stderr False
   let logOptions = setLogUseTime True $ setLogUseLoc True logOptions'
   withLogFunc logOptions $ \logFunc -> do
-    let cfg = APC.AppConfig { APC.dBConfig = dBConnInfo, APC.logger = logFunc }
+    let cfg = APC.AppConfig { APC.dBConfig = DBC.initDb dBConnInfo
+                            , APC.logger   = logFunc
+                            }
     runRIO cfg app
 
 -- In the full-fledged app, this will be application's main event loop.
@@ -80,7 +81,7 @@ conduitApp = do
       (CLI.GetArticlesCmd aQuery) -> getArticleResources aQuery
     CLI.Comment         -> undefined
     (CLI.Comments slug) -> getArticleCommentsResource slug
-    CLI.Tag             -> getTagResource
+    CLI.Tags            -> getTagResource
   let dispResult = displayResult result
   logInfo dispResult
 

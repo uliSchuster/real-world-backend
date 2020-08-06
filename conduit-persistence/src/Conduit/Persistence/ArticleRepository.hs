@@ -29,7 +29,6 @@ import           Control.Arrow                  ( returnA
                                                 , (<<<)
                                                 )
 import qualified Data.Profunctor.Product       as PP
-import qualified Database.PostgreSQL.Simple    as PGS
 import qualified Opaleye                       as OE
 import           Opaleye                        ( (.==)
                                                 , (.===)
@@ -71,14 +70,14 @@ maxReadCount = 100
 -- past the last article in the repository.
 -- TODO: Make offset queries work.
 readArticles
-  :: (DBC.HasDbConnInfo cfg)
+  :: (DBC.HasDbConnPool cfg)
   => Int -- ^ Number of articles to read. Must be less than `maxReadCount`.
   -> Int   -- ^ Offset to start reading from..
   -> RIO cfg (Either Text [DA.Article])
 readArticles limit offset = do
-  connInfo            <- view DBC.connInfoL
+  connPool            <- view DBC.connPoolL
   articlesAuthorsTags <- liftIO
-    $ findLimitedSortedArticlesWithAuthorsAndTags connInfo limit
+    $ findLimitedSortedArticlesWithAuthorsAndTags connPool limit
   return
     $   VAL.validationToEither
     .   sequenceA
@@ -89,12 +88,12 @@ readArticles limit offset = do
 -- | Read a single article identified by its slug from the repository.
 -- The slug uniquely identifies an article.
 readArticle
-  :: (DBC.HasDbConnInfo cfg)
+  :: (DBC.HasDbConnPool cfg)
   => DT.Slug -- ^ Slug that uniquely identifies this article.
   -> RIO cfg (Either Text DA.Article)
 readArticle slug = do
-  connInfo       <- view DBC.connInfoL
-  articleOrMaybe <- liftIO $ findArticleBySlug connInfo slug
+  connPool       <- view DBC.connPoolL
+  articleOrMaybe <- liftIO $ findArticleBySlug connPool slug
   case articleOrMaybe of
     Nothing ->
       return $ Left ("No article with slug " <> DT.getSlug slug <> " found.")
@@ -103,12 +102,12 @@ readArticle slug = do
 -- | Read all comments that pertain to a given article that is identified by 
 -- its slug.
 readArticleComments
-  :: (DBC.HasDbConnInfo cfg)
+  :: (DBC.HasDbConnPool cfg)
   => DT.Slug -- ^ Slug that uniquely identifies the commented article.
   -> RIO cfg (Either Text [DCO.Comment])
 readArticleComments slug = do
-  connInfo        <- view DBC.connInfoL
-  commentsAuthors <- liftIO $ findArticleCommentsBySlug connInfo slug
+  connPool        <- view DBC.connPoolL
+  commentsAuthors <- liftIO $ findArticleCommentsBySlug connPool slug
   return
     $   VAL.validationToEither
     .   sequenceA
@@ -179,18 +178,16 @@ toComment (c, u) =
 -- first `limit` articles, sorted by creation data with the newest article 
 -- first.
 findLimitedSortedArticlesWithAuthorsAndTags
-  :: PGS.ConnectInfo -> Int -> IO [(PA.Article, PU.User, PTA.TagArray)]
-findLimitedSortedArticlesWithAuthorsAndTags connInfo limit =
-  withPostgreSQL connInfo $ \conn ->
+  :: DBC.ConnPool -> Int -> IO [(PA.Article, PU.User, PTA.TagArray)]
+findLimitedSortedArticlesWithAuthorsAndTags connPool limit =
+  withPostgreSQLPool connPool $ \conn ->
     OE.runSelect conn $ articlesWithAuthorsAndTagsCountSortedQ limit
 
 -- | Find an article by its slug and return the article jointly with its author 
 -- and all associated tags.
 findArticleBySlug
-  :: PGS.ConnectInfo
-  -> DT.Slug
-  -> IO (Maybe (PA.Article, PU.User, PTA.TagArray))
-findArticleBySlug connInfo slug = withPostgreSQL connInfo $ \conn -> do
+  :: DBC.ConnPool -> DT.Slug -> IO (Maybe (PA.Article, PU.User, PTA.TagArray))
+findArticleBySlug connPool slug = withPostgreSQLPool connPool $ \conn -> do
   result <- OE.runSelect
     conn
     (arr (const (OE.sqlStrictText rTitle)) >>> articlesWithAuthorAndTagsByTitleQ
@@ -202,17 +199,19 @@ findArticleBySlug connInfo slug = withPostgreSQL connInfo $ \conn -> do
 -- | Find all comments that pertain to a given article identified by its slug. 
 -- Together with each comment, return the comment's author.
 findArticleCommentsBySlug
-  :: PGS.ConnectInfo -> DT.Slug -> IO [(PC.Comment, PU.User)]
-findArticleCommentsBySlug connInfo slug = withPostgreSQL connInfo $ \conn ->
-  OE.runSelect
-    conn
-    (arr (const (OE.sqlStrictText rTitle)) >>> articleCommentsByTitleQ) :: IO
-      [(PC.Comment, PU.User)]
+  :: DBC.ConnPool -> DT.Slug -> IO [(PC.Comment, PU.User)]
+findArticleCommentsBySlug connPool slug =
+  withPostgreSQLPool connPool $ \conn ->
+    OE.runSelect
+      conn
+      (arr (const (OE.sqlStrictText rTitle)) >>> articleCommentsByTitleQ) :: IO
+        [(PC.Comment, PU.User)]
   where rTitle = DT.getTitle $ DT.reconstructTitleFromSlug slug
 
 --------------------
 -- Compound Queries
 --------------------
+
 
 -- | Join article-ids and tag names for all articles.
 articleTagNamesQ :: OE.Select (PA.ArticleIdField, F OE.SqlText)

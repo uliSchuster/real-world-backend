@@ -25,6 +25,7 @@ dependencies:
 - opaleye
 - errors
 - either
+- resource-pool
 
 ghc-options:
 - -Wall

@@ -26,7 +26,6 @@ import           Control.Arrow                  ( (<<<)
                                                 , arr
                                                 , returnA
                                                 )
-import qualified Database.PostgreSQL.Simple    as PGS
 import qualified Opaleye                       as OE
 import           Opaleye                        ( (.===) )
 import qualified Conduit.Domain.User           as DU
@@ -42,10 +41,10 @@ import           RIO.List                      as L
 -- | Returns a specific user stored in the underlying persistence mechanism
 -- Naming convention: Read repository operations are called "read".
 readUser
-  :: (DBC.HasDbConnInfo cfg) => DUN.Username -> RIO cfg (Either Text DU.User)
+  :: (DBC.HasDbConnPool cfg) => DUN.Username -> RIO cfg (Either Text DU.User)
 readUser (DUN.Username uName) = do
-  connInfo <- view DBC.connInfoL
-  pUser    <- liftIO $ findUser connInfo uName
+  connPool <- view DBC.connPoolL
+  pUser    <- liftIO $ findUser connPool uName
   case pUser of
     Nothing -> return $ Left ("Could not find user with username " <> uName)
     Just u  -> return $ toUser u
@@ -80,13 +79,13 @@ toUser pu = case maybeUser of
 
 -- | Find all users stored in the DB and return them.
 -- Naming convention: DB retrievals are called "find".
-findAllUsers :: PGS.ConnectInfo -> IO [PU.User]
-findAllUsers connInfo =
-  withPostgreSQL connInfo $ \conn -> OE.runSelect conn PU.allUsersQ
+findAllUsers :: DBC.ConnPool -> IO [PU.User]
+findAllUsers connPool =
+  withPostgreSQLPool connPool $ \conn -> OE.runSelect conn PU.allUsersQ
 
 -- | Find the user with given user name.
-findUser :: PGS.ConnectInfo -> Text -> IO (Maybe PU.User)
-findUser connInfo uName = withPostgreSQL connInfo $ \conn -> do
+findUser :: DBC.ConnPool -> Text -> IO (Maybe PU.User)
+findUser connPool uName = withPostgreSQLPool connPool $ \conn -> do
   result <- OE.runSelect
     conn
     (userByNameQ <<< arr (const $ OE.sqlStrictText uName)) -- Convert a parameter into an arrow via the const function.
