@@ -107,18 +107,3 @@ type TagArray = TagArrayT [Text]
 -- | Query all article-tag relations.
 allTaggedArticlesQ :: OE.Select TaggedArticleR
 allTaggedArticlesQ = OE.selectTable taggedArticlesTable
-
---------------------
--- DB Access
---------------------
-
--- TODO: Use Bracket or ResourceT to handle DB resources.
-
--- | Find all tagged articles stored in the DB and return them.
--- Naming convention: DB retrievals are called "find".
--- findAllTaggedArticles :: PGS.ConnectInfo -> IO [TaggedArticle]
--- findAllTaggedArticles connInfo = do
---   conn   <- PGS.connect connInfo
---   result <- OE.runSelect conn allTaggedArticlesQ
---   PGS.close conn
---   return result

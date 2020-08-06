@@ -181,7 +181,7 @@ toComment (c, u) =
 findLimitedSortedArticlesWithAuthorsAndTags
   :: PGS.ConnectInfo -> Int -> IO [(PA.Article, PU.User, PTA.TagArray)]
 findLimitedSortedArticlesWithAuthorsAndTags connInfo limit =
-  runPostgreSQL connInfo $ \conn ->
+  withPostgreSQL connInfo $ \conn ->
     OE.runSelect conn $ articlesWithAuthorsAndTagsCountSortedQ limit
 
 -- | Find an article by its slug and return the article jointly with its author 
@@ -190,7 +190,7 @@ findArticleBySlug
   :: PGS.ConnectInfo
   -> DT.Slug
   -> IO (Maybe (PA.Article, PU.User, PTA.TagArray))
-findArticleBySlug connInfo slug = runPostgreSQL connInfo $ \conn -> do
+findArticleBySlug connInfo slug = withPostgreSQL connInfo $ \conn -> do
   result <- OE.runSelect
     conn
     (arr (const (OE.sqlStrictText rTitle)) >>> articlesWithAuthorAndTagsByTitleQ
@@ -203,7 +203,7 @@ findArticleBySlug connInfo slug = runPostgreSQL connInfo $ \conn -> do
 -- Together with each comment, return the comment's author.
 findArticleCommentsBySlug
   :: PGS.ConnectInfo -> DT.Slug -> IO [(PC.Comment, PU.User)]
-findArticleCommentsBySlug connInfo slug = runPostgreSQL connInfo $ \conn ->
+findArticleCommentsBySlug connInfo slug = withPostgreSQL connInfo $ \conn ->
   OE.runSelect
     conn
     (arr (const (OE.sqlStrictText rTitle)) >>> articleCommentsByTitleQ) :: IO

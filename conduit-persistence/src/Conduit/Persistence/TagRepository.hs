@@ -58,4 +58,4 @@ toTag (PT.Tag (PT.TagId dbId) pt) = case DT.mkTag pt of
 -- Naming convention: DB retrievals are called "find".
 findAllTags :: PGS.ConnectInfo -> IO [PT.Tag]
 findAllTags connInfo =
-  runPostgreSQL connInfo $ \conn -> OE.runSelect conn PT.allTagsQ
+  withPostgreSQL connInfo $ \conn -> OE.runSelect conn PT.allTagsQ

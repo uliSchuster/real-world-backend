@@ -85,16 +85,3 @@ followsTable = OE.tableWithSchema
 -- | Retrieve all follow relations.
 allFollowsQ :: OE.Select FollowsR
 allFollowsQ = OE.selectTable followsTable
-
---------------------
--- DB Access
---------------------
-
--- | Find all following relations stored in the DB and return them.
--- Naming convention: DB retrievals are called "find".
--- findAllFollows :: PGS.ConnectInfo -> IO [Follows]
--- findAllFollows connInfo = do
---   conn   <- PGS.connect connInfo
---   result <- OE.runSelect conn allFollowsQ
---   PGS.close conn
---   return result

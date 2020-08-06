@@ -135,17 +135,3 @@ commentsTable = OE.tableWithSchema
 -- | Retrieve all comments.
 allCommentsQ :: OE.Select CommentR
 allCommentsQ = OE.selectTable commentsTable
-
---------------------
--- DB Access
---------------------
--- Functions in the IO Monad that perform the actual database access.
-
--- | Find all comments stored in the DB and return them.
--- Naming convention: DB retrievals are called "find".
--- findAllComments :: PGS.ConnectInfo -> IO [Comment]
--- findAllComments connInfo = do
---   conn   <- PGS.connect connInfo
---   result <- OE.runSelect conn allCommentsQ
---   PGS.close conn
---   return result
