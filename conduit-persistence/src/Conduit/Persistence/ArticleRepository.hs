@@ -180,11 +180,9 @@ toComment (c, u) =
 -- first.
 findLimitedSortedArticlesWithAuthorsAndTags
   :: PGS.ConnectInfo -> Int -> IO [(PA.Article, PU.User, PTA.TagArray)]
-findLimitedSortedArticlesWithAuthorsAndTags connInfo limit = do
-  conn   <- PGS.connect connInfo
-  result <- OE.runSelect conn $ articlesWithAuthorsAndTagsCountSortedQ limit
-  PGS.close conn
-  return result
+findLimitedSortedArticlesWithAuthorsAndTags connInfo limit =
+  withPostgreSQL connInfo $ \conn ->
+    OE.runSelect conn $ articlesWithAuthorsAndTagsCountSortedQ limit
 
 -- | Find an article by its slug and return the article jointly with its author 
 -- and all associated tags.
@@ -192,37 +190,25 @@ findArticleBySlug
   :: PGS.ConnectInfo
   -> DT.Slug
   -> IO (Maybe (PA.Article, PU.User, PTA.TagArray))
-findArticleBySlug connInfo slug = do
-  conn   <- PGS.connect connInfo
-  result <-
-    OE.runSelect
-      conn
-      (   arr (const (OE.sqlStrictText rTitle))
-      >>> articlesWithAuthorAndTagsByTitleQ
-      ) :: IO [(PA.Article, PU.User, PTA.TagArray)]
-  PGS.close conn
+findArticleBySlug connInfo slug = withPostgreSQL connInfo $ \conn -> do
+  result <- OE.runSelect
+    conn
+    (arr (const (OE.sqlStrictText rTitle)) >>> articlesWithAuthorAndTagsByTitleQ
+    )
   return $ headMaybe result
- where
-  titleFromSlug = DT.reconstructTitleFromSlug slug
-  rTitle        = DT.getTitle titleFromSlug
+  where rTitle = DT.getTitle $ DT.reconstructTitleFromSlug slug
+
 
 -- | Find all comments that pertain to a given article identified by its slug. 
 -- Together with each comment, return the comment's author.
 findArticleCommentsBySlug
   :: PGS.ConnectInfo -> DT.Slug -> IO [(PC.Comment, PU.User)]
-findArticleCommentsBySlug connInfo slug = do
-  conn   <- PGS.connect connInfo
-  result <-
-    OE.runSelect
-      conn
-      (arr (const (OE.sqlStrictText rTitle)) >>> articleCommentsByTitleQ) :: IO
+findArticleCommentsBySlug connInfo slug = withPostgreSQL connInfo $ \conn ->
+  OE.runSelect
+    conn
+    (arr (const (OE.sqlStrictText rTitle)) >>> articleCommentsByTitleQ) :: IO
       [(PC.Comment, PU.User)]
-  PGS.close conn
-  return result
- where
-  titleFromSlug = DT.reconstructTitleFromSlug slug
-  rTitle        = DT.getTitle titleFromSlug
-
+  where rTitle = DT.getTitle $ DT.reconstructTitleFromSlug slug
 
 --------------------
 -- Compound Queries

@@ -13,12 +13,21 @@
 module Conduit.Persistence.PersistenceUtils
   ( F
   , FNull
+  , withPostgreSQL
   )
 where
 
+import qualified Database.PostgreSQL.Simple    as PGS
 import qualified Opaleye                       as OE
+import           RIO
 
 -- | Type synonyms for convenience
 type F field = OE.Field field -- ^ Opaleye type for a non-nullable DB field.
 
 type FNull field = OE.FieldNullable field   -- ^ Nullable DB field
+
+-- | Safely execute a DB action: Properly acquire the DB connection and clean 
+-- up the resources afterwards.
+withPostgreSQL :: PGS.ConnectInfo -> (PGS.Connection -> IO a) -> IO a
+withPostgreSQL connInfo = bracket (PGS.connect connInfo) -- acquire
+                                  PGS.close -- release

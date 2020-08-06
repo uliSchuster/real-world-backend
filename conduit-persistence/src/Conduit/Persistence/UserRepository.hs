@@ -81,21 +81,17 @@ toUser pu = case maybeUser of
 -- | Find all users stored in the DB and return them.
 -- Naming convention: DB retrievals are called "find".
 findAllUsers :: PGS.ConnectInfo -> IO [PU.User]
-findAllUsers connInfo = do
-  conn   <- PGS.connect connInfo
-  result <- OE.runSelect conn PU.allUsersQ
-  PGS.close conn
-  return result
+findAllUsers connInfo =
+  withPostgreSQL connInfo $ \conn -> OE.runSelect conn PU.allUsersQ
 
 -- | Find the user with given user name.
 findUser :: PGS.ConnectInfo -> Text -> IO (Maybe PU.User)
-findUser connInfo uName = do
-  conn   <- PGS.connect connInfo
+findUser connInfo uName = withPostgreSQL connInfo $ \conn -> do
   result <- OE.runSelect
     conn
     (userByNameQ <<< arr (const $ OE.sqlStrictText uName)) -- Convert a parameter into an arrow via the const function.
-  PGS.close conn
   return $ L.headMaybe result
+
 
 --------------------
 -- Compund Queries

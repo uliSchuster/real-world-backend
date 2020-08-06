@@ -93,16 +93,3 @@ favoritesTable = OE.tableWithSchema
 -- | Retrieve all follow relations.
 allFavoritesQ :: OE.Select FavoriteR
 allFavoritesQ = OE.selectTable favoritesTable
-
---------------------
--- DB Access
---------------------
-
--- | Find all favorites stored in the DB and return them.
--- Naming convention: DB retrievals are called "find".
--- findAllFavorites :: PGS.ConnectInfo -> IO [Favorite]
--- findAllFavorites connInfo = do
---   conn   <- PGS.connect connInfo
---   result <- OE.runSelect conn allFavoritesQ
---   PGS.close conn
---   return result
