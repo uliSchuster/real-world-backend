@@ -18,6 +18,7 @@ module Conduit.Persistence.TagRepository
 where
 
 import qualified Database.PostgreSQL.Simple    as PGS
+import           Conduit.Persistence.PersistenceUtils
 import qualified Opaleye                       as OE
 import qualified Conduit.Domain.Tag            as DT
 import qualified Conduit.Persistence.DbConfig  as DBC
@@ -56,8 +57,5 @@ toTag (PT.Tag (PT.TagId dbId) pt) = case DT.mkTag pt of
 -- | Find all tags stored in the DB and return them.
 -- Naming convention: DB retrievals are called "find".
 findAllTags :: PGS.ConnectInfo -> IO [PT.Tag]
-findAllTags connInfo = do
-  conn   <- PGS.connect connInfo
-  result <- OE.runSelect conn PT.allTagsQ
-  PGS.close conn
-  return result
+findAllTags connInfo =
+  runPostgreSQL connInfo $ \conn -> OE.runSelect conn PT.allTagsQ

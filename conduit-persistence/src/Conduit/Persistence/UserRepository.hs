@@ -81,20 +81,15 @@ toUser pu = case maybeUser of
 -- | Find all users stored in the DB and return them.
 -- Naming convention: DB retrievals are called "find".
 findAllUsers :: PGS.ConnectInfo -> IO [PU.User]
-findAllUsers connInfo = do
-  conn   <- PGS.connect connInfo
-  result <- OE.runSelect conn PU.allUsersQ
-  PGS.close conn
-  return result
+findAllUsers connInfo =
+  runPostgreSQL connInfo $ \conn -> OE.runSelect conn PU.allUsersQ
 
 -- | Find the user with given user name.
 findUser :: PGS.ConnectInfo -> Text -> IO (Maybe PU.User)
-findUser connInfo uName = do
-  conn   <- PGS.connect connInfo
+findUser connInfo uName = runPostgreSQL connInfo $ \conn -> do
   result <- OE.runSelect
     conn
     (userByNameQ <<< arr (const $ OE.sqlStrictText uName)) -- Convert a parameter into an arrow via the const function.
-  PGS.close conn
   return $ L.headMaybe result
 
 --------------------
@@ -105,6 +100,7 @@ findUser connInfo uName = do
 -- DBMS. The query statements specified below are similar to prepared
 -- statements; they need to be executed separately.
 -- Queries return Opaleye PostgreSQL "Read" records.
+
 
 userByNameQ :: OE.SelectArr (F OE.SqlText) PU.UserR
 userByNameQ = proc uName -> do
