@@ -1,7 +1,7 @@
 module AppConfig
   ( AppConfig(..)
   , HasDbConfig()
-  , dbConfigL
+  , dBConfigL
   )
 where
 
@@ -30,16 +30,19 @@ data AppConfig
       }
 
 class HasDbConfig config where
-  dbConfigL :: Lens' config DBC.DbConfig
+  dBConfigL :: Lens' config DBC.DbConfig
 
 instance HasDbConfig DBC.DbConfig where
-  dbConfigL = id
+  dBConfigL = id
 
 instance HasDbConfig AppConfig where
-  dbConfigL = lens dBConfig (\x y -> x { dBConfig = y })
+  dBConfigL = lens dBConfig (\x y -> x { dBConfig = y })
 
 instance DBC.HasDbConnInfo AppConfig where
-  connInfoL = dbConfigL . DBC.connInfoL
+  connInfoL = dBConfigL . DBC.connInfoL
+
+instance DBC.HasDbConnPool AppConfig where
+  connPoolL = dBConfigL . DBC.connPoolL
 
 instance HasLogFunc AppConfig where
   logFuncL = lens logger (\x y -> x { logger = y })

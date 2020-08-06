@@ -14,11 +14,14 @@ module Conduit.Persistence.PersistenceUtils
   ( F
   , FNull
   , withPostgreSQL
+  , withPostgreSQLPool
   )
 where
 
 import qualified Database.PostgreSQL.Simple    as PGS
+import qualified Data.Pool                     as DPL
 import qualified Opaleye                       as OE
+import qualified Conduit.Persistence.DbConfig  as DBC
 import           RIO
 
 -- | Type synonyms for convenience
@@ -31,3 +34,9 @@ type FNull field = OE.FieldNullable field   -- ^ Nullable DB field
 withPostgreSQL :: PGS.ConnectInfo -> (PGS.Connection -> IO a) -> IO a
 withPostgreSQL connInfo = bracket (PGS.connect connInfo) -- acquire
                                   PGS.close -- release
+
+-- | Safely execute a DB action using a DB connection from a pool.
+withPostgreSQLPool :: DBC.ConnPool -> (PGS.Connection -> IO a) -> IO a
+withPostgreSQLPool (DBC.ConnPool poolIO) action = do
+  pool <- poolIO
+  DPL.withResource pool action

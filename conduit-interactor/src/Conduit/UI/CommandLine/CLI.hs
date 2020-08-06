@@ -43,7 +43,7 @@ data Command
   | Article DT.Slug
   | Comment
   | Comments DT.Slug
-  | Tag
+  | Tags
   deriving (Eq, Show)
 
 newtype ProfileCmd
@@ -110,7 +110,7 @@ cmdLineParserSpec = info' cmdLineParser "Blogging made too simple."
            )
          )
     <> O.command
-         "tag"
+         "tags"
          (O.info tagCmdParser (O.progDesc "Inspect available tags."))
     )
 
@@ -205,7 +205,7 @@ commentsCmdParser = Comments <$> O.argument
 -- | Parse the command line when the "tag" subcommand is given. Currently, there
 -- are no options to parse here, we simply list all available tags.
 tagCmdParser :: O.Parser Command
-tagCmdParser = pure Tag
+tagCmdParser = pure Tags
 
 usernameReader :: O.ReadM DUN.Username
 usernameReader = O.eitherReader $ \s ->
