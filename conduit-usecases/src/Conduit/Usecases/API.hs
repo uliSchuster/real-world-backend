@@ -10,21 +10,30 @@
 -- Public interface of the Usecases library.
 -- This is the Usecases _module_ according to clean architecture terminology.
 module Conduit.Usecases.API
-  ( ARI.ArticleRepositoryI()
-  , ARI.readArticle
-  , ARI.readArticles
-  , ARI.readArticleComments
-  , TRI.TagRepositoryI()
-  , TRI.readTags
-  , URI.UserRepositoryI()
-  , URI.readUser
-  , AUC.ArticleQueryOptions(..)
+  (
+  -- * The application's use cases
+  -- ** Use cases to manipulate articles
+    AUC.ArticleQueryOptions(..)
   , AUC.ArticleFilter(..)
   , AUC.getArticles
   , AUC.getArticle
   , AUC.getArticleComments
+  -- ** Use cases to manipulate user profiles
   , PUC.getProfile
+  -- ** Use cases to manipulate tags
   , TUC.getTags
+  -- * Type classes as repository interfaces for dependency inversion
+  -- ** Interface for the article repository
+  , ARI.ArticleRepositoryI()
+  , ARI.readArticle
+  , ARI.readArticles
+  , ARI.readArticleComments
+  -- ** Interface for the tag repository
+  , TRI.TagRepositoryI()
+  , TRI.readTags
+  -- ** Interface for the user repository
+  , URI.UserRepositoryI()
+  , URI.readUser
   )
 where
 

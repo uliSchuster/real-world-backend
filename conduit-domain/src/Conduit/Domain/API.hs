@@ -13,30 +13,41 @@
 -- Public interface of the domain library.
 -- This is the Domain _module_ according to clean architecture terminology.
 module Conduit.Domain.API
-  ( DA.Article(..)
-  , DC.Comment(..)
-  , DC.CommentId
-  , DC.getCommentId
-  , DC.mkCommentIdFromInt64
+  (
+  -- * Blog article
+    DA.Article(..)
+  -- ** Article description
   , DO.Description(..)
+  -- ** Article body, the actual article content
   , DO.Body(..)
-  , DG.Tag
-  , pattern DG.Tag
-  , DG.getTag
-  , DG.mkTag
+  -- ** Article title
   , DT.Title
   , pattern DT.Title
   , DT.getTitle
   , DT.mkTitle
   , DT.reconstructTitleFromSlug
+  -- ** A slug uniquely identifies an article
   , DT.Slug
   , DT.getSlug
   , DT.mkSlug
   , DT.mkSlugFromText
-  , DU.UserBio
-  , DU.getUserBio
+  -- ** Tags can be used to group articles
+  , DG.Tag
+  , pattern DG.Tag
+  , DG.getTag
+  , DG.mkTag
+  -- * Article Comment
+  , DC.Comment(..)
+  , DC.CommentId
+  , DC.getCommentId
+  , DC.mkCommentIdFromInt64
+  -- * User
   , DU.User(..)
   , DU.mkUser
+  -- ** Biography text
+  , DU.UserBio
+  , DU.getUserBio
+  -- ** Unique user name
   , DN.Username
   , pattern DN.Username
   , DN.getUsername

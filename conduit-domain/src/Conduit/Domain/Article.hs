@@ -40,33 +40,3 @@ data Article
         articleTags :: ![DTG.Tag]
       }
   deriving (Eq, Show)
-
--- -- | construct a valid `Article` from Text values
--- mkArticle ::
---   -- | Title
---   Text ->
---   -- | Description
---   Text ->
---   -- | Body
---   Text ->
---   -- | Created at
---   T.UTCTime ->
---   -- | Updated at
---   T.UTCTime ->
---   -- | Author
---   DU.User ->
---   -- | Tags
---   [DTG.Tag] ->
---   Either Text Article
-
--- mkArticle title description body createdAt updatedAt author tags =
---   Article
---     <$> DT.mkTitle title
---     <*> DC.Description
---       description
---       DC.Body
---       body
---       createdAt
---       updatedAt
---       author
---       tags

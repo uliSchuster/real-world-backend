@@ -17,9 +17,14 @@
 -- Command-line parsing uses the optparse-applicative package:
 -- https://www.stackage.org/lts-16.7/package/optparse-applicative-0.15.1.0
 module Conduit.UI.CommandLine.CLI
-  ( Command(..)
+  (
+  -- * Top-level command data type
+    Command(..)
+  -- ** Commands to manipulate user profiles
   , ProfileCmd(..)
+  -- ** Commands to manipulate articles
   , ArticlesCmd(..)
+  -- * Functions for command line parsing
   , parseCmdLine
   , parseStrings
   )

@@ -10,11 +10,18 @@
 -- Public interface of the Presenter library.
 -- This is the Presenter _module_ according to clean architecture terminology.
 module Conduit.Presenter.API
-  ( PRA.Article(..)
-  , PRC.Comment
-  , PRP.Profile(..)
+  (
+  -- * Article resources
+    PRA.Article(..)
+  -- ** Resource for a liste of tags
   , PRT.TagList(..)
+  -- ** Resource for an article comment
+  , PRC.Comment
+  -- * Resource for user profiles
+  , PRP.Profile(..)
+  -- * Genereic resource handling
   , PRR.Resource(..)
+  -- * Type class to convert a domain model into coresponding resources
   , PRO.ToResource()
   , PRO.toResource
   )

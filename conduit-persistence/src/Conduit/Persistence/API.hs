@@ -10,10 +10,15 @@
 -- Public interface of the Persistence library.
 -- This is the Persistence _module_ according to clean architecture terminology.
 module Conduit.Persistence.API
-  ( PAR.readArticles
+  (
+  -- * Persistence functions for articles
+    PAR.readArticles
   , PAR.readArticle
+  -- ** Persistence functions for article comments
   , PAR.readArticleComments
+  -- ** Persistence functions for article tags
   , PTR.readTags
+  -- * Persistence functions for user profiles
   , PUR.readUser
   )
 where

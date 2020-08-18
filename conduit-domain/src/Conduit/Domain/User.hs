@@ -52,3 +52,4 @@ mkUser email uName imageUrl bio =
     <*> DUN.mkUsername uName
     <*> mapM URI.mkURI        imageUrl
     <*> mapM (Just . UserBio) bio
+

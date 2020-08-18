@@ -22,8 +22,8 @@
 -- and between some minimum and maximum length.
 module Conduit.Domain.Username
   ( Username()
-  , -- Do not export the data constructor
-    pattern Username
+  -- Do not export the data constructor
+  , pattern Username
   , getUsername
   , mkUsername
   , minUsernameLength
