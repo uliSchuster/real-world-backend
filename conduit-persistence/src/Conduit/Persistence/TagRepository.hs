@@ -13,23 +13,23 @@
 --
 -- Abstract collection-like interface to the underlying persistence layer.
 module Conduit.Persistence.TagRepository
-  ( readAllTags
+  ( readTags
   )
 where
 
 import           Conduit.Persistence.PersistenceUtils
 import qualified Opaleye                       as OE
-import qualified Conduit.Domain.Tag            as DT
+import qualified Conduit.Domain.API            as D
 import qualified Conduit.Persistence.DbConfig  as DBC
 import qualified Conduit.Persistence.TagsTable as PT
 import           RIO
 
 -- | Returns all tags stored in the underlying persistence mechanism
 -- Naming convention: Read repository operations are called "read".
-readAllTags :: (DBC.HasDbConnPool cfg) => RIO cfg [Either Text DT.Tag]
-readAllTags = do
+readTags :: (DBC.HasDbConnPool cfg) => RIO cfg [Either Text D.Tag]
+readTags = do
   connPool <- view DBC.connPoolL
-  pTags    <- liftIO $ findAllTags connPool
+  pTags    <- liftIO $ findTags connPool
   return $ toTag <$> pTags
 
 -- | Helper function that converts the data obtained from the DB into a
@@ -37,8 +37,8 @@ readAllTags = do
 -- smart constructors, we need to handle the case here that a tag does not
 -- conform to the domain restrictions. For now, we do it in the simples
 -- possible way: return an error message.
-toTag :: PT.Tag -> Either Text DT.Tag
-toTag (PT.Tag (PT.TagId dbId) pt) = case DT.mkTag pt of
+toTag :: PT.Tag -> Either Text D.Tag
+toTag (PT.Tag (PT.TagId dbId) pt) = case D.mkTag pt of
   Just tag -> Right tag
   Nothing ->
     Left
@@ -55,6 +55,6 @@ toTag (PT.Tag (PT.TagId dbId) pt) = case DT.mkTag pt of
 
 -- | Find all tags stored in the DB and return them.
 -- Naming convention: DB retrievals are called "find".
-findAllTags :: DBC.ConnPool -> IO [PT.Tag]
-findAllTags connPool =
+findTags :: DBC.ConnPool -> IO [PT.Tag]
+findTags connPool =
   withPostgreSQLPool connPool $ \conn -> OE.runSelect conn PT.allTagsQ

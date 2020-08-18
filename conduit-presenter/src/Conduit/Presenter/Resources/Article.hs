@@ -30,10 +30,7 @@ import qualified Conduit.Presenter.Resources.Profile
                                                as RP
 import qualified Conduit.Presenter.Resources.ToResource
                                                as TR
-import qualified Conduit.Domain.Article        as DA
-import qualified Conduit.Domain.Title          as DT
-import qualified Conduit.Domain.Content        as DC
-import qualified Conduit.Domain.Tag            as DT
+import qualified Conduit.Domain.API            as D
 import           RIO
 
 -- {
@@ -70,17 +67,17 @@ data Article
       }
   deriving (Show, Eq, Generic, J.ToJSON)
 
-instance TR.ToResource DA.Article Article where
-  toResource :: DA.Article -> Article
+instance TR.ToResource D.Article Article where
+  toResource :: D.Article -> Article
   toResource da = Article
-    { slug           = DT.getSlug . DT.mkSlug . DA.articleTitle $ da
-    , title          = DT.getTitle . DA.articleTitle $ da
-    , description    = DC.getDescription . DA.articleDescription $ da
-    , body           = DC.getBody . DA.articleBody $ da
-    , createdAt      = DA.articleCreatedAt da
-    , updatedAt      = DA.articleModifiedAt da
-    , author         = TR.toResource . DA.articleAuthor $ da
+    { slug           = D.getSlug . D.mkSlug . D.articleTitle $ da
+    , title          = D.getTitle . D.articleTitle $ da
+    , description    = D.getDescription . D.articleDescription $ da
+    , body           = D.getBody . D.articleBody $ da
+    , createdAt      = D.articleCreatedAt da
+    , updatedAt      = D.articleModifiedAt da
+    , author         = TR.toResource . D.articleAuthor $ da
     , favorited      = False -- TODO: Include favories with user auth
     , favoritesCount = 0 -- TODO: Include favories with user auth
-    , tagList        = DT.getTag <$> DA.articleTags da
+    , tagList        = D.getTag <$> D.articleTags da
     }

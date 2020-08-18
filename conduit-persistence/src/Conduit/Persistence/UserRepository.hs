@@ -28,8 +28,7 @@ import           Control.Arrow                  ( (<<<)
                                                 )
 import qualified Opaleye                       as OE
 import           Opaleye                        ( (.===) )
-import qualified Conduit.Domain.User           as DU
-import qualified Conduit.Domain.Username       as DUN
+import qualified Conduit.Domain.API            as D
 import qualified Conduit.Persistence.DbConfig  as DBC
 import qualified Conduit.Persistence.UsersTable
                                                as PU
@@ -41,8 +40,8 @@ import           RIO.List                      as L
 -- | Returns a specific user stored in the underlying persistence mechanism
 -- Naming convention: Read repository operations are called "read".
 readUser
-  :: (DBC.HasDbConnPool cfg) => DUN.Username -> RIO cfg (Either Text DU.User)
-readUser (DUN.Username uName) = do
+  :: (DBC.HasDbConnPool cfg) => D.Username -> RIO cfg (Either Text D.User)
+readUser (D.Username uName) = do
   connPool <- view DBC.connPoolL
   pUser    <- liftIO $ findUser connPool uName
   case pUser of
@@ -54,7 +53,7 @@ readUser (DUN.Username uName) = do
 -- smart constructors, we need to handle the case here that a user read from
 -- the DB does not conform to the domain restrictions. For now, we do it in the
 -- simplest possible way: return an error message.
-toUser :: PU.User -> Either Text DU.User
+toUser :: PU.User -> Either Text D.User
 toUser pu = case maybeUser of
   Just user -> Right user
   Nothing ->
@@ -65,10 +64,10 @@ toUser pu = case maybeUser of
       <> tshow (PU.userKey pu)
       <> " is invalid."
  where
-  maybeUser = DU.mkUser (PU.userEmail pu)
-                        (PU.userUsername pu)
-                        (PU.userImageUrl pu)
-                        (PU.userBio pu)
+  maybeUser = D.mkUser (PU.userEmail pu)
+                       (PU.userUsername pu)
+                       (PU.userImageUrl pu)
+                       (PU.userBio pu)
 
 --------------------
 -- DB Access
@@ -90,6 +89,7 @@ findUser connPool uName = withPostgreSQLPool connPool $ \conn -> do
     conn
     (userByNameQ <<< arr (const $ OE.sqlStrictText uName)) -- Convert a parameter into an arrow via the const function.
   return $ L.headMaybe result
+
 
 
 --------------------

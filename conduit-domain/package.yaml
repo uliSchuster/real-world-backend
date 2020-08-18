@@ -16,11 +16,10 @@ copyright:           2020 Ulrich Schuster
 description:         Please see the README on Github at <https://github.com/uliSchuster/real-world-backend#readme>
 
 dependencies:
-- base >= 4.11 && < 10
+- base
 - rio
 - email-validate
 - modern-uri
-- time
 - text-latin1
 
 ghc-options:
@@ -36,13 +35,20 @@ ghc-options:
 library:
   source-dirs:
   - src
+  exposed-modules:
+  - Conduit.Domain.API
+  dependencies:
+  - time
 
 tests:
   conduit-domain-test:
     main:                Test.hs
-    source-dirs:         test
+    source-dirs:
+    - test
+    - src
     dependencies:
     - conduit-domain
+    - time
     - tasty
     - tasty-hunit
     - tasty-quickcheck

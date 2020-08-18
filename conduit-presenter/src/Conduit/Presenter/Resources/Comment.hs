@@ -30,8 +30,7 @@ import qualified Conduit.Presenter.Resources.Profile
                                                as RP
 import qualified Conduit.Presenter.Resources.ToResource
                                                as TR
-import qualified Conduit.Domain.Comment        as DC
-import qualified Conduit.Domain.Content        as DCO
+import qualified Conduit.Domain.API            as D
 import           RIO                     hiding ( id )
 
 -- {
@@ -56,11 +55,11 @@ data Comment = Comment
      author :: !RP.Profile }
    deriving (Show, Eq, Generic, J.ToJSON)
 
-instance TR.ToResource DC.Comment Comment where
-  toResource :: DC.Comment -> Comment
-  toResource dc = Comment { id        = DC.getCommentId . DC.commentId $ dc
-                          , body      = DCO.getBody . DC.commentBody $ dc
-                          , createdAt = DC.commentCreatedAt dc
-                          , updatedAt = DC.commentModifiedAt dc
-                          , author    = TR.toResource . DC.commentAuthor $ dc
+instance TR.ToResource D.Comment Comment where
+  toResource :: D.Comment -> Comment
+  toResource dc = Comment { id        = D.getCommentId . D.commentId $ dc
+                          , body      = D.getBody . D.commentBody $ dc
+                          , createdAt = D.commentCreatedAt dc
+                          , updatedAt = D.commentModifiedAt dc
+                          , author    = TR.toResource . D.commentAuthor $ dc
                           }

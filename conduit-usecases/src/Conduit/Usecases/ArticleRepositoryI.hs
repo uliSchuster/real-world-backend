@@ -20,9 +20,7 @@ module Conduit.Usecases.ArticleRepositoryI
   )
 where
 
-import qualified Conduit.Domain.Article        as DA
-import qualified Conduit.Domain.Comment        as DC
-import qualified Conduit.Domain.Title          as DT
+import qualified Conduit.Domain.API            as D
 import           RIO
 
 -- | Interface of the actual persistence engine employed by this use case.
@@ -31,10 +29,10 @@ class ArticleRepositoryI articleRepo where
   readArticles
     :: Int -- ^ Number of articles to read. Must be less than
     -> Int -- ^ Offset to start reading from. Must be <= `maxReadCount`.
-    -> RIO articleRepo (Either Text [DA.Article])
+    -> RIO articleRepo (Either Text [D.Article])
   readArticle
-    :: DT.Slug -- ^ Slug that uniquely identifies this article.
-    -> RIO articleRepo (Either Text DA.Article)
+    :: D.Slug -- ^ Slug that uniquely identifies this article.
+    -> RIO articleRepo (Either Text D.Article)
   readArticleComments
-    :: DT.Slug -- ^ Slug that uniquely identifies the commented article.
-    -> RIO articleRepo (Either Text [DC.Comment])
+    :: D.Slug -- ^ Slug that uniquely identifies the commented article.
+    -> RIO articleRepo (Either Text [D.Comment])

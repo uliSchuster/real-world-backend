@@ -45,12 +45,7 @@ import qualified Conduit.Persistence.TaggedArticlesTable
                                                as PTA
 import qualified Conduit.Persistence.UsersTable
                                                as PU
-import qualified Conduit.Domain.Article        as DA
-import qualified Conduit.Domain.Comment        as DCO
-import qualified Conduit.Domain.Content        as DC
-import qualified Conduit.Domain.Tag            as DTG
-import qualified Conduit.Domain.Title          as DT
-import qualified Conduit.Domain.User           as DU
+import qualified Conduit.Domain.API            as D
 import qualified Data.Either.Validation        as VAL
 import           Control.Error.Util             ( note )
 import           RIO
@@ -73,7 +68,7 @@ readArticles
   :: (DBC.HasDbConnPool cfg)
   => Int -- ^ Number of articles to read. Must be less than `maxReadCount`.
   -> Int   -- ^ Offset to start reading from..
-  -> RIO cfg (Either Text [DA.Article])
+  -> RIO cfg (Either Text [D.Article])
 readArticles limit offset = do
   connPool            <- view DBC.connPoolL
   articlesAuthorsTags <- liftIO
@@ -85,26 +80,27 @@ readArticles limit offset = do
     .   toArticle
     <$> articlesAuthorsTags
 
+
 -- | Read a single article identified by its slug from the repository.
 -- The slug uniquely identifies an article.
 readArticle
   :: (DBC.HasDbConnPool cfg)
-  => DT.Slug -- ^ Slug that uniquely identifies this article.
-  -> RIO cfg (Either Text DA.Article)
+  => D.Slug -- ^ Slug that uniquely identifies this article.
+  -> RIO cfg (Either Text D.Article)
 readArticle slug = do
   connPool       <- view DBC.connPoolL
   articleOrMaybe <- liftIO $ findArticleBySlug connPool slug
   case articleOrMaybe of
     Nothing ->
-      return $ Left ("No article with slug " <> DT.getSlug slug <> " found.")
+      return $ Left ("No article with slug " <> D.getSlug slug <> " found.")
     Just article -> return $ toArticle article
 
 -- | Read all comments that pertain to a given article that is identified by 
 -- its slug.
 readArticleComments
   :: (DBC.HasDbConnPool cfg)
-  => DT.Slug -- ^ Slug that uniquely identifies the commented article.
-  -> RIO cfg (Either Text [DCO.Comment])
+  => D.Slug -- ^ Slug that uniquely identifies the commented article.
+  -> RIO cfg (Either Text [D.Comment])
 readArticleComments slug = do
   connPool        <- view DBC.connPoolL
   commentsAuthors <- liftIO $ findArticleCommentsBySlug connPool slug
@@ -115,7 +111,7 @@ readArticleComments slug = do
     .   toComment
     <$> commentsAuthors
 
-toTitle :: Text -> PA.ArticleId -> Either Text DT.Title
+toTitle :: Text -> PA.ArticleId -> Either Text D.Title
 toTitle t tId =
   note
       (  "The article title "
@@ -124,9 +120,9 @@ toTitle t tId =
       <> tshow tId
       <> " is invalid."
       )
-    $ DT.mkTitle t
+    $ D.mkTitle t
 
-toUser :: PU.User -> Either Text DU.User
+toUser :: PU.User -> Either Text D.User
 toUser u =
   note
       (  "The user "
@@ -135,34 +131,34 @@ toUser u =
       <> tshow (PU.userKey u)
       <> " is invalid."
       )
-    $ DU.mkUser (PU.userEmail u)
-                (PU.userUsername u)
-                (PU.userImageUrl u)
-                (PU.userBio u)
+    $ D.mkUser (PU.userEmail u)
+               (PU.userUsername u)
+               (PU.userImageUrl u)
+               (PU.userBio u)
 
 -- | Convert article, user and tag records retrieved from the database into an
 -- `DA.Article` domain value.
-toArticle :: (PA.Article, PU.User, PTA.TagArray) -> Either Text DA.Article
+toArticle :: (PA.Article, PU.User, PTA.TagArray) -> Either Text D.Article
 toArticle (a, u, ts) =
-  DA.Article
+  D.Article
     <$> toTitle (PA.articleTitle a) (PA.articleKey a)
-    <*> Right (DC.Description $ PA.articleDescription a)
-    <*> Right (DC.Body $ PA.articleBody a)
+    <*> Right (D.Description $ PA.articleDescription a)
+    <*> Right (D.Body $ PA.articleBody a)
     <*> Right (PA.articleCreatedAt a)
     <*> Right (PA.articleUpdatedAt a)
     <*> toUser u
     <*> tagList
  where
   tagList = note "A persisted tag is invalid."
-    $ sequence (DTG.mkTag <$> PTA.getTagArray ts)
+    $ sequence (D.mkTag <$> PTA.getTagArray ts)
 
 -- | Convert comment and user records retrieved from the database into a
 -- `DCO.Comment` domain value.
-toComment :: (PC.Comment, PU.User) -> Either Text DCO.Comment
+toComment :: (PC.Comment, PU.User) -> Either Text D.Comment
 toComment (c, u) =
-  DCO.Comment
-    <$> Right (DCO.mkCommentIdFromInt64 . PC.getCommentId $ PC.commentKey c)
-    <*> Right (DC.Body $ PC.commentBody c)
+  D.Comment
+    <$> Right (D.mkCommentIdFromInt64 . PC.getCommentId $ PC.commentKey c)
+    <*> Right (D.Body $ PC.commentBody c)
     <*> Right (PC.commentCreatedAt c)
     <*> Right (PC.commentUpdatedAt c)
     <*> toUser u
@@ -186,32 +182,31 @@ findLimitedSortedArticlesWithAuthorsAndTags connPool limit =
 -- | Find an article by its slug and return the article jointly with its author 
 -- and all associated tags.
 findArticleBySlug
-  :: DBC.ConnPool -> DT.Slug -> IO (Maybe (PA.Article, PU.User, PTA.TagArray))
+  :: DBC.ConnPool -> D.Slug -> IO (Maybe (PA.Article, PU.User, PTA.TagArray))
 findArticleBySlug connPool slug = withPostgreSQLPool connPool $ \conn -> do
   result <- OE.runSelect
     conn
     (arr (const (OE.sqlStrictText rTitle)) >>> articlesWithAuthorAndTagsByTitleQ
     )
   return $ headMaybe result
-  where rTitle = DT.getTitle $ DT.reconstructTitleFromSlug slug
+  where rTitle = D.getTitle $ D.reconstructTitleFromSlug slug
 
 
 -- | Find all comments that pertain to a given article identified by its slug. 
 -- Together with each comment, return the comment's author.
 findArticleCommentsBySlug
-  :: DBC.ConnPool -> DT.Slug -> IO [(PC.Comment, PU.User)]
+  :: DBC.ConnPool -> D.Slug -> IO [(PC.Comment, PU.User)]
 findArticleCommentsBySlug connPool slug =
   withPostgreSQLPool connPool $ \conn ->
     OE.runSelect
       conn
       (arr (const (OE.sqlStrictText rTitle)) >>> articleCommentsByTitleQ) :: IO
         [(PC.Comment, PU.User)]
-  where rTitle = DT.getTitle $ DT.reconstructTitleFromSlug slug
+  where rTitle = D.getTitle $ D.reconstructTitleFromSlug slug
 
 --------------------
 -- Compound Queries
 --------------------
-
 
 -- | Join article-ids and tag names for all articles.
 articleTagNamesQ :: OE.Select (PA.ArticleIdField, F OE.SqlText)
@@ -222,10 +217,9 @@ articleTagNamesQ = proc () -> do
   returnA -< (aId, tn)
 
 -- | Aggregate all tag names for all articles
-articleTagsQ :: OE.Select (F OE.SqlInt8, F (OE.SqlArray OE.SqlText))
+articleTagsQ :: OE.Select (PA.ArticleIdField, F (OE.SqlArray OE.SqlText))
 articleTagsQ =
-  OE.aggregate (PP.p2 (OE.groupBy, OE.arrayAgg)) $
-    arr (first PA.getArticleId) <<< articleTagNamesQ
+  OE.aggregate (PP.p2 (PA.pArticleId (PA.ArticleId OE.groupBy), OE.arrayAgg)) articleTagNamesQ
 
 -- | Retrieve all articles with corresponding author and array of tags.
 articlesWithAuthorsAndTagsQ :: OE.Select (PA.ArticleR, PU.UserR, PTA.TagArrayF)
@@ -233,7 +227,7 @@ articlesWithAuthorsAndTagsQ = proc () -> do
   (aId, ts) <- articleTagsQ -< ()
   article <- PA.allArticlesQ -< ()
   user <- PU.allUsersQ -< ()
-  OE.restrict -< (PA.getArticleId . PA.articleKey) article .== aId
+  OE.restrict -< PA.articleKey article .=== aId
   OE.restrict -< PA.articleAuthorFk article .=== PU.userKey user
   returnA -< (article, user, PTA.TagArray ts)
 

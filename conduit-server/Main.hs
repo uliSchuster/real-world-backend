@@ -9,24 +9,11 @@ where
 
 import qualified Data.Aeson                    as J
 import qualified Data.Aeson.Encode.Pretty      as JPP
-import qualified Conduit.Domain.Username       as DUN
-import qualified Conduit.Domain.Title          as DT
-import qualified Conduit.Usecases.ArticleUsecases
-                                               as UCA
-import qualified Conduit.Usecases.ProfileUsecases
-                                               as UCP
-import qualified Conduit.Usecases.TagUsecases  as UCT
+
+import qualified Conduit.Domain.API            as D
+import qualified Conduit.Usecases.API          as U
 import qualified Conduit.Persistence.DbConfig  as DBC
-import qualified Conduit.Presenter.Resources.Article
-                                               as RA
-import qualified Conduit.Presenter.Resources.Profile
-                                               as RP
-import qualified Conduit.Presenter.Resources.Resource
-                                               as RR
-import qualified Conduit.Presenter.Resources.Tags
-                                               as RT
-import qualified Conduit.Presenter.Resources.Comment
-                                               as RC
+import qualified Conduit.Presenter.API         as P
 import qualified Conduit.UI.CommandLine.CLI    as CLI
 import qualified AppConfig                     as APC
 import           RIO
@@ -106,43 +93,43 @@ main :: IO ()
 main = runApp conduitApp
 
 getProfileResource
-  :: DUN.Username -> RIO APC.AppConfig (Either ApplicationError RR.Resource)
+  :: D.Username -> RIO APC.AppConfig (Either ApplicationError P.Resource)
 getProfileResource uName = do
-  userOrError <- UCP.getProfile uName
+  userOrError <- U.getProfile uName
   case userOrError of
     Left  e -> return $ Left $ NotFound e
-    Right u -> return $ Right $ RR.Profile $ RP.toResource u
+    Right u -> return $ Right $ P.ResProfile $ P.toResource u
 
-getTagResource :: RIO APC.AppConfig (Either ApplicationError RR.Resource)
+getTagResource :: RIO APC.AppConfig (Either ApplicationError P.Resource)
 getTagResource = do
-  dTags <- UCT.getAllTags
-  let tagList = RT.toResource dTags
-  return $ Right (RR.Tags tagList) -- TODO: Error handling.
+  dTags <- U.getTags
+  let tagList = P.toResource dTags
+  return $ Right (P.ResTags tagList) -- TODO: Error handling.
 
 getArticleResource
-  :: DT.Slug -> RIO APC.AppConfig (Either ApplicationError RR.Resource)
+  :: D.Slug -> RIO APC.AppConfig (Either ApplicationError P.Resource)
 getArticleResource slug = do
-  articleOrError <- UCA.getArticle slug
+  articleOrError <- U.getArticle slug
   case articleOrError of
     Left  e -> return $ Left $ NotFound e
-    Right a -> return $ Right (RR.Article $ RA.toResource a)
+    Right a -> return $ Right (P.ResArticle $ P.toResource a)
 
 getArticleResources
-  :: UCA.ArticleQueryOptions
-  -> RIO APC.AppConfig (Either ApplicationError RR.Resource)
+  :: U.ArticleQueryOptions
+  -> RIO APC.AppConfig (Either ApplicationError P.Resource)
 getArticleResources qOpts = do
-  articlesOrError <- UCA.getArticles qOpts
+  articlesOrError <- U.getArticles qOpts
   case articlesOrError of
     Left  e  -> return $ Left $ NotFound e
-    Right as -> return $ Right $ RR.Articles $ RA.toResource <$> as
+    Right as -> return $ Right $ P.ResArticles $ P.toResource <$> as
 
 getArticleCommentsResource
-  :: DT.Slug -> RIO APC.AppConfig (Either ApplicationError RR.Resource)
+  :: D.Slug -> RIO APC.AppConfig (Either ApplicationError P.Resource)
 getArticleCommentsResource slug = do
-  commentsOrError <- UCA.getArticleComments slug
+  commentsOrError <- U.getArticleComments slug
   case commentsOrError of
     Left  e  -> return $ Left $ NotFound e
-    Right cs -> return $ Right $ RR.Comments $ RC.toResource <$> cs
+    Right cs -> return $ Right $ P.ResComments $ P.toResource <$> cs
 
 
 displayResult :: (J.ToJSON l, J.ToJSON r) => Either l r -> Utf8Builder

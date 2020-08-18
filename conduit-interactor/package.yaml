@@ -16,10 +16,8 @@ copyright:           2020 Ulrich Schuster
 description:         Please see the README on Github at <https://github.com/uliSchuster/real-world-backend#readme>
 
 dependencies:
-- base >= 4.11 && < 10
+- base
 - rio
-- errors
-- optparse-applicative
 
 ghc-options:
 - -Wall
@@ -35,5 +33,7 @@ library:
   source-dirs:
   - src
   dependencies:
+  - errors
+  - optparse-applicative
   - conduit-domain
   - conduit-usecases

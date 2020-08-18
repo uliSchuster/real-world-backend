@@ -25,8 +25,7 @@ module Conduit.Presenter.Resources.Profile
 where
 
 import qualified Data.Aeson                    as J
-import qualified Conduit.Domain.User           as DU
-import qualified Conduit.Domain.Username       as DUN
+import qualified Conduit.Domain.API            as D
 import qualified Conduit.Presenter.Resources.ToResource
                                                as TR
 import           RIO
@@ -49,10 +48,10 @@ data Profile
       }
   deriving (Show, Eq, Generic, J.ToJSON)
 
-instance TR.ToResource DU.User Profile where
-  toResource :: DU.User -> Profile
-  toResource du = Profile { username  = DUN.getUsername . DU.userName $ du
-                          , bio       = DU.getUserBio <$> DU.userBio du
-                          , image     = URI.render <$> DU.userImageUrl du
+instance TR.ToResource D.User Profile where
+  toResource :: D.User -> Profile
+  toResource du = Profile { username  = D.getUsername . D.userName $ du
+                          , bio       = D.getUserBio <$> D.userBio du
+                          , image     = URI.render <$> D.userImageUrl du
                           , following = False -- TODO: Map following status once login is available.
                           }
