@@ -25,13 +25,13 @@
 -- Because of the stringent invariants ensured by the `Title` type, it can be
 -- converted into a `Slug` without additional validation.
 module Conduit.Domain.Title
-  ( -- | Title
+  ( -- * Title
     Title()
   , pattern Title
   , getTitle
   , mkTitle
   , reconstructTitleFromSlug
-  -- | Slug
+  -- * Slug
   , maxSlugLength
   , slugSeparator
   , Slug()

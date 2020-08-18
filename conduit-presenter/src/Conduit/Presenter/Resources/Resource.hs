@@ -31,18 +31,18 @@ import qualified Conduit.Presenter.Resources.Tags
 import           RIO
 
 data Resource
-  = Profile RP.Profile
-  | Article RA.Article
-  | Articles [RA.Article]
-  | Comment RC.Comment
-  | Comments [RC.Comment]
-  | Tags RT.TagList
+  = ResProfile RP.Profile
+  | ResArticle RA.Article
+  | ResArticles [RA.Article]
+  | ResComment RC.Comment
+  | ResComments [RC.Comment]
+  | ResTags RT.TagList
   deriving (Eq, Show, Generic)
 
 instance J.ToJSON Resource where
-  toJSON (Profile  p ) = J.object [("profile", J.toJSON p)]
-  toJSON (Article  a ) = J.toJSON a
-  toJSON (Articles as) = J.object [("articles", J.toJSON as)]
-  toJSON (Comment  c ) = J.toJSON c
-  toJSON (Comments cs) = J.object [("comments", J.toJSON cs)]
-  toJSON (Tags     t ) = J.toJSON t
+  toJSON (ResProfile  p ) = J.object [("profile", J.toJSON p)]
+  toJSON (ResArticle  a ) = J.toJSON a
+  toJSON (ResArticles as) = J.object [("articles", J.toJSON as)]
+  toJSON (ResComment  c ) = J.toJSON c
+  toJSON (ResComments cs) = J.object [("comments", J.toJSON cs)]
+  toJSON (ResTags     t ) = J.toJSON t

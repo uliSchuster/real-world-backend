@@ -17,9 +17,14 @@
 -- Command-line parsing uses the optparse-applicative package:
 -- https://www.stackage.org/lts-16.7/package/optparse-applicative-0.15.1.0
 module Conduit.UI.CommandLine.CLI
-  ( Command(..)
+  (
+  -- * Top-level command data type
+    Command(..)
+  -- ** Commands to manipulate user profiles
   , ProfileCmd(..)
+  -- ** Commands to manipulate articles
   , ArticlesCmd(..)
+  -- * Functions for command line parsing
   , parseCmdLine
   , parseStrings
   )
@@ -27,11 +32,8 @@ where
 
 import qualified Control.Error.Util            as EUTL
 import qualified Options.Applicative           as O
-import qualified Conduit.Domain.Tag            as DTG
-import qualified Conduit.Domain.Username       as DUN
-import qualified Conduit.Domain.Title          as DT
-import qualified Conduit.Usecases.ArticleUsecases
-                                               as UA
+import qualified Conduit.Domain.API            as D
+import qualified Conduit.Usecases.API          as U
 import           RIO
 import qualified RIO.Text                      as T
 
@@ -40,18 +42,18 @@ data Command
   = User
   | Profile ProfileCmd
   | Articles ArticlesCmd
-  | Article DT.Slug
+  | Article D.Slug
   | Comment
-  | Comments DT.Slug
+  | Comments D.Slug
   | Tags
   deriving (Eq, Show)
 
 newtype ProfileCmd
-  = ShowProfile DUN.Username
+  = ShowProfile D.Username
   deriving (Eq, Show)
 
 newtype ArticlesCmd
-  = GetArticlesCmd UA.ArticleQueryOptions
+  = GetArticlesCmd U.ArticleQueryOptions
   deriving (Eq, Show)
 
 --- | FollowUser Text
@@ -135,7 +137,7 @@ articlesCmdParser :: O.Parser Command
 articlesCmdParser =
   Articles
     <$> (   GetArticlesCmd
-        <$> (   UA.ArticleQueryOptions
+        <$> (   U.ArticleQueryOptions
             <$> O.option
                   O.auto
                   (  O.long "limit"
@@ -153,7 +155,7 @@ articlesCmdParser =
                   <> O.help
                        "Offset from where on to show articles, ordered by date."
                   )
-            <*> (   UA.ArticleFilter
+            <*> (   U.ArticleFilter
                 <$> O.optional
                       (O.option
                         usernameReader
@@ -207,14 +209,14 @@ commentsCmdParser = Comments <$> O.argument
 tagCmdParser :: O.Parser Command
 tagCmdParser = pure Tags
 
-usernameReader :: O.ReadM DUN.Username
-usernameReader = O.eitherReader $ \s ->
-  EUTL.note ("Not a valid username: " ++ s) (DUN.mkUsername $ T.pack s)
+usernameReader :: O.ReadM D.Username
+usernameReader = O.eitherReader
+  $ \s -> EUTL.note ("Not a valid username: " ++ s) (D.mkUsername $ T.pack s)
 
-tagReader :: O.ReadM DTG.Tag
+tagReader :: O.ReadM D.Tag
 tagReader = O.eitherReader
-  $ \s -> EUTL.note ("Not a valid tagname: " ++ s) (DTG.mkTag $ T.pack s)
+  $ \s -> EUTL.note ("Not a valid tagname: " ++ s) (D.mkTag $ T.pack s)
 
-slugReader :: O.ReadM DT.Slug
+slugReader :: O.ReadM D.Slug
 slugReader = O.eitherReader
-  $ \s -> EUTL.note ("Not a valid slug: " ++ s) (DT.mkSlugFromText $ T.pack s)
+  $ \s -> EUTL.note ("Not a valid slug: " ++ s) (D.mkSlugFromText $ T.pack s)

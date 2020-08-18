@@ -20,12 +20,9 @@ extra-source-files:
 description:         Please see the README on Github at <https://github.com/uliSchuster/real-world-backend#readme>
 
 dependencies:
-- base >= 4.11 && < 10
+- base
 - rio
 - time
-- postgresql-simple
-- aeson
-- aeson-pretty
 
 ghc-options:
 - -Wall
@@ -42,6 +39,9 @@ executables:
     main:                Main.hs
     source-dirs:         conduit-server
     dependencies:
+    - postgresql-simple
+    - aeson
+    - aeson-pretty
     - conduit-domain
     - conduit-usecases
     - conduit-persistence

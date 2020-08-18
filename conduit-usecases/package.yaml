@@ -16,7 +16,7 @@ copyright:           2020 Ulrich Schuster
 description:         Please see the README on Github at <https://github.com/uliSchuster/real-world-backend#readme>
 
 dependencies:
-- base >= 4.11 && < 10
+- base
 - rio
 
 ghc-options:
@@ -32,5 +32,7 @@ ghc-options:
 library:
   source-dirs:
   - src
+  exposed-modules:
+  - Conduit.Usecases.API
   dependencies:
   - conduit-domain

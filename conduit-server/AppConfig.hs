@@ -1,3 +1,5 @@
+{-# LANGUAGE NoImplicitPrelude #-}
+
 module AppConfig
   ( AppConfig(..)
   , HasDbConfig()
@@ -5,19 +7,9 @@ module AppConfig
   )
 where
 
-import qualified Conduit.Persistence.ArticleRepository
-                                               as ARepo
 import qualified Conduit.Persistence.DbConfig  as DBC
-import qualified Conduit.Persistence.TagRepository
-                                               as TRepo
-import qualified Conduit.Persistence.UserRepository
-                                               as URepo
-import qualified Conduit.Usecases.ArticleRepositoryI
-                                               as ARepoI
-import qualified Conduit.Usecases.TagRepositoryI
-                                               as TRepoI
-import qualified Conduit.Usecases.UserRepositoryI
-                                               as URepoI
+import qualified Conduit.Persistence.API       as R
+import qualified Conduit.Usecases.API          as U
 import           RIO
 
 -- | Genereic configuration data structure for the entire application. Each IO
@@ -48,13 +40,13 @@ instance HasLogFunc AppConfig where
   logFuncL = lens logger (\x y -> x { logger = y })
 
 -- Wire dependencies.
-instance TRepoI.TagRepositoryI AppConfig where
-  readAllTags = TRepo.readAllTags
+instance U.TagRepositoryI AppConfig where
+  readTags = R.readTags
 
-instance URepoI.UserRepositoryI AppConfig where
-  readUser = URepo.readUser
+instance U.UserRepositoryI AppConfig where
+  readUser = R.readUser
 
-instance ARepoI.ArticleRepositoryI AppConfig where
-  readArticles        = ARepo.readArticles
-  readArticle         = ARepo.readArticle
-  readArticleComments = ARepo.readArticleComments
+instance U.ArticleRepositoryI AppConfig where
+  readArticles        = R.readArticles
+  readArticle         = R.readArticle
+  readArticleComments = R.readArticleComments

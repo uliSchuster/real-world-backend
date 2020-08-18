@@ -1,4 +1,3 @@
-{-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE NoImplicitPrelude #-}
 
 -- |
@@ -25,19 +24,15 @@ module Conduit.Usecases.ArticleUsecases
   )
 where
 
-import qualified Conduit.Domain.Article                as DA
-import qualified Conduit.Domain.Comment                as DC
-import qualified Conduit.Domain.Tag                    as DTG
-import qualified Conduit.Domain.Username               as DU
-import qualified Conduit.Domain.Title                  as DT
+import qualified Conduit.Domain.API            as D
 import           RIO
 import           Conduit.Usecases.ArticleRepositoryI
 
 data ArticleFilter
   = ArticleFilter
-      { author :: !(Maybe DU.Username),
-        favoritedBy :: !(Maybe DU.Username),
-        tag :: !(Maybe DTG.Tag)
+      { author :: !(Maybe D.Username),
+        favoritedBy :: !(Maybe D.Username),
+        tag :: !(Maybe D.Tag)
       }
   deriving (Eq, Show)
 
@@ -54,16 +49,16 @@ data ArticleQueryOptions
 getArticles
   :: ArticleRepositoryI cfg
   => ArticleQueryOptions
-  -> RIO cfg (Either Text [DA.Article])
+  -> RIO cfg (Either Text [D.Article])
 getArticles ArticleQueryOptions { articleLimit = limit, articleOffset = offset }
   = readArticles limit offset
 
 -- | Get a specific article identified by its slug.
 getArticle
-  :: ArticleRepositoryI cfg => DT.Slug -> RIO cfg (Either Text DA.Article)
+  :: ArticleRepositoryI cfg => D.Slug -> RIO cfg (Either Text D.Article)
 getArticle = readArticle
 
 -- | Get all comments that pertain to an article that is identified by its slug.
 getArticleComments
-  :: ArticleRepositoryI cfg => DT.Slug -> RIO cfg (Either Text [DC.Comment])
+  :: ArticleRepositoryI cfg => D.Slug -> RIO cfg (Either Text [D.Comment])
 getArticleComments = readArticleComments

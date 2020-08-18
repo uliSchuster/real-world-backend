@@ -25,7 +25,7 @@ module Conduit.Presenter.Resources.Tags
 where
 
 import qualified Data.Aeson                    as J
-import qualified Conduit.Domain.Tag            as DT
+import qualified Conduit.Domain.API            as D
 import qualified Conduit.Presenter.Resources.ToResource
                                                as TR
 import           RIO
@@ -35,6 +35,6 @@ newtype TagList = TagList {tags :: [Text]}
 
 instance J.ToJSON TagList
 
-instance TR.ToResource [DT.Tag] TagList where
-  toResource :: [DT.Tag] -> TagList
-  toResource ts = TagList $ DT.getTag <$> ts
+instance TR.ToResource [D.Tag] TagList where
+  toResource :: [D.Tag] -> TagList
+  toResource ts = TagList $ D.getTag <$> ts

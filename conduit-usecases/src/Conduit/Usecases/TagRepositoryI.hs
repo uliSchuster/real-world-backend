@@ -14,14 +14,14 @@
 -- Therefore, the persistence interface is defined here in the form of a type -- class.
 module Conduit.Usecases.TagRepositoryI
   ( TagRepositoryI()
-  , readAllTags
+  , readTags
   )
 where
 
-import qualified Conduit.Domain.Tag            as DT
+import qualified Conduit.Domain.API            as D
 import           RIO
 
 -- | Interface of the actual persistence engine employed by this use case.
 -- Must be implemented by the outermost application ring.
 class TagRepositoryI tagRepo where
-  readAllTags :: RIO tagRepo [Either Text DT.Tag]
+  readTags :: RIO tagRepo [Either Text D.Tag]

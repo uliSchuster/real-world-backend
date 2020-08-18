@@ -25,6 +25,8 @@ import           RIO
 import qualified Text.Email.Validate           as Email
 import qualified Text.URI                      as URI
 
+-- TODO: Properly hide the UserBio implementation and provide a sanitizing 
+-- constructor.
 newtype UserBio = UserBio {getUserBio :: Text}
   deriving (Eq, Show, Ord, IsString, Semigroup, Monoid, Display, Hashable)
 
@@ -50,3 +52,4 @@ mkUser email uName imageUrl bio =
     <*> DUN.mkUsername uName
     <*> mapM URI.mkURI        imageUrl
     <*> mapM (Just . UserBio) bio
+

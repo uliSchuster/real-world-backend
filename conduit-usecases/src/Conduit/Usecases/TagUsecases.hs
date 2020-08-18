@@ -13,24 +13,24 @@
 -- Uses an abstract repository to retrieve the persisted tags. Filters them and
 -- logs errors for those tags that could not be properly loaded from the store.
 module Conduit.Usecases.TagUsecases
-  ( getAllTags
+  ( getTags
   )
 where
 
-import qualified Conduit.Domain.Tag            as DT
+import qualified Conduit.Domain.API            as D
 import           RIO
 import           Conduit.Usecases.TagRepositoryI
 
 -- | Use the tag-repository configured at application-level to read all tags.
 -- For those tags that fail to map on the domain type, log an error.
-getAllTags :: (HasLogFunc cfg, TagRepositoryI cfg) => RIO cfg [DT.Tag]
-getAllTags = do
-  tagsErrors <- readAllTags
+getTags :: (HasLogFunc cfg, TagRepositoryI cfg) => RIO cfg [D.Tag]
+getTags = do
+  tagsErrors <- readTags
   mapM_ logInvalidTag tagsErrors
   return $ rights tagsErrors
 
 -- | Helper function to log the error reported by the repository.
-logInvalidTag :: (HasLogFunc cfg) => Either Text DT.Tag -> RIO cfg ()
+logInvalidTag :: (HasLogFunc cfg) => Either Text D.Tag -> RIO cfg ()
 logInvalidTag it = case it of
   Right _ -> return ()
   Left  e -> logError $ display e

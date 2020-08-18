@@ -16,16 +16,8 @@ copyright:           2020 Ulrich Schuster
 description:         Please see the README on Github at <https://github.com/uliSchuster/real-world-backend#readme>
 
 dependencies:
-- base >= 4.11 && < 10
+- base
 - rio
-- time
-- profunctors
-- product-profunctors
-- postgresql-simple
-- opaleye
-- errors
-- either
-- resource-pool
 
 ghc-options:
 - -Wall
@@ -40,6 +32,17 @@ ghc-options:
 library:
   source-dirs:
   - src
+  exposed-modules:
+  - Conduit.Persistence.DbConfig
+  - Conduit.Persistence.API
   dependencies:
+  - time
+  - profunctors
+  - product-profunctors
+  - postgresql-simple
+  - opaleye
+  - errors
+  - either
+  - resource-pool
   - conduit-domain
   - conduit-usecases

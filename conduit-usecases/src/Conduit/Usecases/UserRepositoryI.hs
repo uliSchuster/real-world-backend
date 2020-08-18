@@ -18,11 +18,10 @@ module Conduit.Usecases.UserRepositoryI
   )
 where
 
-import qualified Conduit.Domain.User           as DU
-import qualified Conduit.Domain.Username       as DUN
+import qualified Conduit.Domain.API            as D
 import           RIO
 
 -- | Interface of the actual persistence engine employed by this use case.
 -- Must be implemented by the outermost application ring.
 class UserRepositoryI userRepo where
-  readUser :: DUN.Username -> RIO userRepo (Either Text DU.User)
+  readUser :: D.Username -> RIO userRepo (Either Text D.User)

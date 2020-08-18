@@ -16,13 +16,11 @@ module Conduit.Usecases.ProfileUsecases
   )
 where
 
-import qualified Conduit.Domain.User           as DU
-import qualified Conduit.Domain.Username       as DUN
+import qualified Conduit.Domain.API            as D
 import           RIO
 import           Conduit.Usecases.UserRepositoryI
 
 -- | Use the tag-repository configured at application-level to read all tags.
 -- For those tags that fail to map on the domain type, log an error.
-getProfile
-  :: UserRepositoryI cfg => DUN.Username -> RIO cfg (Either Text DU.User)
+getProfile :: UserRepositoryI cfg => D.Username -> RIO cfg (Either Text D.User)
 getProfile = readUser
