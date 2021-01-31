@@ -97,7 +97,7 @@ To limit complexity, it is essential to properly organize and minimize dependenc
 
 - [Three Layer Haskell Cake](https://www.parsonsmatt.org/2018/03/22/three_layer_haskell_cake.html). Architecture proposal by P. Matt. It's an implementation of Clean Architecture principles, with a pure domain core, and adapters to external systems in the outermost layer.
 - [Invert Your Mocks](https://www.parsonsmatt.org/2017/07/27/inverted_mocking.html). Mocking external systems for efficient testing of the aplication core.
-- [The ReaderT Desidn Pattern](https://www.fpcomplete.com/blog/2017/06/readert-design-pattern/). Minimal Transformer stack (ReaderT and IO) advocated by FPComplete. See also their posts on the [RIO Monad](https://www.fpcomplete.com/blog/2017/07/the-rio-monad/) and the [RIO Standard Library](https://www.fpcomplete.com/haskell/library/rio/.)
+- [The ReaderT Design Pattern](https://www.fpcomplete.com/blog/2017/06/readert-design-pattern/). Minimal Transformer stack (ReaderT and IO) advocated by FPComplete. See also their posts on the [RIO Monad](https://www.fpcomplete.com/blog/2017/07/the-rio-monad/) and the [RIO Standard Library](https://www.fpcomplete.com/haskell/library/rio/.)
 - An [StackOverflow] question about modular application architecture. The answers explain why stacking multiple Reader monads might be problematic, and explain the ReaderT design pattern as a solution for large applications.
 - An [example](https://gvolpe.github.io/blog/lessons-learned-while-writing-a-haskell-app/) about a web application that uses `dhall` configuration, the ReaderT design pattern plus polymprphic function records.
 
