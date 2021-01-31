@@ -21,6 +21,7 @@
 - [Haskell for All](http://www.haskellforall.com). G. Gonzales' blog about all things Haskell. Good tutorials and though-provoking posts, but hard to browse.
 - [Mark Karpov's Haskell Blog](https://markkarpov.com/tag/haskell.html).
 - [William Yao's Haskell Blog](https://www.williamyaoh.com/archive.html)
+- [Alexis King's Haskell Blog](https://lexi-lambda.github.io)
 
 ### Books about Haskell
 
