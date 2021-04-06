@@ -16,7 +16,7 @@
 -- experimentation and simpler integration testing.
 -- Command-line parsing uses the optparse-applicative package:
 -- https://www.stackage.org/lts-16.7/package/optparse-applicative-0.15.1.0
-module Conduit.UI.CommandLine.CLI
+module Conduit.Interactor.CommandLine.CLI
   (
   -- * Top-level command data type
     Command(..)
@@ -39,13 +39,18 @@ import qualified RIO.Text                      as T
 
 -- | All possible commands the user can input via the command line.
 data Command
-  = User
+  = User -- UserCmd
   | Profile ProfileCmd
   | Articles ArticlesCmd
   | Article D.Slug
   | Comment
   | Comments D.Slug
   | Tags
+  deriving (Eq, Show)
+
+data UserCmd
+  = RegisterUserCmd
+  | UpdateUserCmd
   deriving (Eq, Show)
 
 newtype ProfileCmd

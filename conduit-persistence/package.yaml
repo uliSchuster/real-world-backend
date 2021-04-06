@@ -43,6 +43,7 @@ library:
   - opaleye
   - errors
   - either
+  - password
   - resource-pool
   - conduit-domain
   - conduit-usecases

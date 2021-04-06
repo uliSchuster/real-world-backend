@@ -35,4 +35,6 @@ library:
   exposed-modules:
   - Conduit.Usecases.API
   dependencies:
+  - password
+  - zxcvbn-hs
   - conduit-domain

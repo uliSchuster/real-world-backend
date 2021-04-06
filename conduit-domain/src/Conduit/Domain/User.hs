@@ -16,14 +16,19 @@ module Conduit.Domain.User
   ( UserBio(..)
   , User(..)
   , mkUser
+  , UserIdentity(..)
   )
 where
 
-import qualified Conduit.Domain.Types          as DT
-import qualified Conduit.Domain.Username       as DUN
-import           RIO
 import qualified Text.Email.Validate           as Email
 import qualified Text.URI                      as URI
+import qualified Data.Password.Argon2          as PW
+
+import qualified Conduit.Domain.Types          as DT
+import qualified Conduit.Domain.Username       as DUN
+
+import           RIO
+
 
 -- TODO: Properly hide the UserBio implementation and provide a sanitizing 
 -- constructor.
@@ -53,3 +58,10 @@ mkUser email uName imageUrl bio =
     <*> mapM URI.mkURI        imageUrl
     <*> mapM (Just . UserBio) bio
 
+-- | A user identity combines the openly available information in a user 
+-- profile with a salted password hash of this user. We rely on the Argon2
+-- passowrd hasing algorithm. Password hashing must be performed at the usecase
+-- level, as it requires a random salt.
+data UserIdentity = UserIdentity
+    { userPwdHash :: !(PW.PasswordHash PW.Argon2)
+    , profile :: !User}

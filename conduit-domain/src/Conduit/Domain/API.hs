@@ -44,6 +44,7 @@ module Conduit.Domain.API
   -- * User
   , DU.User(..)
   , DU.mkUser
+  , DU.UserIdentity(..)
   -- ** Biography text
   , DU.UserBio
   , DU.getUserBio
@@ -52,6 +53,10 @@ module Conduit.Domain.API
   , pattern DN.Username
   , DN.getUsername
   , DN.mkUsername
+  -- ** Utility functions for basic types
+  , DY.mkEmail
+  , DY.emailToText
+  , DY.uriToText
   )
 where
 
@@ -62,3 +67,4 @@ import qualified Conduit.Domain.Tag            as DG
 import qualified Conduit.Domain.Title          as DT
 import qualified Conduit.Domain.User           as DU
 import qualified Conduit.Domain.Username       as DN
+import qualified Conduit.Domain.Types          as DY

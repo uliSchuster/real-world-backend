@@ -19,6 +19,7 @@
 module Conduit.Persistence.UserRepository
   ( readUser
   , findAllUsers
+  , insertUserIdentities
   )
 where
 
@@ -34,7 +35,8 @@ import qualified Conduit.Persistence.UsersTable
                                                as PU
 import           Conduit.Persistence.PersistenceUtils
 import           RIO
-import           RIO.List                      as L
+import qualified RIO.List                      as L
+import qualified Data.Password.Argon2          as PW
 
 
 -- | Returns a specific user stored in the underlying persistence mechanism
@@ -69,6 +71,35 @@ toUser pu = case maybeUser of
                        (PU.userImageUrl pu)
                        (PU.userBio pu)
 
+insertUserIdentities
+  :: (DBC.HasDbConnPool cfg)
+  => [D.UserIdentity]
+  -> RIO cfg (Either Text [PU.UserId])
+insertUserIdentities userIdentities = do
+  connPool  <- view DBC.connPoolL
+  userIds <- liftIO $ insertUsers connPool insertSpec
+  return $ Right userIds
+ where
+  newUsers   = toPersistenceEntity <$> userIdentities
+  insertSpec = OE.Insert
+    { OE.iTable      = PU.userTable
+    , OE.iRows       = map OE.toFields newUsers
+    , OE.iReturning  = OE.rReturning (\PU.User { PU.userKey = pk } -> pk)
+    , OE.iOnConflict = Nothing
+    }
+
+toPersistenceEntity :: D.UserIdentity -> PU.UserI
+toPersistenceEntity u = PU.User
+  { PU.userKey      = PU.UserId (Nothing :: Maybe Int64) -- DBMS generates key.
+  , PU.userUsername = D.getUsername $ D.userName user
+  , PU.userEmail    = D.emailToText $ D.userEmail user
+  , PU.userBio      = D.getUserBio <$> D.userBio user
+  , PU.userImageUrl = D.uriToText <$> D.userImageUrl user
+  , PU.userPwdHash  = PW.unPasswordHash $ D.userPwdHash u
+  }
+  where user = D.profile u
+
+
 --------------------
 -- DB Access
 --------------------
@@ -90,6 +121,9 @@ findUser connPool uName = withPostgreSQLPool connPool $ \conn -> do
     (userByNameQ <<< arr (const $ OE.sqlStrictText uName)) -- Convert a parameter into an arrow via the const function.
   return $ L.headMaybe result
 
+insertUsers :: DBC.ConnPool -> OE.Insert [PU.UserId] -> IO [PU.UserId]
+insertUsers connPool insertSpec =
+  withPostgreSQLPool connPool $ \conn -> OE.runInsert_ conn insertSpec
 
 
 --------------------

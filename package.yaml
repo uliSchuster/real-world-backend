@@ -4,7 +4,7 @@ github:              uliSchuster/real-world-backend
 license:             Apache-2.0
 author:              Ulrich Schuster
 maintainer:          real-world-study-group@ugsmail.mailworks.org
-copyright:           2020 Ulrich Schuster
+copyright:           2020-2021 Ulrich Schuster
 
 extra-source-files:
 - README.md

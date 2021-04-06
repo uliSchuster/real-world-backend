@@ -14,7 +14,8 @@ import qualified Conduit.Domain.API            as D
 import qualified Conduit.Usecases.API          as U
 import qualified Conduit.Persistence.DbConfig  as DBC
 import qualified Conduit.Presenter.API         as P
-import qualified Conduit.UI.CommandLine.CLI    as CLI
+import qualified Conduit.Interactor.CommandLine.CLI
+                                               as CLI
 import qualified AppConfig                     as APC
 import           RIO
 import           RIO.ByteString.Lazy            ( toStrict )
