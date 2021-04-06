@@ -69,7 +69,7 @@ newtype ArticlesCmd
 parseCmdLine :: IO Command
 parseCmdLine = O.execParser cmdLineParserSpec
 
--- | For testing the command line parser in apure setting.
+-- | For testing the command line parser in a pure setting.
 parseStrings :: [String] -> O.ParserResult Command
 parseStrings = O.execParserPure O.defaultPrefs cmdLineParserSpec
 
